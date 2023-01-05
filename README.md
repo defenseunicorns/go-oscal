@@ -4,7 +4,7 @@ Repository for the generation of OSCAL data types
 
 ## Usage
 
-Clone the repository and  change into the `go-oscal` directory
+Clone the repository and change into the `go-oscal` directory
 
 Build the CLI
 
@@ -20,6 +20,8 @@ Generate Go structs from the OSCAL JSON schema:
            --sub-struct \
            --pkg oscal
 ```
+
+After running the above command, the auto-generated Go structs are output to a file at `internal/oscal/types.go`
 
 To view the available CLI flags and their use-case:
 

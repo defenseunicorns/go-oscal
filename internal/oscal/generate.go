@@ -70,6 +70,7 @@ var intToWordMap = []string{
 
 type Parser func(io.Reader) (interface{}, error)
 
+// ParseJson reads encoded JSON as input and stores to an interface pointer
 func ParseJson(input io.Reader) (interface{}, error) {
 	var result interface{}
 	if err := json.NewDecoder(input).Decode(&result); err != nil {
@@ -78,6 +79,7 @@ func ParseJson(input io.Reader) (interface{}, error) {
 	return result, nil
 }
 
+// ParseYaml reads encoded YAML as input and stores to an interface pointer
 func ParseYaml(input io.Reader) (interface{}, error) {
 	var result interface{}
 	b, err := readFile(input)

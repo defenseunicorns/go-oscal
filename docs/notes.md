@@ -1,8 +1,8 @@
 # Notes
 
-The Core logic/functionality as of this commit is based on a modified version of [gojson](https://github.com/ChimeraCoder/gojson).
+The core logic/functionality as of this commit is based on a modified version of [gojson](https://github.com/ChimeraCoder/gojson).
 
-There is a quite a bit more modification/customization that will probably be required to seamlessly generate Go structs for OSCAL data types, so using the `gojson` tool directly is likely not a great choice. It doesn't support generating structs from XML (a supported OSCAL data format), which is a capability that we should aim to have at some point. There also hasn't been a commit made to the repository in 3.5 years.
+There is a quite a bit more modification/customization that will probably be required to seamlessly generate Go structs for OSCAL data types, so using the `gojson` tool directly is likely not a great choice. It doesn't support generating structs from XML (a supported OSCAL data format), which is a capability that we should aim to have at some point. There also hasn't been a commit made to the repository in 3.5 years, which is a concern in regards to security and reliability due to lack of active maintenance/development.
 
 There are multiple one-off, go modules available that are designed to generate Go structs from JSON schemas.
 
