@@ -16,8 +16,6 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-var ForceFloats bool
-
 // commonInitialisms is a set of common initialisms.
 // Only add entries that are highly unlikely to be non-initialisms.
 // For instance, "ID" is fine (Freudian code is rare), but "AND" is not.
@@ -99,10 +97,6 @@ func readFile(input io.Reader) ([]byte, error) {
 		return []byte{}, nil
 	}
 	return buf.Bytes(), nil
-}
-
-func Run() {
-
 }
 
 // Generate a struct definition given a JSON string representation of an object and a name structName.
@@ -260,13 +254,15 @@ func generateTypes(obj map[string]interface{}, structName string, tags []string,
 	return structure
 }
 
-// FmtFieldName formats a string as a struct key
-//
-// Example:
-//
-//	FmtFieldName("foo_id")
-//
-// Output: FooID
+/*
+	FmtFieldName formats a string as a struct key
+
+Example:
+
+	FmtFieldName("foo_id")
+
+	Output: FooID
+*/
 func FmtFieldName(s string) string {
 	runes := []rune(s)
 	for len(runes) > 0 && !unicode.IsLetter(runes[0]) && !unicode.IsDigit(runes[0]) {
@@ -410,7 +406,7 @@ func typeForValue(value interface{}, structName string, tags []string, subStruct
 func disambiguateFloatInt(value interface{}) string {
 	const epsilon = .0001
 	vfloat := value.(float64)
-	if !ForceFloats && math.Abs(vfloat-math.Floor(vfloat+epsilon)) < epsilon {
+	if math.Abs(vfloat-math.Floor(vfloat+epsilon)) < epsilon {
 		var tmp int64
 		return reflect.TypeOf(tmp).Name()
 	}

@@ -1,6 +1,6 @@
 # go-oscal
 
-Repository for the generation of OSCAL data types 
+Repository for the generation of OSCAL data types
 
 ## Usage
 
