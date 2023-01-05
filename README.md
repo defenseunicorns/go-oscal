@@ -28,3 +28,11 @@ To view the available CLI flags and their use-case:
 ```bash
 ./go-oscal --help
 ```
+
+## Development
+
+For development, use the `Makefile` to build, test, and generate the Go structs:
+
+```bash
+make
+```
