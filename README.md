@@ -31,7 +31,7 @@ To view the available CLI flags and their use-case:
 
 ## Development
 
-For development, use the `Makefile` to build, test, and generate the Go structs:
+For development, the `Makefile` can be used to build, test, and generate the Go structs:
 
 ```bash
 make
