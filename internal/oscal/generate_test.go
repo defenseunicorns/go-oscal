@@ -49,7 +49,7 @@ func TestInvalidFieldChars(t *testing.T) {
 func TestInferFloatInt(t *testing.T) {
 	f, err := os.Open(filepath.Join(examplesDir, "floats.json"))
 	if err != nil {
-		t.Fatalf("error opening"+examplesDir+"/floats.json: %s", err)
+		t.Fatalf("error opening "+examplesDir+"/floats.json: %s", err)
 	}
 	defer f.Close()
 
@@ -73,7 +73,7 @@ func TestInferFloatInt(t *testing.T) {
 func TestYamlNumbers(t *testing.T) {
 	f, err := os.Open(filepath.Join(examplesDir, "numbers.yaml"))
 	if err != nil {
-		t.Fatalf("error opening"+examplesDir+"/numbers.yaml: %s", err)
+		t.Fatalf("error opening "+examplesDir+"/numbers.yaml: %s", err)
 	}
 	defer f.Close()
 
