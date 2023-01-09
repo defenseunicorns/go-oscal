@@ -129,6 +129,7 @@ func Generate(input io.Reader, parser Parser, structName, pkgName string, tags [
 	case map[string]interface{}:
 		result = interfaceResultType
 
+	// Infer the data type of the interface slice and format the Go statements
 	case []interface{}:
 		src := fmt.Sprintf("package %s\n\ntype %s %s\n",
 			pkgName,
@@ -150,6 +151,7 @@ func Generate(input io.Reader, parser Parser, structName, pkgName string, tags [
 		structName,
 		generateTypes(result, structName, tags, 0, subStructMap, convertFloats))
 
+	// Append subStructMap keys to a string slice
 	keys := make([]string, 0, len(subStructMap))
 	for key := range subStructMap {
 		keys = append(keys, key)
@@ -157,8 +159,8 @@ func Generate(input io.Reader, parser Parser, structName, pkgName string, tags [
 
 	sort.Strings(keys)
 
-	for _, k := range keys {
-		src = fmt.Sprintf("%v\n\ntype %v %v", src, subStructMap[k], k)
+	for _, key := range keys {
+		src = fmt.Sprintf("%v\n\ntype %v %v", src, subStructMap[key], key)
 	}
 
 	formatted, err := format.Source([]byte(src))
@@ -193,8 +195,6 @@ func generateTypes(obj map[string]interface{}, structName string, tags []string,
 		value := obj[key]
 		valueType := structDataType(value, structName, tags, subStructMap, convertFloats)
 
-		// value = mergeElements(value)
-
 		// If a nested value, recurse
 		switch value := value.(type) {
 		case []interface{}:
@@ -215,6 +215,11 @@ func generateTypes(obj map[string]interface{}, structName string, tags []string,
 							subName = val
 
 						} else {
+							// TODO: dynamically grab/build the sub-struct name instead of building it as "OscalComponentDefinition_sub1"
+							// Reason for this is so that the types in this repo can be referenced by their field name,
+							// rather than the index number it was generated with.
+							// Example of how types would be referenced now:
+							// var componentDefinitions = &OscalComponentDefinition_sub108{}
 							subName = fmt.Sprintf("%v_sub%v", structName, len(subStructMap)+1)
 
 							subStructMap[sub] = subName
@@ -233,6 +238,11 @@ func generateTypes(obj map[string]interface{}, structName string, tags []string,
 				if val, ok := subStructMap[sub]; ok {
 					subName = val
 				} else {
+					// TODO: dynamically grab/build the sub-struct name instead of building it as "OscalComponentDefinition_sub1"
+					// Reason for this is so that the types in this repo can be referenced by their field name,
+					// rather than the index number it was generated with.
+					// Example of how types would be referenced now:
+					// var componentDefinitions = &OscalComponentDefinition_sub108{}
 					subName = fmt.Sprintf("%v_sub%v", structName, len(subStructMap)+1)
 
 					subStructMap[sub] = subName
@@ -248,6 +258,11 @@ func generateTypes(obj map[string]interface{}, structName string, tags []string,
 				if val, ok := subStructMap[sub]; ok {
 					subName = val
 				} else {
+					// TODO: dynamically grab/build the sub-struct name instead of building it as "OscalComponentDefinition_sub1"
+					// Reason for this is so that the types in this repo can be referenced by their field name,
+					// rather than the index number it was generated with.
+					// Example of how types would be referenced now:
+					// var componentDefinitions = &OscalComponentDefinition_sub108{}
 					subName = fmt.Sprintf("%v_sub%v", structName, len(subStructMap)+1)
 
 					subStructMap[sub] = subName
@@ -456,11 +471,11 @@ func mergeElements(i interface{}) interface{} {
 		return i
 
 	case []interface{}:
-		l := len(i)
-		if l == 0 {
+		length := len(i)
+		if length == 0 {
 			return i
 		}
-		for j := 1; j < l; j++ {
+		for j := 1; j < length; j++ {
 			i[0] = mergeObjects(i[0], i[j])
 		}
 		return i[0:1]

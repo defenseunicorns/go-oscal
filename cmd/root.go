@@ -13,13 +13,13 @@ import (
 )
 
 var (
-	name       string
-	pkg        string
-	inputName  string
-	outputName string
-	format     string
-	tags       string
-	subStruct  bool
+	name           string
+	pkg            string
+	inputFileName  string
+	outputFileName string
+	format         string
+	tags           string
+	subStruct      bool
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -45,8 +45,8 @@ func Execute() {
 func init() {
 	rootCmd.Flags().StringVarP(&name, "name", "n", "OscalComponentDefinition", "the name of the struct")
 	rootCmd.Flags().StringVarP(&pkg, "pkg", "p", "main", "the name of the package for the generated code")
-	rootCmd.Flags().StringVarP(&inputName, "input", "i", "", "the name of the input file containing JSON (if input not provided via STDIN)")
-	rootCmd.Flags().StringVarP(&outputName, "output-file", "o", "", "the name of the file to write the output to (outputs to STDOUT by default)")
+	rootCmd.Flags().StringVarP(&inputFileName, "input", "i", "", "the name of the input file containing JSON (if input not provided via STDIN)")
+	rootCmd.Flags().StringVarP(&outputFileName, "output-file", "o", "", "the name of the file to write the output to (outputs to STDOUT by default)")
 	rootCmd.Flags().StringVar(&format, "fmt", "json", "the format of the input data (json or yaml, defaults to json)")
 	rootCmd.Flags().StringVar(&tags, "tags", format, "comma seperated list of the tags to put on the struct, default is the same as fmt")
 	rootCmd.Flags().BoolVar(&subStruct, "sub-struct", false, "create types for sub-structs (default is false)")
@@ -69,8 +69,8 @@ func run() {
 
 	var input io.Reader
 	input = os.Stdin
-	if inputName != "" {
-		f, err := os.Open(inputName)
+	if inputFileName != "" {
+		f, err := os.Open(inputFileName)
 		if err != nil {
 			log.Fatalf("reading input file: %s", err)
 		}
@@ -92,8 +92,8 @@ func run() {
 		fmt.Fprintln(os.Stderr, "error parsing", err)
 		os.Exit(1)
 	} else {
-		if outputName != "" {
-			err := os.WriteFile(outputName, output, 0644)
+		if outputFileName != "" {
+			err := os.WriteFile(outputFileName, output, 0644)
 			if err != nil {
 				log.Fatalf("writing output: %s", err)
 			}
