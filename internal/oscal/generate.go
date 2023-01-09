@@ -70,7 +70,7 @@ var intToWordMap = []string{
 
 type Parser func(io.Reader) (interface{}, error)
 
-// ParseJson reads encoded JSON as input and stores to an interface pointer
+// ParseJson reads encoded JSON as input, stores to an interface pointer, and returns the interface.
 func ParseJson(input io.Reader) (interface{}, error) {
 	var result interface{}
 	if err := json.NewDecoder(input).Decode(&result); err != nil {
@@ -79,7 +79,7 @@ func ParseJson(input io.Reader) (interface{}, error) {
 	return result, nil
 }
 
-// ParseYaml reads encoded YAML as input and stores to an interface pointer
+// ParseYaml reads encoded YAML as input, stores to an interface pointer, and returns the interface.
 func ParseYaml(input io.Reader) (interface{}, error) {
 	var result interface{}
 	b, err := readFile(input)
@@ -92,6 +92,7 @@ func ParseYaml(input io.Reader) (interface{}, error) {
 	return result, nil
 }
 
+// readFile stores the input data as a buffer and returns the buffer's bytes.
 func readFile(input io.Reader) ([]byte, error) {
 	buf := bytes.NewBuffer(nil)
 	_, err := io.Copy(buf, input)
@@ -104,34 +105,44 @@ func readFile(input io.Reader) ([]byte, error) {
 // Generate a struct definition given a JSON string representation of an object and a name structName.
 func Generate(input io.Reader, parser Parser, structName, pkgName string, tags []string, subStruct bool, convertFloats bool) ([]byte, error) {
 	var subStructMap map[string]string = nil
+
+	// If --sub-struct flag is used, create string-string map
 	if subStruct {
 		subStructMap = make(map[string]string)
 	}
 
 	var result map[string]interface{}
 
-	iresult, err := parser(input)
+	interfaceResult, err := parser(input)
 	if err != nil {
 		return nil, err
 	}
 
-	switch iresult := iresult.(type) {
+	// Parse input interface and perform necessary data transformations
+	switch interfaceResultType := interfaceResult.(type) {
+
+	// Convert interface map keys to string map keys
 	case map[interface{}]interface{}:
-		result = convertKeysToStrings(iresult)
+		result = convertKeysToStrings(interfaceResultType)
+
+	// No transformations, this is what we want
 	case map[string]interface{}:
-		result = iresult
+		result = interfaceResultType
+
 	case []interface{}:
 		src := fmt.Sprintf("package %s\n\ntype %s %s\n",
 			pkgName,
 			structName,
-			typeForValue(iresult, structName, tags, subStructMap, convertFloats))
+			structDataType(interfaceResult, structName, tags, subStructMap, convertFloats))
+
 		formatted, err := format.Source([]byte(src))
 		if err != nil {
 			err = fmt.Errorf("error formatting: %s, was formatting\n%s", err, src)
 		}
 		return formatted, err
+
 	default:
-		return nil, fmt.Errorf("unexpected type: %T", iresult)
+		return nil, fmt.Errorf("unexpected type: %T", interfaceResult)
 	}
 
 	src := fmt.Sprintf("package %s\ntype %s %s}",
@@ -157,11 +168,12 @@ func Generate(input io.Reader, parser Parser, structName, pkgName string, tags [
 	return formatted, err
 }
 
+// convertKeysToStrings converts interface{} map keys to strings
 func convertKeysToStrings(obj map[interface{}]interface{}) map[string]interface{} {
 	res := make(map[string]interface{})
 
-	for k, v := range obj {
-		res[fmt.Sprintf("%v", k)] = v
+	for key, value := range obj {
+		res[fmt.Sprintf("%v", key)] = value
 	}
 
 	return res
@@ -179,17 +191,18 @@ func generateTypes(obj map[string]interface{}, structName string, tags []string,
 
 	for _, key := range keys {
 		value := obj[key]
-		valueType := typeForValue(value, structName, tags, subStructMap, convertFloats)
+		valueType := structDataType(value, structName, tags, subStructMap, convertFloats)
 
-		//value = mergeElements(value)
+		// value = mergeElements(value)
 
-		//If a nested value, recurse
+		// If a nested value, recurse
 		switch value := value.(type) {
 		case []interface{}:
 			if len(value) > 0 {
 				sub := ""
 				if v, ok := value[0].(map[interface{}]interface{}); ok {
 					sub = generateTypes(convertKeysToStrings(v), structName, tags, depth+1, subStructMap, convertFloats) + "}"
+
 				} else if v, ok := value[0].(map[string]interface{}); ok {
 					sub = generateTypes(v, structName, tags, depth+1, subStructMap, convertFloats) + "}"
 				}
@@ -200,6 +213,7 @@ func generateTypes(obj map[string]interface{}, structName string, tags []string,
 					if subStructMap != nil {
 						if val, ok := subStructMap[sub]; ok {
 							subName = val
+
 						} else {
 							subName = fmt.Sprintf("%v_sub%v", structName, len(subStructMap)+1)
 
@@ -210,6 +224,7 @@ func generateTypes(obj map[string]interface{}, structName string, tags []string,
 					valueType = "[]" + subName
 				}
 			}
+
 		case map[interface{}]interface{}:
 			sub := generateTypes(convertKeysToStrings(value), structName, tags, depth+1, subStructMap, convertFloats) + "}"
 			subName := sub
@@ -224,6 +239,7 @@ func generateTypes(obj map[string]interface{}, structName string, tags []string,
 				}
 			}
 			valueType = subName
+
 		case map[string]interface{}:
 			sub := generateTypes(value, structName, tags, depth+1, subStructMap, convertFloats) + "}"
 			subName := sub
@@ -353,7 +369,7 @@ func lintFieldName(name string) string {
 			copy(runes[i+1:], runes[i+n+1:])
 			runes = runes[:len(runes)-n]
 		} else if unicode.IsLower(runes[i]) && !unicode.IsLower(runes[i+1]) {
-			// lower->non-lower
+			// lower -> non-lower
 			eow = true
 		}
 		i++
@@ -377,30 +393,33 @@ func lintFieldName(name string) string {
 	return string(runes)
 }
 
-// generate an appropriate struct type entry
-func typeForValue(value interface{}, structName string, tags []string, subStructMap map[string]string, convertFloats bool) string {
-	//Check if this is an array
+// generate an appropriate struct data type entry
+func structDataType(value interface{}, structName string, tags []string, subStructMap map[string]string, convertFloats bool) string {
+	// Check if this is an array
 	if objects, ok := value.([]interface{}); ok {
 		types := make(map[reflect.Type]bool, 0)
 		for _, o := range objects {
 			types[reflect.TypeOf(o)] = true
 		}
 		if len(types) == 1 {
-			return "[]" + typeForValue(mergeElements(objects).([]interface{})[0], structName, tags, subStructMap, convertFloats)
+			return "[]" + structDataType(mergeElements(objects).([]interface{})[0], structName, tags, subStructMap, convertFloats)
 		}
 		return "[]interface{}"
+
 	} else if object, ok := value.(map[interface{}]interface{}); ok {
 		return generateTypes(convertKeysToStrings(object), structName, tags, 0, subStructMap, convertFloats) + "}"
+
 	} else if object, ok := value.(map[string]interface{}); ok {
 		return generateTypes(object, structName, tags, 0, subStructMap, convertFloats) + "}"
+
 	} else if reflect.TypeOf(value) == nil {
 		return "interface{}"
 	}
-	v := reflect.TypeOf(value).Name()
-	if v == "float64" && convertFloats {
-		v = disambiguateFloatInt(value)
+	typeName := reflect.TypeOf(value).Name()
+	if typeName == "float64" && convertFloats {
+		typeName = disambiguateFloatInt(value)
 	}
-	return v
+	return typeName
 }
 
 // All numbers will initially be read as float64
@@ -408,10 +427,12 @@ func typeForValue(value interface{}, structName string, tags []string, subStruct
 func disambiguateFloatInt(value interface{}) string {
 	const epsilon = .0001
 	vfloat := value.(float64)
+
 	if math.Abs(vfloat-math.Floor(vfloat+epsilon)) < epsilon {
 		var tmp int64
 		return reflect.TypeOf(tmp).Name()
 	}
+
 	return reflect.TypeOf(value).Name()
 }
 
@@ -430,8 +451,10 @@ func stringifyFirstChar(str string) string {
 
 func mergeElements(i interface{}) interface{} {
 	switch i := i.(type) {
+
 	default:
 		return i
+
 	case []interface{}:
 		l := len(i)
 		if l == 0 {
@@ -458,14 +481,17 @@ func mergeObjects(o1, o2 interface{}) interface{} {
 	}
 
 	switch i := o1.(type) {
+
 	default:
 		return o1
+
 	case []interface{}:
 		if i2, ok := o2.([]interface{}); ok {
 			i3 := append(i, i2...)
 			return mergeElements(i3)
 		}
 		return mergeElements(i)
+
 	case map[string]interface{}:
 		if i2, ok := o2.(map[string]interface{}); ok {
 			for k, v := range i2 {
@@ -477,6 +503,7 @@ func mergeObjects(o1, o2 interface{}) interface{} {
 			}
 		}
 		return i
+
 	case map[interface{}]interface{}:
 		if i2, ok := o2.(map[interface{}]interface{}); ok {
 			for k, v := range i2 {
