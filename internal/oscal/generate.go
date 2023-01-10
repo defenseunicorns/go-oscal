@@ -167,6 +167,7 @@ func Generate(input io.Reader, parser Parser, structName, pkgName string, tags [
 	if err != nil {
 		err = fmt.Errorf("error formatting: %s, was formatting\n%s", err, src)
 	}
+
 	return formatted, err
 }
 
@@ -220,7 +221,8 @@ func generateTypes(obj map[string]interface{}, structName string, tags []string,
 							// rather than the index number it was generated with.
 							// Example of how types would be referenced now:
 							// var componentDefinitions = &OscalComponentDefinition_sub108{}
-							subName = fmt.Sprintf("%v_sub%v", structName, len(subStructMap)+1)
+							structName := FmtFieldName(key)
+							subName = fmt.Sprintf("%v_%v", structName, len(subStructMap)+1)
 
 							subStructMap[sub] = subName
 						}
@@ -243,7 +245,8 @@ func generateTypes(obj map[string]interface{}, structName string, tags []string,
 					// rather than the index number it was generated with.
 					// Example of how types would be referenced now:
 					// var componentDefinitions = &OscalComponentDefinition_sub108{}
-					subName = fmt.Sprintf("%v_sub%v", structName, len(subStructMap)+1)
+					structName := FmtFieldName(key)
+					subName = fmt.Sprintf("%v_%v", structName, len(subStructMap)+1)
 
 					subStructMap[sub] = subName
 				}
@@ -263,9 +266,11 @@ func generateTypes(obj map[string]interface{}, structName string, tags []string,
 					// rather than the index number it was generated with.
 					// Example of how types would be referenced now:
 					// var componentDefinitions = &OscalComponentDefinition_sub108{}
-					subName = fmt.Sprintf("%v_sub%v", structName, len(subStructMap)+1)
+					structName := FmtFieldName(key)
+					subName = fmt.Sprintf("%v_%v", structName, len(subStructMap)+1)
 
 					subStructMap[sub] = subName
+
 				}
 			}
 
@@ -284,6 +289,7 @@ func generateTypes(obj map[string]interface{}, structName string, tags []string,
 			valueType,
 			strings.Join(tagList, " "))
 	}
+
 	return structure
 }
 
