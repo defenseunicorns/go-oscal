@@ -114,6 +114,7 @@ func TestExample(t *testing.T) {
 	}
 }
 
+// TestFmtFieldName tests that we handle formatting a json string to a go struct correctly
 func TestFmtFieldName(t *testing.T) {
 	type TestCase struct {
 		in  string
@@ -131,9 +132,10 @@ func TestFmtFieldName(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
-		lintField := FmtFieldName(testCase.in)
-		if lintField != testCase.out {
-			t.Errorf("error fmtFiledName %s != %s (%s)", testCase.in, testCase.out, lintField)
+		actual := FmtFieldName(testCase.in)
+		expected := testCase.out
+		if expected != actual {
+			t.Errorf("error FmtFieldName(): expected: %s | got: %s", expected, actual)
 		}
 	}
 }

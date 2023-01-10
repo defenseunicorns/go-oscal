@@ -18,4 +18,4 @@ generate: ## Generate Go structs from OSCAL JSON schema and output to 'internal/
 
 .PHONY: test
 test: ## Run unit tests
-	go test -v ./internal/oscal
+	go test -failfast -v ./...
