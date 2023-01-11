@@ -1,11 +1,14 @@
 package oscal
 
 import (
+	"encoding/json"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/ghodss/yaml"
 )
 
 var examplesDir string = "../../examples"
@@ -169,15 +172,27 @@ func TestExampleArray(t *testing.T) {
 	}
 }
 
-// TestUUID tests that we can ingest and validate
-// the UUID fields of an oscal component definition document.
-func TestUUID(t *testing.T) {
-	file, err := os.Open(filepath.Join(examplesDir, "example-component-definition.yaml"))
-	if err != nil {
-		t.Fatalf("error opening example-component-definition.yaml: %s", err)
-	}
-	defer file.Close()
+// TestExampleOscalComponentDefinition tests that we can unmarshal
+// an oscal component definition yaml file into the generated go data types
+func TestExampleOscalComponentDefinition(t *testing.T) {
+	file := filepath.Join(examplesDir, "example-component-definition.yaml")
 
-	// TODO: Need some logic that parses/validates UUID fields
-	// and that it conforms to the schema.
+	rawYaml, err := os.ReadFile(file)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	topLevelStruct := OscalComponentDefinition{}
+	oscalComponentDefinition := topLevelStruct.Definitions.Oscal_component_definition_oscal_component_definition_component_definition
+
+	rawJson, err := yaml.YAMLToJSON(rawYaml)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = json.Unmarshal(rawJson, &oscalComponentDefinition)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 }
