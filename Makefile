@@ -11,10 +11,7 @@ clean: ## Remove built binary
 
 .PHONY: generate
 generate: ## Generate Go structs from OSCAL JSON schema and output to 'internal/oscal/types.go'
-	./go-oscal --input test/oscal_component_schema.json \
-	           --output-file internal/oscal/types.go \
-	           --sub-struct \
-	           --pkg oscal
+	./go-oscal --input test/oscal_component_schema.json --output-file internal/oscal/types.go --sub-struct --pkg oscal --tags json,yaml
 
 .PHONY: test
 test: ## Run unit tests

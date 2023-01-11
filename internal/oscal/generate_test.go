@@ -1,14 +1,13 @@
 package oscal
 
 import (
-	"encoding/json"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
-	"github.com/ghodss/yaml"
+	"gopkg.in/yaml.v2"
 )
 
 var examplesDir string = "../../examples"
@@ -182,17 +181,11 @@ func TestExampleOscalComponentDefinition(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	topLevelStruct := OscalComponentDefinition{}
-	oscalComponentDefinition := topLevelStruct.Definitions.Oscal_component_definition_oscal_component_definition_component_definition
+	oscalComponentDefinition := OscalComponentDefinition{}
+	componentDefinition := oscalComponentDefinition.Definitions.Oscal_component_definition_oscal_component_definition_component_definition.Properties
 
-	rawJson, err := yaml.YAMLToJSON(rawYaml)
+	err = yaml.Unmarshal(rawYaml, &componentDefinition)
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	err = json.Unmarshal(rawJson, &oscalComponentDefinition)
-	if err != nil {
-		t.Fatal(err)
-	}
-
 }
