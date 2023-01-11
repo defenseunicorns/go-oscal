@@ -53,9 +53,9 @@ func TestInferFloatInt(t *testing.T) {
 	}
 	defer f.Close()
 
-	expected, err := os.ReadFile(filepath.Join(examplesDir, "expected_floats.go.out"))
+	expected, err := os.ReadFile(filepath.Join(examplesDir, "expected-floats.go.out"))
 	if err != nil {
-		t.Fatalf("error reading expected_floats.go.out: %s", err)
+		t.Fatalf("error reading expected-floats.go.out: %s", err)
 	}
 
 	actual, err := Generate(f, ParseJson, "Stats", pkgName, []string{"json"}, false, true)
@@ -77,9 +77,9 @@ func TestYamlNumbers(t *testing.T) {
 	}
 	defer f.Close()
 
-	expected, err := os.ReadFile(filepath.Join(examplesDir, "expected_numbers.go.out"))
+	expected, err := os.ReadFile(filepath.Join(examplesDir, "expected-numbers.go.out"))
 	if err != nil {
-		t.Fatalf("error reading expected_numbers.go.out: %s", err)
+		t.Fatalf("error reading expected-numbers.go.out: %s", err)
 	}
 
 	actual, err := Generate(f, ParseYaml, "Stats", pkgName, []string{"yaml"}, false, false)
@@ -99,9 +99,9 @@ func TestExample(t *testing.T) {
 		t.Error("error opening example.json", err)
 	}
 
-	expected, err := os.ReadFile(filepath.Join(examplesDir, "expected_output_test.go.out"))
+	expected, err := os.ReadFile(filepath.Join(examplesDir, "expected-output-test.go.out"))
 	if err != nil {
-		t.Error("error reading expected_output_test.go", err)
+		t.Error("error reading expected-output-test.go", err)
 	}
 
 	actual, err := Generate(i, ParseJson, "User", pkgName, []string{"json"}, false, true)
@@ -142,21 +142,21 @@ func TestFmtFieldName(t *testing.T) {
 
 // Test example document
 func TestExampleArray(t *testing.T) {
-	i, err := os.Open(filepath.Join(examplesDir, "example_array.json"))
+	i, err := os.Open(filepath.Join(examplesDir, "example-array.json"))
 	if err != nil {
 		t.Fatalf("error opening example.json: %s", err)
 	}
 	defer i.Close()
 
-	expectedf, err := os.Open(filepath.Join(examplesDir, "example_array.go.out"))
+	expectedf, err := os.Open(filepath.Join(examplesDir, "example-array.go.out"))
 	if err != nil {
-		t.Fatalf("error opening example_array.go: %s", err)
+		t.Fatalf("error opening example-array.go: %s", err)
 	}
 	defer expectedf.Close()
 
 	expectedBts, err := io.ReadAll(expectedf)
 	if err != nil {
-		t.Fatalf("error reading example_array.go: %s", err)
+		t.Fatalf("error reading example-array.go: %s", err)
 	}
 
 	actual, err := Generate(i, ParseJson, "Users", pkgName, []string{"json"}, false, true)
@@ -167,4 +167,17 @@ func TestExampleArray(t *testing.T) {
 	if sactual != sexpected {
 		t.Fatalf("'%s' (expected) != '%s' (actual)", sexpected, sactual)
 	}
+}
+
+// TestUUID tests that we can ingest and validate
+// the UUID fields of an oscal component definition document.
+func TestUUID(t *testing.T) {
+	file, err := os.Open(filepath.Join(examplesDir, "example-component-definition.yaml"))
+	if err != nil {
+		t.Fatalf("error opening example-component-definition.yaml: %s", err)
+	}
+	defer file.Close()
+
+	// TODO: Need some logic that parses/validates UUID fields
+	// and that it conforms to the schema.
 }
