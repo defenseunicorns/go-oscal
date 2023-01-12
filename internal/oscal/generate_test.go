@@ -173,7 +173,7 @@ func TestExampleArray(t *testing.T) {
 
 // TestExampleOscalComponentDefinition tests that we can unmarshal
 // an oscal component definition yaml file into the generated Go structs,
-// marhshal it back out to a file, and compares the input and output
+// marhshal it back, and compares the input and output
 func TestExampleOscalComponentDefinition(t *testing.T) {
 	file := filepath.Join(examplesDir, "example-component-definition.yaml")
 
