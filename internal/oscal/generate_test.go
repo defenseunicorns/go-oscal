@@ -172,11 +172,12 @@ func TestExampleArray(t *testing.T) {
 }
 
 // TestExampleOscalComponentDefinition tests that we can unmarshal
-// an oscal component definition yaml file into the generated go data types
+// an oscal component definition yaml file into the generated Go structs,
+// marhshal it back out to a file, and compares the input and output
 func TestExampleOscalComponentDefinition(t *testing.T) {
 	file := filepath.Join(examplesDir, "example-component-definition.yaml")
 
-	rawYaml, err := os.ReadFile(file)
+	input, err := os.ReadFile(file)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -184,8 +185,19 @@ func TestExampleOscalComponentDefinition(t *testing.T) {
 	oscalComponentDefinition := OscalComponentDefinition{}
 	componentDefinition := oscalComponentDefinition.Definitions.Oscal_component_definition_oscal_component_definition_component_definition.Properties
 
-	err = yaml.Unmarshal(rawYaml, &componentDefinition)
+	err = yaml.Unmarshal(input, &componentDefinition)
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	output, err := yaml.Marshal(componentDefinition)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expected, actual := string(input), string(output)
+
+	if expected != actual {
+		t.Errorf("error TestExampleOscalComponentDefinition(): expected: %s | got: %s", expected, actual)
 	}
 }
