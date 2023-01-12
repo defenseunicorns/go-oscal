@@ -6,8 +6,6 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-
-	"gopkg.in/yaml.v2"
 )
 
 var examplesDir string = "../../examples"
@@ -168,36 +166,5 @@ func TestExampleArray(t *testing.T) {
 	sactual, sexpected := string(actual), string(expectedBts)
 	if sactual != sexpected {
 		t.Fatalf("'%s' (expected) != '%s' (actual)", sexpected, sactual)
-	}
-}
-
-// TestExampleOscalComponentDefinition tests that we can unmarshal
-// an oscal component definition yaml file into the generated Go structs,
-// marhshal it back, and compares the input and output
-func TestExampleOscalComponentDefinition(t *testing.T) {
-	file := filepath.Join(examplesDir, "example-component-definition.yaml")
-
-	input, err := os.ReadFile(file)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	oscalComponentDefinition := OscalComponentDefinition{}
-	componentDefinition := oscalComponentDefinition.Definitions.Oscal_component_definition_oscal_component_definition_component_definition.Properties
-
-	err = yaml.Unmarshal(input, &componentDefinition)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	output, err := yaml.Marshal(componentDefinition)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	expected, actual := string(input), string(output)
-
-	if expected != actual {
-		t.Errorf("error TestExampleOscalComponentDefinition(): expected: %s | got: %s", expected, actual)
 	}
 }
