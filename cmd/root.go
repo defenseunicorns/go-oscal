@@ -88,18 +88,9 @@ func run() {
 		parser = oscal.ParseYaml
 	}
 
-	if output, err := oscal.Generate(input, parser, name, pkg, tagList, subStruct, convertFloats); err != nil {
+	_, err := oscal.Generate(input, parser, name, pkg, tagList, subStruct, convertFloats)
+	if err != nil {
 		fmt.Fprintln(os.Stderr, "error parsing", err)
 		os.Exit(1)
-	} else {
-		if outputFileName != "" {
-			err := os.WriteFile(outputFileName, output, 0644)
-			if err != nil {
-				log.Fatalf("writing output: %s", err)
-			}
-		} else {
-			fmt.Print(string(output))
-		}
 	}
-	oscal.Generate(input, parser, name, pkg, tagList, subStruct, convertFloats)
 }
