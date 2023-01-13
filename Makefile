@@ -1,5 +1,5 @@
 .PHONY: all
-all: clean build test generate
+all: clean build test generate-file
 
 .PHONY: build
 build: ## Build the binary
