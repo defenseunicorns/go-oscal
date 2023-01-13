@@ -3,7 +3,6 @@ module github.com/defenseunicorns/go-oscal
 go 1.19
 
 require (
-	github.com/ghodss/yaml v1.0.0
 	github.com/spf13/cobra v1.6.1
 	gopkg.in/yaml.v2 v2.4.0
 )
