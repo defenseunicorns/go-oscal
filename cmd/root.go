@@ -51,7 +51,7 @@ func init() {
 	rootCmd.Flags().StringVar(&tags, "tags", format, "comma seperated list of the tags to put on the struct, default is the same as fmt")
 	rootCmd.Flags().BoolVar(&subStruct, "sub-struct", false, "create types for sub-structs")
 
-	rootCmd.MarkFlagRequired("input")
+	rootCmd.MarkFlagRequired("input-file")
 }
 
 func run() {
