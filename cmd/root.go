@@ -95,11 +95,12 @@ func run() {
 	}
 
 	if outputFileName != "" {
-		err := os.WriteFile(outputFileName, output, 0644)
-		if err != nil {
+		if err := os.WriteFile(outputFileName, output, 0644); err != nil {
 			log.Fatalf("writing output: %s", err)
 		}
 	} else {
 		fmt.Print(string(output))
 	}
+
+	oscal.GenerateComponentDefinitionModel()
 }

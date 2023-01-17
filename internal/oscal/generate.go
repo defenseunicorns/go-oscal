@@ -102,6 +102,33 @@ func readFile(input io.Reader) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+// Generate a struct definition for OSCAL component definition data model
+func GenerateComponentDefinitionModel() error {
+	var componentDefinition = Properties_25{}
+	var componentDefinitionMap map[string]interface{}
+
+	data, err := json.Marshal(componentDefinition)
+	if err != nil {
+		return err
+	}
+
+	json.Unmarshal(data, &componentDefinitionMap)
+
+	// Append map keys to a string slice
+	keys := make([]string, 0, len(componentDefinitionMap))
+	for key := range componentDefinitionMap {
+		keys = append(keys, key)
+	}
+
+	sort.Strings(keys)
+
+	for _, key := range keys {
+		fmt.Println(key)
+	}
+
+	return nil
+}
+
 // Generate a struct definition given a JSON string representation of an object and a name structName.
 func Generate(input io.Reader, parser Parser, structName, pkgName string, tags []string, subStruct bool, convertFloats bool) ([]byte, error) {
 	var subStructMap map[string]string = nil
@@ -198,60 +225,60 @@ func generateTypes(obj map[string]interface{}, structName string, tags []string,
 
 		// If a nested value, recurse
 		switch value := value.(type) {
-		case []interface{}:
-			if len(value) > 0 {
-				sub := ""
-				if v, ok := value[0].(map[interface{}]interface{}); ok {
-					sub = generateTypes(convertKeysToStrings(v), structName, tags, depth+1, subStructMap, convertFloats) + "}"
+		// case []interface{}:
+		// 	if len(value) > 0 {
+		// 		sub := ""
+		// 		if v, ok := value[0].(map[interface{}]interface{}); ok {
+		// 			sub = generateTypes(convertKeysToStrings(v), structName, tags, depth+1, subStructMap, convertFloats) + "}"
 
-				} else if v, ok := value[0].(map[string]interface{}); ok {
-					sub = generateTypes(v, structName, tags, depth+1, subStructMap, convertFloats) + "}"
-				}
+		// 		} else if v, ok := value[0].(map[string]interface{}); ok {
+		// 			sub = generateTypes(v, structName, tags, depth+1, subStructMap, convertFloats) + "}"
+		// 		}
 
-				if sub != "" {
-					subName := sub
+		// 		if sub != "" {
+		// 			subName := sub
 
-					if subStructMap != nil {
-						if val, ok := subStructMap[sub]; ok {
-							subName = val
+		// 			if subStructMap != nil {
+		// 				if val, ok := subStructMap[sub]; ok {
+		// 					subName = val
 
-						} else {
-							// TODO: dynamically grab/build the sub-struct name instead of building it as "OscalComponentDefinition_sub1"
-							// Reason for this is so that the types in this repo can be referenced by their field name,
-							// rather than the index number it was generated with.
-							// Example of how types would be referenced now:
-							// var componentDefinitions = &OscalComponentDefinition_sub108{}
-							structName := FmtFieldName(key)
-							subName = fmt.Sprintf("%v_%v", structName, len(subStructMap)+1)
+		// 				} else {
+		// 					// TODO: dynamically grab/build the sub-struct name instead of building it as "OscalComponentDefinition_sub1"
+		// 					// Reason for this is so that the types in this repo can be referenced by their field name,
+		// 					// rather than the index number it was generated with.
+		// 					// Example of how types would be referenced now:
+		// 					// var componentDefinitions = &OscalComponentDefinition_sub108{}
+		// 					structName := FmtFieldName(key)
+		// 					subName = fmt.Sprintf("%v_%v", structName, len(subStructMap)+1)
 
-							subStructMap[sub] = subName
-						}
-					}
+		// 					subStructMap[sub] = subName
+		// 				}
+		// 			}
 
-					valueType = "[]" + subName
-				}
-			}
+		// 			valueType = "[]" + subName
+		// 		}
+		// 	}
 
-		case map[interface{}]interface{}:
-			sub := generateTypes(convertKeysToStrings(value), structName, tags, depth+1, subStructMap, convertFloats) + "}"
-			subName := sub
+		// case map[interface{}]interface{}:
+		// 	sub := generateTypes(convertKeysToStrings(value), structName, tags, depth+1, subStructMap, convertFloats) + "}"
+		// 	subName := sub
 
-			if subStructMap != nil {
-				if val, ok := subStructMap[sub]; ok {
-					subName = val
-				} else {
-					// TODO: dynamically grab/build the sub-struct name instead of building it as "OscalComponentDefinition_sub1"
-					// Reason for this is so that the types in this repo can be referenced by their field name,
-					// rather than the index number it was generated with.
-					// Example of how types would be referenced now:
-					// var componentDefinitions = &OscalComponentDefinition_sub108{}
-					structName := FmtFieldName(key)
-					subName = fmt.Sprintf("%v_%v", structName, len(subStructMap)+1)
+		// 	if subStructMap != nil {
+		// 		if val, ok := subStructMap[sub]; ok {
+		// 			subName = val
+		// 		} else {
+		// 			// TODO: dynamically grab/build the sub-struct name instead of building it as "OscalComponentDefinition_sub1"
+		// 			// Reason for this is so that the types in this repo can be referenced by their field name,
+		// 			// rather than the index number it was generated with.
+		// 			// Example of how types would be referenced now:
+		// 			// var componentDefinitions = &OscalComponentDefinition_sub108{}
+		// 			structName := FmtFieldName(key)
+		// 			subName = fmt.Sprintf("%v_%v", structName, len(subStructMap)+1)
 
-					subStructMap[sub] = subName
-				}
-			}
-			valueType = subName
+		// 			subStructMap[sub] = subName
+		// 		}
+		// 	}
+		// 	valueType = subName
 
 		case map[string]interface{}:
 			sub := generateTypes(value, structName, tags, depth+1, subStructMap, convertFloats) + "}"
@@ -506,12 +533,12 @@ func mergeObjects(o1, o2 interface{}) interface{} {
 	default:
 		return o1
 
-	case []interface{}:
-		if i2, ok := o2.([]interface{}); ok {
-			i3 := append(i, i2...)
-			return mergeElements(i3)
-		}
-		return mergeElements(i)
+	// case []interface{}:
+	// 	if i2, ok := o2.([]interface{}); ok {
+	// 		i3 := append(i, i2...)
+	// 		return mergeElements(i3)
+	// 	}
+	// 	return mergeElements(i)
 
 	case map[string]interface{}:
 		if i2, ok := o2.(map[string]interface{}); ok {
@@ -525,16 +552,16 @@ func mergeObjects(o1, o2 interface{}) interface{} {
 		}
 		return i
 
-	case map[interface{}]interface{}:
-		if i2, ok := o2.(map[interface{}]interface{}); ok {
-			for k, v := range i2 {
-				if v2, ok := i[k]; ok {
-					i[k] = mergeObjects(v2, v)
-				} else {
-					i[k] = v
-				}
-			}
-		}
-		return i
+		// case map[interface{}]interface{}:
+		// 	if i2, ok := o2.(map[interface{}]interface{}); ok {
+		// 		for k, v := range i2 {
+		// 			if v2, ok := i[k]; ok {
+		// 				i[k] = mergeObjects(v2, v)
+		// 			} else {
+		// 				i[k] = v
+		// 			}
+		// 		}
+		// 	}
+		// 	return i
 	}
 }
