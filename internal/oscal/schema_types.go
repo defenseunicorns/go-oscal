@@ -1,6 +1,6 @@
 package oscal
 
-type OscalComponentDefinition struct {
+type OscalSchema struct {
 	Comment              string          `json:"$comment" yaml:"$comment"`
 	ID                   string          `json:"$id" yaml:"$id"`
 	Schema               string          `json:"$schema" yaml:"$schema"`

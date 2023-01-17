@@ -29,7 +29,7 @@ var rootCmd = &cobra.Command{
 	Short: "Generate Go data types from OSCAL JSON schema",
 	Long:  "Generate Go data types from OSCAL JSON schema",
 	Run: func(cmd *cobra.Command, args []string) {
-		run()
+		generateSchemaStructs()
 	},
 }
 
@@ -43,18 +43,36 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.Flags().StringVarP(&name, "name", "n", "OscalComponentDefinition", "the name of the struct")
-	rootCmd.Flags().StringVarP(&pkg, "pkg", "p", "main", "the name of the package for the generated code")
+	rootCmd.PersistentFlags().StringVarP(&name, "name", "n", "Example", "the name of the struct")
+	rootCmd.PersistentFlags().StringVarP(&pkg, "pkg", "p", "main", "the name of the package for the generated code")
 	rootCmd.Flags().StringVarP(&inputFileName, "input-file", "i", "", "the name of the input file containing JSON (if input not provided via STDIN)")
-	rootCmd.Flags().StringVarP(&outputFileName, "output-file", "o", "", "the name of the file to write the output to (outputs to STDOUT by default)")
-	rootCmd.Flags().StringVar(&format, "fmt", "json", "the format of the input data (json or yaml)")
-	rootCmd.Flags().StringVar(&tags, "tags", format, "comma seperated list of the tags to put on the struct, default is the same as fmt")
-	rootCmd.Flags().BoolVar(&subStruct, "sub-struct", false, "create types for sub-structs")
+	rootCmd.PersistentFlags().StringVarP(&outputFileName, "output-file", "o", "", "the name of the file to write the output to (outputs to STDOUT by default)")
+	rootCmd.PersistentFlags().StringVar(&format, "fmt", "json", "the format of the input data (json or yaml)")
+	rootCmd.PersistentFlags().StringVar(&tags, "tags", format, "comma seperated list of the tags to put on the struct, default is the same as fmt")
+	rootCmd.PersistentFlags().BoolVar(&subStruct, "sub-struct", false, "create types for sub-structs")
 
 	rootCmd.MarkFlagRequired("input-file")
 }
 
-func run() {
+func generateSchemaStructs() {
+	input, convertFloats, parser, tagList := validateInput()
+
+	output, err := oscal.Generate(input, parser, name, pkg, tagList, subStruct, convertFloats)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "error parsing", err)
+		os.Exit(1)
+	}
+
+	if outputFileName != "" {
+		if err := os.WriteFile(outputFileName, output, 0644); err != nil {
+			log.Fatalf("writing output: %s", err)
+		}
+	} else {
+		fmt.Print(string(output))
+	}
+}
+
+func validateInput() (io.Reader, bool, oscal.Parser, []string) {
 	if format != "json" && format != "yaml" {
 		fmt.Fprintln(os.Stderr, "fmt must be json or yaml")
 		os.Exit(1)
@@ -74,7 +92,6 @@ func run() {
 		if err != nil {
 			log.Fatalf("reading input file: %s", err)
 		}
-		defer f.Close()
 		input = f
 	}
 
@@ -88,19 +105,5 @@ func run() {
 		parser = oscal.ParseYaml
 	}
 
-	output, err := oscal.Generate(input, parser, name, pkg, tagList, subStruct, convertFloats)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "error parsing", err)
-		os.Exit(1)
-	}
-
-	if outputFileName != "" {
-		if err := os.WriteFile(outputFileName, output, 0644); err != nil {
-			log.Fatalf("writing output: %s", err)
-		}
-	} else {
-		fmt.Print(string(output))
-	}
-
-	oscal.GenerateComponentDefinitionModel()
+	return input, convertFloats, parser, tagList
 }

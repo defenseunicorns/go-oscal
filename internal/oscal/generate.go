@@ -102,31 +102,50 @@ func readFile(input io.Reader) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// Generate a struct definition for OSCAL component definition data model
-func GenerateComponentDefinitionModel() error {
+// Generate a struct definition for OSCAL component definition
+func GenerateComponentDefinitionStructs(structName, pkgName string, tags []string, subStruct bool, convertFloats bool) ([]byte, error) {
 	var componentDefinition = Properties_25{}
 	var componentDefinitionMap map[string]interface{}
 
-	data, err := json.Marshal(componentDefinition)
-	if err != nil {
-		return err
+	var subStructMap map[string]string = nil
+
+	// If --sub-struct flag is used, create string-string map
+	if subStruct {
+		subStructMap = make(map[string]string)
 	}
 
-	json.Unmarshal(data, &componentDefinitionMap)
+	data, err := json.Marshal(componentDefinition)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := json.Unmarshal(data, &componentDefinitionMap); err != nil {
+		return nil, err
+	}
+
+	src := fmt.Sprintf("package %s\ntype %s %s}",
+		pkgName,
+		structName,
+		generateTypes(componentDefinitionMap, structName, tags, 0, subStructMap, convertFloats))
 
 	// Append map keys to a string slice
-	keys := make([]string, 0, len(componentDefinitionMap))
-	for key := range componentDefinitionMap {
+	keys := make([]string, 0, len(subStructMap))
+	for key := range subStructMap {
 		keys = append(keys, key)
 	}
 
 	sort.Strings(keys)
 
 	for _, key := range keys {
-		fmt.Println(key)
+		src = fmt.Sprintf("%v\n\ntype %v %v", src, subStructMap[key], key)
 	}
 
-	return nil
+	formatted, err := format.Source([]byte(src))
+	if err != nil {
+		err = fmt.Errorf("error formatting: %s, was formatting\n%s", err, src)
+	}
+
+	return formatted, err
 }
 
 // Generate a struct definition given a JSON string representation of an object and a name structName.
