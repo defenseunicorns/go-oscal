@@ -14,6 +14,8 @@ import (
 	"unicode"
 
 	"gopkg.in/yaml.v2"
+
+	types "github.com/defenseunicorns/go-oscal/internal/oscal/types"
 )
 
 // commonInitialisms is a set of common initialisms.
@@ -104,7 +106,7 @@ func readFile(input io.Reader) ([]byte, error) {
 
 // Generate a struct definition for OSCAL component definition
 func GenerateComponentDefinitionStructs(structName, pkgName string, tags []string, subStruct bool, convertFloats bool) ([]byte, error) {
-	var componentDefinition = Properties_25{}
+	var componentDefinition = types.Properties_25{}
 	var componentDefinitionMap map[string]interface{}
 
 	var subStructMap map[string]string = nil
