@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/defenseunicorns/go-oscal/internal/oscal"
@@ -19,10 +18,14 @@ var generateCmd = &cobra.Command{
 	},
 }
 
+// Add generateCmd to the parent rootCmd
 func init() {
 	rootCmd.AddCommand(generateCmd)
 }
 
+// generateDefinitionStructs validates user input,
+// generates OSCAL component definition structs,
+// and either writes them to a file or prints to STDOUT
 func generateDefinitionStructs() {
 	_, convertFloats, _, tagList := validateInput()
 
@@ -32,11 +35,11 @@ func generateDefinitionStructs() {
 		os.Exit(1)
 	}
 
+	// If the --output-file flag was provided, write the structs to the provided file
+	// if not, print to STDOUT
 	if outputFileName != "" {
-		if err := os.WriteFile(outputFileName, output, 0644); err != nil {
-			log.Fatalf("writing output: %s", err)
-		}
+		writeOutputFile(output)
 	} else {
-		fmt.Print(string(output))
+		printStdout(output)
 	}
 }

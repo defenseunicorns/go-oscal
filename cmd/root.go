@@ -42,10 +42,13 @@ func Execute() {
 	}
 }
 
+// Set command-line flags.
+// Flags() are local to the rootCmd.
+// PersistentFlags() are global
 func init() {
+	rootCmd.Flags().StringVarP(&inputFileName, "input-file", "i", "", "the name of the input file containing JSON (if input not provided via STDIN)")
 	rootCmd.PersistentFlags().StringVarP(&name, "name", "n", "Example", "the name of the struct")
 	rootCmd.PersistentFlags().StringVarP(&pkg, "pkg", "p", "main", "the name of the package for the generated code")
-	rootCmd.Flags().StringVarP(&inputFileName, "input-file", "i", "", "the name of the input file containing JSON (if input not provided via STDIN)")
 	rootCmd.PersistentFlags().StringVarP(&outputFileName, "output-file", "o", "", "the name of the file to write the output to (outputs to STDOUT by default)")
 	rootCmd.PersistentFlags().StringVar(&format, "fmt", "json", "the format of the input data (json or yaml)")
 	rootCmd.PersistentFlags().StringVar(&tags, "tags", format, "comma seperated list of the tags to put on the struct, default is the same as fmt")
@@ -54,24 +57,28 @@ func init() {
 	rootCmd.MarkFlagRequired("input-file")
 }
 
+// generateSchemaStructs validates user input, generates OSCAL schema structs
+// and either writes them to a file or prints to STDOUT
 func generateSchemaStructs() {
 	input, convertFloats, parser, tagList := validateInput()
 
-	output, err := oscal.Generate(input, parser, name, pkg, tagList, subStruct, convertFloats)
+	output, err := oscal.GenerateSchemaStructs(input, parser, name, pkg, tagList, subStruct, convertFloats)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "error parsing", err)
 		os.Exit(1)
 	}
 
+	// If the --output-file flag was provided, write the structs to the provided file
+	// if not, print to STDOUT
 	if outputFileName != "" {
-		if err := os.WriteFile(outputFileName, output, 0644); err != nil {
-			log.Fatalf("writing output: %s", err)
-		}
+		writeOutputFile(output)
 	} else {
-		fmt.Print(string(output))
+		printStdout(output)
 	}
 }
 
+// validateInput parses and validates these user-provided flags:
+// --fmt, --tags, and --input-file
 func validateInput() (io.Reader, bool, oscal.Parser, []string) {
 	if format != "json" && format != "yaml" {
 		fmt.Fprintln(os.Stderr, "fmt must be json or yaml")
@@ -106,4 +113,17 @@ func validateInput() (io.Reader, bool, oscal.Parser, []string) {
 	}
 
 	return input, convertFloats, parser, tagList
+}
+
+// writeOutputFile writes the generated structs to the file
+// provided via --output-file
+func writeOutputFile(output []byte) {
+	if err := os.WriteFile(outputFileName, output, 0644); err != nil {
+		log.Fatalf("writing output: %s", err)
+	}
+}
+
+// printStdout prints the generated structs to STDOUT
+func printStdout(output []byte) {
+	fmt.Print(string(output))
 }

@@ -11,7 +11,7 @@ clean: ## Remove built binary
 
 .PHONY: generate-definition
 generate-definition: ## Generate Go structs from OSCAL schema types and output to stdout
-	./go-oscal generate --output-file internal/oscal/types/definition_types.go --name "OscalComponentDefinition" --sub-struct --pkg oscal --tags json,yaml
+	./go-oscal generate --name "OscalComponentDefinition" --sub-struct --pkg oscal --tags json,yaml
 
 .PHONY: generate-file
 generate-file: ## Generate Go structs from OSCAL JSON schema and output to 'internal/oscal/types.go'

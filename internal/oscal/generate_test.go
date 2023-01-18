@@ -15,7 +15,7 @@ var pkgName string = "oscal"
 // It does not (yet) test for correctness of the end result
 func TestSimpleJson(t *testing.T) {
 	i := strings.NewReader(`{"foo" : "bar"}`)
-	if _, err := Generate(i, ParseJson, "TestStruct", pkgName, []string{"json"}, false, true); err != nil {
+	if _, err := GenerateSchemaStructs(i, ParseJson, "TestStruct", pkgName, []string{"json"}, false, true); err != nil {
 		t.Error("Generate() error:", err)
 	}
 }
@@ -23,7 +23,7 @@ func TestSimpleJson(t *testing.T) {
 // TestNullableJson tests that a null JSON value is handled properly
 func TestNullableJson(t *testing.T) {
 	i := strings.NewReader(`{"foo" : "bar", "baz" : null}`)
-	if _, err := Generate(i, ParseJson, "TestStruct", pkgName, []string{"json"}, false, true); err != nil {
+	if _, err := GenerateSchemaStructs(i, ParseJson, "TestStruct", pkgName, []string{"json"}, false, true); err != nil {
 		t.Error("Generate() error:", err)
 	}
 }
@@ -31,7 +31,7 @@ func TestNullableJson(t *testing.T) {
 // TestSimpleArray tests that an array without conflicting types is handled correctly
 func TestSimpleArray(t *testing.T) {
 	i := strings.NewReader(`{"foo" : [{"bar": 24}, {"bar" : 42}]}`)
-	if _, err := Generate(i, ParseJson, "TestStruct", pkgName, []string{"json"}, false, true); err != nil {
+	if _, err := GenerateSchemaStructs(i, ParseJson, "TestStruct", pkgName, []string{"json"}, false, true); err != nil {
 		t.Error("Generate() error:", err)
 	}
 }
@@ -39,7 +39,7 @@ func TestSimpleArray(t *testing.T) {
 // TestInvalidFieldChars tests that a document with invalid field chars is handled correctly
 func TestInvalidFieldChars(t *testing.T) {
 	i := strings.NewReader(`{"f.o-o" : 42}`)
-	if _, err := Generate(i, ParseJson, "TestStruct", pkgName, []string{"json"}, false, true); err != nil {
+	if _, err := GenerateSchemaStructs(i, ParseJson, "TestStruct", pkgName, []string{"json"}, false, true); err != nil {
 		t.Error("Generate() error:", err)
 	}
 }
@@ -58,7 +58,7 @@ func TestInferFloatInt(t *testing.T) {
 		t.Fatalf("error reading expected-floats.go.out: %s", err)
 	}
 
-	actual, err := Generate(f, ParseJson, "Stats", pkgName, []string{"json"}, false, true)
+	actual, err := GenerateSchemaStructs(f, ParseJson, "Stats", pkgName, []string{"json"}, false, true)
 	if err != nil {
 		t.Error(err)
 	}
@@ -82,7 +82,7 @@ func TestYamlNumbers(t *testing.T) {
 		t.Fatalf("error reading expected-numbers.go.out: %s", err)
 	}
 
-	actual, err := Generate(f, ParseYaml, "Stats", pkgName, []string{"yaml"}, false, false)
+	actual, err := GenerateSchemaStructs(f, ParseYaml, "Stats", pkgName, []string{"yaml"}, false, false)
 	if err != nil {
 		t.Error(err)
 	}
@@ -104,7 +104,7 @@ func TestExample(t *testing.T) {
 		t.Error("error reading expected-output-test.go", err)
 	}
 
-	actual, err := Generate(i, ParseJson, "User", pkgName, []string{"json"}, false, true)
+	actual, err := GenerateSchemaStructs(i, ParseJson, "User", pkgName, []string{"json"}, false, true)
 	if err != nil {
 		t.Error(err)
 	}
@@ -159,7 +159,7 @@ func TestExampleArray(t *testing.T) {
 		t.Fatalf("error reading example-array.go: %s", err)
 	}
 
-	actual, err := Generate(i, ParseJson, "Users", pkgName, []string{"json"}, false, true)
+	actual, err := GenerateSchemaStructs(i, ParseJson, "Users", pkgName, []string{"json"}, false, true)
 	if err != nil {
 		t.Fatal(err)
 	}

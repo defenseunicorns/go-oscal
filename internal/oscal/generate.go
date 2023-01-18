@@ -104,7 +104,7 @@ func readFile(input io.Reader) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// Generate a struct definition for OSCAL component definition
+// Generate structs for OSCAL component definition
 func GenerateComponentDefinitionStructs(structName, pkgName string, tags []string, subStruct bool, convertFloats bool) ([]byte, error) {
 	var componentDefinition = types.Properties_25{}
 	var componentDefinitionMap map[string]interface{}
@@ -150,8 +150,8 @@ func GenerateComponentDefinitionStructs(structName, pkgName string, tags []strin
 	return formatted, err
 }
 
-// Generate a struct definition given a JSON string representation of an object and a name structName.
-func Generate(input io.Reader, parser Parser, structName, pkgName string, tags []string, subStruct bool, convertFloats bool) ([]byte, error) {
+// Generate structs for OSCAL schema
+func GenerateSchemaStructs(input io.Reader, parser Parser, structName, pkgName string, tags []string, subStruct bool, convertFloats bool) ([]byte, error) {
 	var subStructMap map[string]string = nil
 
 	// If --sub-struct flag is used, create string-string map
