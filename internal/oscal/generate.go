@@ -125,6 +125,15 @@ func GenerateComponentDefinitionStructs(structName, pkgName string, tags []strin
 		return nil, err
 	}
 
+	// Append map keys to a string slice
+	testKeys := make([]string, 0, len(componentDefinitionMap))
+	for key := range componentDefinitionMap {
+		testKeys = append(testKeys, key)
+
+		// keyValuePair := fmt.Sprintf("%+v : %+v\n", key, value)
+		// fmt.Println(keyValuePair)
+	}
+
 	src := fmt.Sprintf("package %s\ntype %s %s}",
 		pkgName,
 		structName,
@@ -350,33 +359,36 @@ Example:
 
 	Output: FooID
 */
-func FmtFieldName(s string) string {
-	runes := []rune(s)
+func FmtFieldName(str string) string {
+	runes := []rune(str)
+
 	for len(runes) > 0 && !unicode.IsLetter(runes[0]) && !unicode.IsDigit(runes[0]) {
 		runes = runes[1:]
 	}
+
 	if len(runes) == 0 {
 		return "_"
 	}
 
-	s = stringifyFirstChar(string(runes))
-	name := lintFieldName(s)
+	str = stringifyFirstChar(string(runes))
+	name := lintFieldName(str)
 	runes = []rune(name)
-	for i, c := range runes {
-		ok := unicode.IsLetter(c) || unicode.IsDigit(c)
-		if i == 0 {
-			ok = unicode.IsLetter(c)
+	for integer, character := range runes {
+		ok := unicode.IsLetter(character) || unicode.IsDigit(character)
+		if integer == 0 {
+			ok = unicode.IsLetter(character)
 		}
 		if !ok {
-			runes[i] = '_'
+			runes[integer] = '_'
 		}
 	}
-	s = string(runes)
-	s = strings.Trim(s, "_")
-	if len(s) == 0 {
+
+	str = string(runes)
+	str = strings.Trim(str, "_")
+	if len(str) == 0 {
 		return "_"
 	}
-	return s
+	return str
 }
 
 func lintFieldName(name string) string {
