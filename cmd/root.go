@@ -20,6 +20,7 @@ var (
 	format         string
 	tags           string
 	subStruct      bool
+	schema         bool
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -50,6 +51,7 @@ func init() {
 	rootCmd.Flags().StringVar(&format, "fmt", "json", "the format of the input data (json or yaml)")
 	rootCmd.Flags().StringVar(&tags, "tags", format, "comma seperated list of the tags to put on the struct, default is the same as fmt")
 	rootCmd.Flags().BoolVar(&subStruct, "sub-struct", false, "create types for sub-structs")
+	rootCmd.Flags().BoolVar(&schema, "schema", false, "create types for schema")
 
 	rootCmd.MarkFlagRequired("input")
 }
@@ -102,4 +104,5 @@ func run() {
 	} else {
 		fmt.Print(string(output))
 	}
+
 }
