@@ -156,17 +156,23 @@ func Generate(input io.Reader, parser Parser, structName, pkgName string, tags [
 	generateModelTypes(idMap, id, modelTypeMap)
 
 	// Loop to print to stdout the current data we created
-	for key, value := range modelTypeMap {
-		fmt.Printf("\n%v\n%v\n", key, value)
-		for _, v := range value {
-			fmt.Printf("%v\n\t", v)
-		}
-	}
+	// for key, value := range modelTypeMap {
+	// 	fmt.Printf("\n%v\n%v\n", key, value)
+	// 	for _, v := range value {
+	// 		fmt.Printf("%v\n\t", v)
+	// 	}
+	// }
 
-	// TODO: generate teh struct file from modelTypeMap
+	// TODO: generate the struct file from modelTypeMap
+	structString := generateStruct(modelTypeMap, pkgName)
+
+	// formatted, err := format.Source([]byte(structString))
+	// if err != nil {
+	// 	err = fmt.Errorf("error formatting: %s, was formatting\n%s", err, structString)
+	// }
 
 	// Change this back to the required return values
-	return nil, nil
+	return []byte(structString), err
 	// return formatted, err
 }
 
@@ -200,10 +206,18 @@ func convertKeysToStrings(obj map[interface{}]interface{}) map[string]interface{
 // integermap was identified as missing?
 func generateModelTypes(obj map[string]interface{}, structId string, modelMap map[string][]string) string {
 
+	// use structId to search for existing data in modelMap
+	if existing := modelMap[structId]; existing != nil {
+		return modelMap[structId][0]
+	}
+
 	structName := strings.Split(structId, "_")[2]
 	structData := []string{structName}
+	// fmt.Println(structData)
 	// If our data has a properties field - evaluate
 	// else it may be the property itself and we need to get the type
+
+	// TODO - evaluate for properties that
 	if prop := obj[structId].(map[string]interface{})["properties"]; prop != nil {
 		for i, v := range obj[structId].(map[string]interface{})["properties"].(map[string]interface{}) {
 			if valueType := v.(map[string]interface{})["type"]; valueType != nil {
@@ -215,7 +229,6 @@ func generateModelTypes(obj map[string]interface{}, structId string, modelMap ma
 				case "integer":
 					structData = append(structData, fmt.Sprintf("%v:%v", i, value))
 				case "array":
-					// fmt.Printf("\narray value: %v/%v", v, v.(map[string]interface{})["items"].(map[string]interface{})["$ref"])
 					if ref := v.(map[string]interface{})["items"].(map[string]interface{})["$ref"]; ref != nil {
 						objectType := generateModelTypes(obj, ref.(string), modelMap)
 						structData = append(structData, fmt.Sprintf("%v:[]%v", i, objectType))
@@ -227,6 +240,8 @@ func generateModelTypes(obj map[string]interface{}, structId string, modelMap ma
 			} else if ref := v.(map[string]interface{})["$ref"]; ref != nil {
 				objectType := generateModelTypes(obj, ref.(string), modelMap)
 				structData = append(structData, fmt.Sprintf("%v:%v", i, objectType))
+			} else if resources := v.(map[string]interface{})["resources"]; resources != nil {
+				// we have to re-write the loop from above - can we simplify?
 			}
 
 		}
@@ -248,6 +263,24 @@ func generateModelTypes(obj map[string]interface{}, structId string, modelMap ma
 	modelMap[structId] = structData
 
 	return structName
+}
+
+func generateStruct(structMap map[string][]string, pkgName string) string {
+	typesString := fmt.Sprintf("package %s\n\n", pkgName)
+	// Begin generation of struct
+	for _, v := range structMap {
+
+		for index, value := range v {
+			if index == 0 {
+				typesString += fmt.Sprintf("\ntype %v struct {", value)
+			} else {
+				prop := strings.Split(value, ":")
+				typesString += fmt.Sprintf("\n\t%v\t%v", prop[0], prop[1])
+			}
+		}
+		typesString += fmt.Sprintf("\n}")
+	}
+	return typesString
 }
 
 // Generate go struct entries for a map[string]interface{} structure
