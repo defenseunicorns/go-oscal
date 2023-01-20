@@ -28,3 +28,5 @@
     - identify omitempty for tags
         - Review objects for "required" fields 
         - have the ability to establish omitempty on all fields that are not required?
+    - add comments to the top of the generated file to indicate it being generated and a reference to go-oscal?
+        - add sub-comment to recommend how to make manual edits - this should aid in instances where users need to track modifications made to the generated types file (particularly during code review)
