@@ -21,3 +21,10 @@
                 - Need to recurse and return a unique struct name by first finding that object in the map via id
 
     - Once fully generated - then loop over provided types and begin producing file
+
+- TODO
+    - evaluate back-matter resources key under properties
+    - add tags
+    - identify omitempty for tags
+        - Review objects for "required" fields 
+        - have the ability to establish omitempty on all fields that are not required?

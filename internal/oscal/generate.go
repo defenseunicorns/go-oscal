@@ -232,7 +232,7 @@ func generateModelTypes(obj map[string]interface{}, structId string, modelMap ma
 				case "array":
 					if ref := v.(map[string]interface{})["items"].(map[string]interface{})["$ref"]; ref != nil {
 						objectType := generateModelTypes(obj, ref.(string), modelMap)
-						structData = append(structData, fmt.Sprintf("%v:[]%v", valueName, FmtFieldName(objectType)))
+						structData = append(structData, fmt.Sprintf("%v:[]%v", valueName, objectType))
 					}
 
 				default:
@@ -243,7 +243,7 @@ func generateModelTypes(obj map[string]interface{}, structId string, modelMap ma
 				// Need to modify this logic to handle a Golang basic type
 
 				objectType := generateModelTypes(obj, ref.(string), modelMap)
-				structData = append(structData, fmt.Sprintf("%v:%v", valueName, FmtFieldName(objectType)))
+				structData = append(structData, fmt.Sprintf("%v:%v", valueName, objectType))
 			}
 		}
 	} else if objType := obj[structId].(map[string]interface{})["type"]; objType != nil {
@@ -263,7 +263,7 @@ func generateModelTypes(obj map[string]interface{}, structId string, modelMap ma
 
 	modelMap[structId] = structData
 
-	return structName
+	return FmtFieldName(structName)
 }
 
 func generateStruct(structMap map[string][]string, pkgName string) string {
