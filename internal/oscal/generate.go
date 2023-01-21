@@ -153,7 +153,7 @@ func Generate(input io.Reader, parser Parser, structName, pkgName string, tags [
 	modelTypeMap := make(map[string][]string)
 
 	// should modelTypeMap be passed in as a reference?
-	generateModelTypes(idMap, id, modelTypeMap)
+	generateModelTypes(idMap, id, strings.Split(id, "_")[2], modelTypeMap)
 
 	// Loop to print to stdout the current data we created
 	// for key, value := range modelTypeMap {
@@ -204,23 +204,18 @@ func convertKeysToStrings(obj map[interface{}]interface{}) map[string]interface{
 	return res
 }
 
-// TODO - testing for edge cases and reviewing json schema for missing value types
-// integermap was identified as missing?
-func generateModelTypes(obj map[string]interface{}, structId string, modelMap map[string][]string) string {
-
+func generateModelTypes(obj map[string]interface{}, structId string, structName string, modelMap map[string][]string) string {
 	// use structId to search for existing data in modelMap
 	if existing := modelMap[structId]; existing != nil {
 		return modelMap[structId][0]
 	}
 
-	structName := strings.Split(structId, "_")[2]
 	structData := []string{FmtFieldName(structName)}
 	// If our data has a properties field - evaluate
 	// else it may be the property itself and we need to get the type
-
 	if prop := obj[structId].(map[string]interface{})["properties"]; prop != nil {
-		for i, v := range prop.(map[string]interface{}) {
-			valueName := FmtFieldName(i)
+		for k, v := range prop.(map[string]interface{}) {
+			valueName := FmtFieldName(k)
 			if valueType := v.(map[string]interface{})["type"]; valueType != nil {
 				switch value := valueType.(string); value {
 				case "string":
@@ -231,19 +226,27 @@ func generateModelTypes(obj map[string]interface{}, structId string, modelMap ma
 					structData = append(structData, fmt.Sprintf("%v:%v", valueName, value))
 				case "array":
 					if ref := v.(map[string]interface{})["items"].(map[string]interface{})["$ref"]; ref != nil {
-						objectType := generateModelTypes(obj, ref.(string), modelMap)
+						objectType := generateModelTypes(obj, ref.(string), strings.Split(ref.(string), "_")[2], modelMap)
+						structData = append(structData, fmt.Sprintf("%v:[]%v", valueName, objectType))
+					} else {
+						// If there is no $ref - then we must be attempting to determine type without a ref
+						obj[valueName] = v.(map[string]interface{})["items"]
+						objectType := generateModelTypes(obj, valueName, valueName, modelMap)
 						structData = append(structData, fmt.Sprintf("%v:[]%v", valueName, objectType))
 					}
+				case "object":
+					obj[valueName] = v
+					objectType := generateModelTypes(obj, valueName, valueName, modelMap)
+					structData = append(structData, fmt.Sprintf("%v:[]%v", valueName, objectType))
 
 				default:
 					fmt.Printf("type not defined: %v", value)
 				}
 			} else if ref := v.(map[string]interface{})["$ref"]; ref != nil {
-
-				// Need to modify this logic to handle a Golang basic type
-
-				objectType := generateModelTypes(obj, ref.(string), modelMap)
+				objectType := generateModelTypes(obj, ref.(string), strings.Split(ref.(string), "_")[2], modelMap)
 				structData = append(structData, fmt.Sprintf("%v:%v", valueName, objectType))
+			} else {
+				fmt.Printf("no type or ref for: %v", v)
 			}
 		}
 	} else if objType := obj[structId].(map[string]interface{})["type"]; objType != nil {
