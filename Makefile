@@ -66,10 +66,6 @@ generate-file: ## Generate Go structs from OSCAL JSON schema and output to 'inte
 generate-stdout: ## Generate Go structs from OSCAL JSON schema and output to stdout
 	./go-oscal --input-file test/oscal_component_schema.json --sub-struct --pkg oscal --tags json,yaml
 
-.PHONY: run-main
-run-main: ## useful for running the main.go file without having to compile
-	go run main.go --input-file test/oscal_component_schema.json --sub-struct --pkg oscal --tags json,yaml
-
 .PHONY: test
 test: build ## Run automated tests.
 	go test $(GOFLAGS) -run $(TESTS) $(PKG) $(TESTFLAGS)
