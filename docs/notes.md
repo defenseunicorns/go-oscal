@@ -33,3 +33,4 @@
     - Enhance logging and errors
     - Abstract the logic to handle other OSCAL models/schemas
     - Enhance structId to account for potential duplicate conflicts
+    - Format `integer` to `int` as value type in port range struct

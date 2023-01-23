@@ -153,7 +153,7 @@ func Generate(input io.Reader, parser Parser, structName, pkgName string, tags [
 	modelTypeMap := make(map[string][]string)
 
 	// should modelTypeMap be passed in as a reference?
-	generateModelTypes(idMap, id, strings.Split(id, "_")[2], modelTypeMap)
+	generateModelTypes(idMap, id, strings.Split(id, "_")[2], tags, modelTypeMap)
 
 	// Loop to print to stdout the current data we created
 	// for key, value := range modelTypeMap {
@@ -165,8 +165,6 @@ func Generate(input io.Reader, parser Parser, structName, pkgName string, tags [
 
 	// TODO: generate the struct file from modelTypeMap
 	structString := generateStruct(modelTypeMap, pkgName)
-
-	// fmt.Println(structString)
 
 	formatted, err := format.Source([]byte(structString))
 	if err != nil {
@@ -204,7 +202,7 @@ func convertKeysToStrings(obj map[interface{}]interface{}) map[string]interface{
 	return res
 }
 
-func generateModelTypes(obj map[string]interface{}, structId string, structName string, modelMap map[string][]string) string {
+func generateModelTypes(obj map[string]interface{}, structId string, structName string, tags []string, modelMap map[string][]string) string {
 	// use structId to search for existing data in modelMap
 	if existing := modelMap[structId]; existing != nil {
 		return modelMap[structId][0]
@@ -216,35 +214,42 @@ func generateModelTypes(obj map[string]interface{}, structId string, structName 
 	if prop := obj[structId].(map[string]interface{})["properties"]; prop != nil {
 		for k, v := range prop.(map[string]interface{}) {
 			valueName := FmtFieldName(k)
+
+			// Format struct tags
+			tagList := make([]string, 0)
+			for _, t := range tags {
+				tagList = append(tagList, fmt.Sprintf("%s:\"%s\"", t, k))
+			}
+
 			if valueType := v.(map[string]interface{})["type"]; valueType != nil {
 				switch value := valueType.(string); value {
 				case "string":
-					structData = append(structData, fmt.Sprintf("%v:%v", valueName, value))
+					structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, value, strings.Join(tagList, " ")))
 				case "bool":
-					structData = append(structData, fmt.Sprintf("%v:%v", valueName, value))
+					structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, value, strings.Join(tagList, " ")))
 				case "integer":
-					structData = append(structData, fmt.Sprintf("%v:%v", valueName, value))
+					structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, value, strings.Join(tagList, " ")))
 				case "array":
 					if ref := v.(map[string]interface{})["items"].(map[string]interface{})["$ref"]; ref != nil {
-						objectType := generateModelTypes(obj, ref.(string), strings.Split(ref.(string), "_")[2], modelMap)
-						structData = append(structData, fmt.Sprintf("%v:[]%v", valueName, objectType))
+						objectType := generateModelTypes(obj, ref.(string), strings.Split(ref.(string), "_")[2], tags, modelMap)
+						structData = append(structData, fmt.Sprintf("%s []%s `%s`", valueName, objectType, strings.Join(tagList, " ")))
 					} else {
 						// If there is no $ref - then we must be attempting to determine type without a ref
 						obj[valueName] = v.(map[string]interface{})["items"]
-						objectType := generateModelTypes(obj, valueName, valueName, modelMap)
-						structData = append(structData, fmt.Sprintf("%v:[]%v", valueName, objectType))
+						objectType := generateModelTypes(obj, valueName, valueName, tags, modelMap)
+						structData = append(structData, fmt.Sprintf("%s []%s `%s`", valueName, objectType, strings.Join(tagList, " ")))
 					}
 				case "object":
 					obj[valueName] = v
-					objectType := generateModelTypes(obj, valueName, valueName, modelMap)
-					structData = append(structData, fmt.Sprintf("%v:[]%v", valueName, objectType))
+					objectType := generateModelTypes(obj, valueName, valueName, tags, modelMap)
+					structData = append(structData, fmt.Sprintf("%s []%s `%s`", valueName, objectType, strings.Join(tagList, " ")))
 
 				default:
 					fmt.Printf("type not defined: %v", value)
 				}
 			} else if ref := v.(map[string]interface{})["$ref"]; ref != nil {
-				objectType := generateModelTypes(obj, ref.(string), strings.Split(ref.(string), "_")[2], modelMap)
-				structData = append(structData, fmt.Sprintf("%v:%v", valueName, objectType))
+				objectType := generateModelTypes(obj, ref.(string), strings.Split(ref.(string), "_")[2], tags, modelMap)
+				structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, objectType, strings.Join(tagList, " ")))
 			} else {
 				fmt.Printf("no type or ref for: %v", v)
 			}
@@ -278,8 +283,7 @@ func generateStruct(structMap map[string][]string, pkgName string) string {
 			if index == 0 {
 				typesString += fmt.Sprintf("\ntype %v struct {", value)
 			} else {
-				prop := strings.Split(value, ":")
-				typesString += fmt.Sprintf("\n\t%v\t%v", prop[0], prop[1])
+				typesString += fmt.Sprintf("\n\t%s", value)
 			}
 		}
 		typesString += fmt.Sprintf("\n}")
