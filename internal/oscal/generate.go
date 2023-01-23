@@ -155,15 +155,6 @@ func Generate(input io.Reader, parser Parser, structName, pkgName string, tags [
 	// should modelTypeMap be passed in as a reference?
 	generateModelTypes(idMap, id, strings.Split(id, "_")[2], tags, modelTypeMap)
 
-	// Loop to print to stdout the current data we created
-	// for key, value := range modelTypeMap {
-	// 	fmt.Printf("\n%v\n%v\n", key, value)
-	// 	for _, v := range value {
-	// 		fmt.Printf("%v\n\t", v)
-	// 	}
-	// }
-
-	// TODO: generate the struct file from modelTypeMap
 	structString := generateStruct(modelTypeMap, pkgName)
 
 	formatted, err := format.Source([]byte(structString))
@@ -171,8 +162,6 @@ func Generate(input io.Reader, parser Parser, structName, pkgName string, tags [
 		err = fmt.Errorf("error formatting: %s, was formatting\n%s", err, structString)
 	}
 
-	// Change this back to the required return values
-	// return nil, nil
 	return formatted, err
 }
 
@@ -276,13 +265,22 @@ func generateModelTypes(obj map[string]interface{}, structId string, structName 
 }
 
 func generateStruct(structMap map[string][]string, pkgName string) string {
+	existing := make(map[string]bool)
 	typesString := fmt.Sprintf("package %s\n", pkgName)
 	// Begin generation of struct
-	for _, v := range structMap {
+	for i, v := range structMap {
 
 		for index, value := range v {
 			if index == 0 {
-				typesString += fmt.Sprintf("\ntype %v struct {", value)
+				_, ok := existing[value]
+				if !ok {
+					typesString += fmt.Sprintf("\ntype %v struct {", value)
+				} else {
+					// Handle duplicate struct names
+					name := strings.Split(i, "_")
+					typesString += fmt.Sprintf("\ntype %v struct {", strings.Trim(name[0], "#")+"_"+value)
+				}
+
 			} else {
 				typesString += fmt.Sprintf("\n\t%s", value)
 			}
@@ -436,7 +434,13 @@ func FmtFieldName(s string) string {
 	if len(s) == 0 {
 		return "_"
 	}
-	return s
+	result := ""
+	for _, v := range strings.Split(s, "_") {
+		runes := []rune(v)
+		runes[0] = unicode.ToUpper(runes[0])
+		result += string(runes)
+	}
+	return result
 }
 
 func lintFieldName(name string) string {
