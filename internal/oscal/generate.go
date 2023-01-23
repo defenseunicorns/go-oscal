@@ -228,6 +228,7 @@ func generateModelTypes(obj map[string]interface{}, structId string, structName 
 				case "bool":
 					structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, value, strings.Join(tagList, " ")))
 				case "integer":
+					value = "int"
 					structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, value, strings.Join(tagList, " ")))
 				case "array":
 					if ref := v.(map[string]interface{})["items"].(map[string]interface{})["$ref"]; ref != nil {
