@@ -64,7 +64,7 @@ generate-file: ## Generate Go structs from OSCAL JSON schema and output to 'inte
 
 .PHONY: generate-stdout
 generate-stdout: ## Generate Go structs from OSCAL JSON schema and output to stdout
-	go-oscal --input-file test/oscal_component_schema.json --sub-struct --pkg oscal --tags json,yaml
+	./go-oscal --input-file test/oscal_component_schema.json --sub-struct --pkg oscal --tags json,yaml
 
 .PHONY: test
 test: build ## Run automated tests.

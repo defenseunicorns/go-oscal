@@ -146,29 +146,39 @@ func Generate(input io.Reader, parser Parser, structName, pkgName string, tags [
 		return nil, fmt.Errorf("unexpected type: %T", interfaceResult)
 	}
 
-	src := fmt.Sprintf("package %s\ntype %s %s}",
-		pkgName,
-		structName,
-		generateTypes(result, structName, tags, 0, subStructMap, convertFloats))
+	// Generate a map with unique Id as key and existing interface as value
+	idMap, id := generateUniqueIdMap(result)
 
-	// Append subStructMap keys to a string slice
-	keys := make([]string, 0, len(subStructMap))
-	for key := range subStructMap {
-		keys = append(keys, key)
-	}
+	// Instantiate variable for storing the data
+	modelTypeMap := make(map[string][]string)
 
-	sort.Strings(keys)
+	// should modelTypeMap be passed in as a reference?
+	generateModelTypes(idMap, id, strings.Split(id, "_")[2], tags, modelTypeMap)
 
-	for _, key := range keys {
-		src = fmt.Sprintf("%v\n\ntype %v %v", src, subStructMap[key], key)
-	}
+	// generate the struct file from modelTypeMap
+	structString := generateStruct(modelTypeMap, pkgName)
 
-	formatted, err := format.Source([]byte(src))
+	formatted, err := format.Source([]byte(structString))
 	if err != nil {
-		err = fmt.Errorf("error formatting: %s, was formatting\n%s", err, src)
+		err = fmt.Errorf("error formatting: %s, was formatting\n%s", err, structString)
 	}
 
 	return formatted, err
+}
+
+func generateUniqueIdMap(obj map[string]interface{}) (map[string]interface{}, string) {
+	result := make(map[string]interface{})
+	var firstId string
+
+	for _, val := range obj["definitions"].(map[string]interface{}) {
+		if val.(map[string]interface{})["title"].(string) == "Component Definition" {
+			firstId = val.(map[string]interface{})["$id"].(string)
+		}
+		result[val.(map[string]interface{})["$id"].(string)] = val
+	}
+
+	return result, firstId
+
 }
 
 // convertKeysToStrings converts interface{} map keys to strings
@@ -182,10 +192,121 @@ func convertKeysToStrings(obj map[interface{}]interface{}) map[string]interface{
 	return res
 }
 
+func generateModelTypes(obj map[string]interface{}, structId string, structName string, tags []string, modelMap map[string][]string) string {
+	// use structId to search for existing data in modelMap
+	if existing := modelMap[structId]; existing != nil {
+		return modelMap[structId][0]
+	}
+
+	// Get required fields in each OSCAL data model
+	requiredFields := make(map[string]bool)
+	if required := obj[structId].(map[string]interface{})["required"]; required != nil {
+		for _, v := range required.([]interface{}) {
+			requiredFields[v.(string)] = true
+		}
+	}
+
+	structData := []string{FmtFieldName(structName)}
+	// If our data has a properties field - evaluate
+	// else it may be the property itself and we need to get the type
+	if prop := obj[structId].(map[string]interface{})["properties"]; prop != nil {
+		for k, v := range prop.(map[string]interface{}) {
+			valueName := FmtFieldName(k)
+
+			// Format struct tags
+			tagList := make([]string, 0)
+			for _, t := range tags {
+				// If this field is not required, then add omitempty to tag
+				if _, required := requiredFields[k]; !required {
+					omitEmpty := ",omitempty"
+					tagList = append(tagList, fmt.Sprintf("%s:\"%s%s\"", t, k, omitEmpty))
+				} else {
+					tagList = append(tagList, fmt.Sprintf("%s:\"%s\"", t, k))
+				}
+			}
+
+			if valueType := v.(map[string]interface{})["type"]; valueType != nil {
+				switch value := valueType.(string); value {
+				case "string":
+					structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, value, strings.Join(tagList, " ")))
+				case "bool":
+					structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, value, strings.Join(tagList, " ")))
+				case "integer":
+					value = "int"
+					structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, value, strings.Join(tagList, " ")))
+				case "array":
+					if ref := v.(map[string]interface{})["items"].(map[string]interface{})["$ref"]; ref != nil {
+						objectType := generateModelTypes(obj, ref.(string), strings.Split(ref.(string), "_")[2], tags, modelMap)
+						structData = append(structData, fmt.Sprintf("%s []%s `%s`", valueName, objectType, strings.Join(tagList, " ")))
+					} else {
+						// If there is no $ref - then we must be attempting to determine type without a ref
+						obj[valueName] = v.(map[string]interface{})["items"]
+						objectType := generateModelTypes(obj, valueName, valueName, tags, modelMap)
+						structData = append(structData, fmt.Sprintf("%s []%s `%s`", valueName, objectType, strings.Join(tagList, " ")))
+					}
+				case "object":
+					obj[valueName] = v
+					objectType := generateModelTypes(obj, valueName, valueName, tags, modelMap)
+					structData = append(structData, fmt.Sprintf("%s []%s `%s`", valueName, objectType, strings.Join(tagList, " ")))
+
+				default:
+					fmt.Printf("type not defined: %v", value)
+				}
+			} else if ref := v.(map[string]interface{})["$ref"]; ref != nil {
+				objectType := generateModelTypes(obj, ref.(string), strings.Split(ref.(string), "_")[2], tags, modelMap)
+				structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, objectType, strings.Join(tagList, " ")))
+			} else {
+				fmt.Printf("no type or ref for: %v", v)
+			}
+		}
+	} else if objType := obj[structId].(map[string]interface{})["type"]; objType != nil {
+		switch value := objType.(string); value {
+		case "string":
+			return "string"
+		case "bool":
+			return "bool"
+		case "array":
+			return "array"
+		default:
+			fmt.Printf("type not defined: %v", value)
+		}
+	} else {
+		fmt.Println("did not find properties or type")
+	}
+
+	modelMap[structId] = structData
+
+	return FmtFieldName(structName)
+}
+
+func generateStruct(structMap map[string][]string, pkgName string) string {
+	existing := make(map[string]bool)
+	typesString := fmt.Sprintf("package %s\n", pkgName)
+	// Begin generation of struct
+	for i, v := range structMap {
+
+		for index, value := range v {
+			if index == 0 {
+				_, ok := existing[value]
+				if !ok {
+					typesString += fmt.Sprintf("\ntype %v struct {", value)
+				} else {
+					// Handle duplicate struct names
+					name := strings.Split(i, "_")
+					typesString += fmt.Sprintf("\ntype %v struct {", strings.Trim(name[0], "#")+"_"+value)
+				}
+			} else {
+				typesString += fmt.Sprintf("\n\t%s", value)
+			}
+		}
+		typesString += fmt.Sprintf("\n}")
+	}
+	return typesString
+}
+
 // Generate go struct entries for a map[string]interface{} structure
 func generateTypes(obj map[string]interface{}, structName string, tags []string, depth int, subStructMap map[string]string, convertFloats bool) string {
 	structure := "struct {"
-
 	keys := make([]string, 0, len(obj))
 	for key := range obj {
 		keys = append(keys, key)
@@ -278,7 +399,6 @@ func generateTypes(obj map[string]interface{}, structName string, tags []string,
 		}
 
 		fieldName := FmtFieldName(key)
-
 		tagList := make([]string, 0)
 		for _, t := range tags {
 			tagList = append(tagList, fmt.Sprintf("%s:\"%s\"", t, key))
@@ -328,7 +448,13 @@ func FmtFieldName(s string) string {
 	if len(s) == 0 {
 		return "_"
 	}
-	return s
+	result := ""
+	for _, v := range strings.Split(s, "_") {
+		runes := []rune(v)
+		runes[0] = unicode.ToUpper(runes[0])
+		result += string(runes)
+	}
+	return result
 }
 
 func lintFieldName(name string) string {
