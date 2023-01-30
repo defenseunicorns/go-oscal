@@ -44,7 +44,6 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.Flags().StringVarP(&name, "name", "n", "OscalComponentDefinition", "the name of the struct")
 	rootCmd.Flags().StringVarP(&pkg, "pkg", "p", "main", "the name of the package for the generated code")
 	rootCmd.Flags().StringVarP(&inputFileName, "input-file", "i", "", "the name of the input file containing JSON (if input not provided via STDIN)")
 	rootCmd.Flags().StringVarP(&outputFileName, "output-file", "o", "", "the name of the file to write the output to (outputs to STDOUT by default)")
