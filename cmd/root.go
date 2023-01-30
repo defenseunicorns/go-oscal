@@ -20,7 +20,6 @@ var (
 	format         string
 	tags           string
 	subStruct      bool
-	schema         bool
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -85,7 +84,7 @@ func run() {
 		parser = oscal.ParseYaml
 	}
 
-	output, err := oscal.Generate(input, parser, name, pkg, tagList, subStruct, convertFloats)
+	output, err := oscal.Generate(input, parser, pkg, tagList, subStruct, convertFloats)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "error parsing", err)
 		os.Exit(1)
