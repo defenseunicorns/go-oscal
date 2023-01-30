@@ -13,7 +13,6 @@ import (
 )
 
 var (
-	name           string
 	pkg            string
 	inputFileName  string
 	outputFileName string
