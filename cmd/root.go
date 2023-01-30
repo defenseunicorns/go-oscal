@@ -18,7 +18,6 @@ var (
 	outputFileName string
 	format         string
 	tags           string
-	subStruct      bool
 )
 
 // rootCmd represents the base command when called without any subcommands
