@@ -100,7 +100,7 @@ func readFile(input io.Reader) ([]byte, error) {
 }
 
 // Generate a struct definition given a JSON string representation of an object and a name structName.
-func Generate(input io.Reader, parser Parser, pkgName string, tags []string, subStruct bool, convertFloats bool) ([]byte, error) {
+func Generate(input io.Reader, parser Parser, pkgName string, tags []string, convertFloats bool) ([]byte, error) {
 	var result map[string]interface{}
 
 	interfaceResult, err := parser(input)

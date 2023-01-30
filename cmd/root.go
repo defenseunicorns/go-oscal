@@ -83,7 +83,7 @@ func run() {
 		parser = oscal.ParseYaml
 	}
 
-	output, err := oscal.Generate(input, parser, pkg, tagList, subStruct, convertFloats)
+	output, err := oscal.Generate(input, parser, pkg, tagList, convertFloats)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "error parsing", err)
 		os.Exit(1)
