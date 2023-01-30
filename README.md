@@ -15,13 +15,11 @@ go build .
 Generate Go structs from the OSCAL JSON schema:
 
 ```bash
-./go-oscal --input test/oscal_component_schema.json \
-           --output-file internal/oscal/types.go \
-           --sub-struct \
-           --pkg oscal
+./go-oscal --input-file test/oscal_component_schema.json \
+           --output-file types.go
 ```
 
-After running the above command, the auto-generated Go structs are output to a file at `internal/oscal/types.go`
+After running the above command, the auto-generated Go structs are output to a file in the root of the repository: `types.go`
 
 To view the available CLI flags and their use-case:
 
@@ -30,6 +28,8 @@ To view the available CLI flags and their use-case:
 ```
 
 ## Development
+
+***Note***: The unit tests are not in a passing state currently. There is an [issue](https://github.com/defenseunicorns/go-oscal/issues/9) to address this
 
 For development, the `Makefile` can be used to build, test, and generate the Go structs:
 
