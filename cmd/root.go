@@ -49,8 +49,6 @@ func init() {
 	rootCmd.Flags().StringVarP(&outputFileName, "output-file", "o", "", "the name of the file to write the output to (outputs to STDOUT by default)")
 	rootCmd.Flags().StringVar(&format, "fmt", "json", "the format of the input data (json or yaml)")
 	rootCmd.Flags().StringVar(&tags, "tags", format, "comma seperated list of the tags to put on the struct, default is the same as fmt")
-
-	rootCmd.MarkFlagRequired("input")
 }
 
 func run() {
