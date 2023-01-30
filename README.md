@@ -16,7 +16,8 @@ Generate Go structs from the OSCAL JSON schema:
 
 ```bash
 ./go-oscal --input-file test/oscal_component_schema.json \
-           --output-file types.go
+           --output-file types.go \
+           --tags json,yaml
 ```
 
 After running the above command, the auto-generated Go structs are output to a file in the root of the repository: `types.go`
