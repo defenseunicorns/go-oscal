@@ -19,6 +19,7 @@ const headerComment string = `/*
 	To regenerate: go-oscal --input-file <path_to_oscal_json_schema_file> \
 							--output-file <name_of_go_types_file> // the path to this file must already exist \
 							--tags json,yaml // the tags to add to the Go structs
+							--pkg <name_of_your_go_package> // defaults to "main"
 
 	For more information on how to use go-oscal: go-oscal --help
 
