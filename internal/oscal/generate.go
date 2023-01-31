@@ -99,7 +99,7 @@ func readFile(input io.Reader) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// Generate a struct definition given a JSON string representation of an object and a name structName.
+// Generate a struct definition given a JSON string representation of an object.
 func Generate(input io.Reader, parser Parser, pkgName string, tags []string, convertFloats bool) ([]byte, error) {
 	var result map[string]interface{}
 
