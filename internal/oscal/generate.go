@@ -200,54 +200,64 @@ func formatStructTags(obj map[string]interface{}, structId string, key string, t
 	return tagList
 }
 
+// handlePropertiesField loops through "properties" fields
+// and constructs data for Go structs
+func handlePropertiesField(prop interface{}, obj map[string]interface{}, structId string, tags []string, structData []string, modelMap map[string][]string) []string {
+	for k, v := range prop.(map[string]interface{}) {
+		valueName := FmtFieldName(k)
+		tagList := formatStructTags(obj, structId, k, tags)
+
+		if valueType := v.(map[string]interface{})["type"]; valueType != nil {
+			switch value := valueType.(string); value {
+			case "string":
+				structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, value, strings.Join(tagList, " ")))
+			case "bool":
+				structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, value, strings.Join(tagList, " ")))
+			case "integer":
+				value = "int"
+				structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, value, strings.Join(tagList, " ")))
+			case "array":
+				if ref := v.(map[string]interface{})["items"].(map[string]interface{})["$ref"]; ref != nil {
+					objectType := generateModelTypes(obj, ref.(string), strings.Split(ref.(string), "_")[2], tags, modelMap)
+					structData = append(structData, fmt.Sprintf("%s []%s `%s`", valueName, objectType, strings.Join(tagList, " ")))
+				} else {
+					// If there is no $ref - then we must be attempting to determine type without a ref
+					obj[valueName] = v.(map[string]interface{})["items"]
+					objectType := generateModelTypes(obj, valueName, valueName, tags, modelMap)
+					structData = append(structData, fmt.Sprintf("%s []%s `%s`", valueName, objectType, strings.Join(tagList, " ")))
+				}
+			case "object":
+				obj[valueName] = v
+				objectType := generateModelTypes(obj, valueName, valueName, tags, modelMap)
+				structData = append(structData, fmt.Sprintf("%s []%s `%s`", valueName, objectType, strings.Join(tagList, " ")))
+
+			default:
+				fmt.Printf("type not defined: %v", value)
+			}
+		} else if ref := v.(map[string]interface{})["$ref"]; ref != nil {
+			objectType := generateModelTypes(obj, ref.(string), strings.Split(ref.(string), "_")[2], tags, modelMap)
+			structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, objectType, strings.Join(tagList, " ")))
+		} else {
+			fmt.Printf("no type or ref for: %v", v)
+		}
+	}
+
+	return structData
+}
+
 func generateModelTypes(obj map[string]interface{}, structId string, structName string, tags []string, modelMap map[string][]string) string {
 	// use structId to search for existing data in modelMap
 	if existing := modelMap[structId]; existing != nil {
 		return modelMap[structId][0]
 	}
 
-	structData := []string{FmtFieldName(structName)}
 	// If our data has a properties field - evaluate
 	// else it may be the property itself and we need to get the type
 	if prop := obj[structId].(map[string]interface{})["properties"]; prop != nil {
-		for k, v := range prop.(map[string]interface{}) {
-			valueName := FmtFieldName(k)
-			tagList := formatStructTags(obj, structId, k, tags)
+		structData := []string{FmtFieldName(structName)}
+		structData = handlePropertiesField(prop, obj, structId, tags, structData, modelMap)
+		modelMap[structId] = structData
 
-			if valueType := v.(map[string]interface{})["type"]; valueType != nil {
-				switch value := valueType.(string); value {
-				case "string":
-					structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, value, strings.Join(tagList, " ")))
-				case "bool":
-					structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, value, strings.Join(tagList, " ")))
-				case "integer":
-					value = "int"
-					structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, value, strings.Join(tagList, " ")))
-				case "array":
-					if ref := v.(map[string]interface{})["items"].(map[string]interface{})["$ref"]; ref != nil {
-						objectType := generateModelTypes(obj, ref.(string), strings.Split(ref.(string), "_")[2], tags, modelMap)
-						structData = append(structData, fmt.Sprintf("%s []%s `%s`", valueName, objectType, strings.Join(tagList, " ")))
-					} else {
-						// If there is no $ref - then we must be attempting to determine type without a ref
-						obj[valueName] = v.(map[string]interface{})["items"]
-						objectType := generateModelTypes(obj, valueName, valueName, tags, modelMap)
-						structData = append(structData, fmt.Sprintf("%s []%s `%s`", valueName, objectType, strings.Join(tagList, " ")))
-					}
-				case "object":
-					obj[valueName] = v
-					objectType := generateModelTypes(obj, valueName, valueName, tags, modelMap)
-					structData = append(structData, fmt.Sprintf("%s []%s `%s`", valueName, objectType, strings.Join(tagList, " ")))
-
-				default:
-					fmt.Printf("type not defined: %v", value)
-				}
-			} else if ref := v.(map[string]interface{})["$ref"]; ref != nil {
-				objectType := generateModelTypes(obj, ref.(string), strings.Split(ref.(string), "_")[2], tags, modelMap)
-				structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, objectType, strings.Join(tagList, " ")))
-			} else {
-				fmt.Printf("no type or ref for: %v", v)
-			}
-		}
 	} else if objType := obj[structId].(map[string]interface{})["type"]; objType != nil {
 		switch value := objType.(string); value {
 		case "string":
@@ -262,8 +272,6 @@ func generateModelTypes(obj map[string]interface{}, structId string, structName 
 	} else {
 		fmt.Println("did not find properties or type")
 	}
-
-	modelMap[structId] = structData
 
 	return FmtFieldName(structName)
 }
