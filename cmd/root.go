@@ -13,14 +13,11 @@ import (
 )
 
 var (
-	name           string
 	pkg            string
 	inputFileName  string
 	outputFileName string
 	format         string
 	tags           string
-	subStruct      bool
-	schema         bool
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -44,16 +41,11 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.Flags().StringVarP(&name, "name", "n", "OscalComponentDefinition", "the name of the struct")
 	rootCmd.Flags().StringVarP(&pkg, "pkg", "p", "main", "the name of the package for the generated code")
 	rootCmd.Flags().StringVarP(&inputFileName, "input-file", "i", "", "the name of the input file containing JSON (if input not provided via STDIN)")
 	rootCmd.Flags().StringVarP(&outputFileName, "output-file", "o", "", "the name of the file to write the output to (outputs to STDOUT by default)")
 	rootCmd.Flags().StringVar(&format, "fmt", "json", "the format of the input data (json or yaml)")
 	rootCmd.Flags().StringVar(&tags, "tags", format, "comma seperated list of the tags to put on the struct, default is the same as fmt")
-	rootCmd.Flags().BoolVar(&subStruct, "sub-struct", false, "create types for sub-structs")
-	rootCmd.Flags().BoolVar(&schema, "schema", false, "create types for schema")
-
-	rootCmd.MarkFlagRequired("input")
 }
 
 func run() {
@@ -90,7 +82,7 @@ func run() {
 		parser = oscal.ParseYaml
 	}
 
-	output, err := oscal.Generate(input, parser, name, pkg, tagList, subStruct, convertFloats)
+	output, err := oscal.Generate(input, parser, pkg, tagList, convertFloats)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "error parsing", err)
 		os.Exit(1)

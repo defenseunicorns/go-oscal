@@ -59,12 +59,12 @@ $(BINDIR)/$(BINNAME): $(SRC)
 	CGO_ENABLED=$(CGO_ENABLED) go build $(GOFLAGS) -trimpath -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o '$(BINDIR)/$(BINNAME)' .
 
 .PHONY: generate-file
-generate-file: ## Generate Go structs from OSCAL JSON schema and output to 'internal/oscal/types.go'
-	go-oscal --input-file test/oscal_component_schema.json --output-file internal/oscal/types.go --sub-struct --pkg oscal --tags json,yaml
+generate-file: clean build ## Generate Go structs from OSCAL JSON schema and output to 'internal/oscal/types.go'
+	$(BINDIR)/$(BINNAME) --input-file test/oscal_component_schema.json --output-file types.go --tags json,yaml
 
 .PHONY: generate-stdout
-generate-stdout: ## Generate Go structs from OSCAL JSON schema and output to stdout
-	./go-oscal --input-file test/oscal_component_schema.json --sub-struct --pkg oscal --tags json,yaml
+generate-stdout: clean build ## Generate Go structs from OSCAL JSON schema and output to stdout
+	$(BINDIR)/$(BINNAME) --input-file test/oscal_component_schema.json --tags json,yaml
 
 .PHONY: test
 test: build ## Run automated tests.
@@ -72,7 +72,7 @@ test: build ## Run automated tests.
 
 .PHONY: run-main
 run-main: ## useful for running the main.go file without having to compile
-	go run main.go --input-file test/oscal_component_schema.json --sub-struct --pkg oscal --tags json,yaml
+	go run main.go --input-file test/oscal_component_schema.json --tags json,yaml
 
 .PHONY: install
 install: ## Install binary to $INSTALL_PATH.
