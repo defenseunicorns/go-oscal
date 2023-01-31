@@ -169,18 +169,41 @@ func convertKeysToStrings(obj map[interface{}]interface{}) map[string]interface{
 	return res
 }
 
-func generateModelTypes(obj map[string]interface{}, structId string, structName string, tags []string, modelMap map[string][]string) string {
-	// use structId to search for existing data in modelMap
-	if existing := modelMap[structId]; existing != nil {
-		return modelMap[structId][0]
-	}
-
-	// Get required fields in each OSCAL data model
+// getRequiredFields collects the required fields in each OSCAL data model
+func getRequiredFields(obj map[string]interface{}, structId string) map[string]bool {
 	requiredFields := make(map[string]bool)
+
 	if required := obj[structId].(map[string]interface{})["required"]; required != nil {
 		for _, v := range required.([]interface{}) {
 			requiredFields[v.(string)] = true
 		}
+	}
+
+	return requiredFields
+}
+
+func formatStructTags(obj map[string]interface{}, structId string, key string, tags []string) []string {
+	requiredFields := getRequiredFields(obj, structId)
+
+	tagList := make([]string, 0)
+
+	for _, tag := range tags {
+		// If this field is not required, then add omitempty to tag
+		if _, required := requiredFields[key]; !required {
+			omitEmpty := ",omitempty"
+			tagList = append(tagList, fmt.Sprintf("%s:\"%s%s\"", tag, key, omitEmpty))
+		} else {
+			tagList = append(tagList, fmt.Sprintf("%s:\"%s\"", tag, key))
+		}
+	}
+
+	return tagList
+}
+
+func generateModelTypes(obj map[string]interface{}, structId string, structName string, tags []string, modelMap map[string][]string) string {
+	// use structId to search for existing data in modelMap
+	if existing := modelMap[structId]; existing != nil {
+		return modelMap[structId][0]
 	}
 
 	structData := []string{FmtFieldName(structName)}
@@ -189,18 +212,7 @@ func generateModelTypes(obj map[string]interface{}, structId string, structName 
 	if prop := obj[structId].(map[string]interface{})["properties"]; prop != nil {
 		for k, v := range prop.(map[string]interface{}) {
 			valueName := FmtFieldName(k)
-
-			// Format struct tags
-			tagList := make([]string, 0)
-			for _, t := range tags {
-				// If this field is not required, then add omitempty to tag
-				if _, required := requiredFields[k]; !required {
-					omitEmpty := ",omitempty"
-					tagList = append(tagList, fmt.Sprintf("%s:\"%s%s\"", t, k, omitEmpty))
-				} else {
-					tagList = append(tagList, fmt.Sprintf("%s:\"%s\"", t, k))
-				}
-			}
+			tagList := formatStructTags(obj, structId, k, tags)
 
 			if valueType := v.(map[string]interface{})["type"]; valueType != nil {
 				switch value := valueType.(string); value {
