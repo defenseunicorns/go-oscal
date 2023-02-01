@@ -9,18 +9,11 @@ import (
 
 var oscalJSONSchemaFile string = "../../test/oscal_component_schema.json"
 
-// TestOscalSchemaVersion tests that the OSCAL schema version is correct
+// TestOscalSchemaVersion tests that the OSCAL schema version is correct.
 func TestOscalSchemaVersion(t *testing.T) {
 	oscalSchemaVersion := "1.0.4"
 
-	oscalMap := make(map[string]interface{})
-
-	oscalBytes, err := os.ReadFile(oscalJSONSchemaFile)
-	if err != nil {
-		t.Error(err)
-	}
-
-	err = json.Unmarshal(oscalBytes, &oscalMap)
+	oscalMap, err := parseOscalFileToMap()
 	if err != nil {
 		t.Error(err)
 	}
@@ -43,7 +36,7 @@ func TestOscalSchemaVersion(t *testing.T) {
 
 }
 
-// TestFmtFieldName tests that we handle formatting a json string to a go struct correctly
+// TestFmtFieldName tests that we handle formatting a json string to a go struct correctly.
 func TestFmtFieldName(t *testing.T) {
 	type TestCase struct {
 		in  string
@@ -67,4 +60,21 @@ func TestFmtFieldName(t *testing.T) {
 			t.Errorf("error FmtFieldName(): expected: %s | got: %s", expected, actual)
 		}
 	}
+}
+
+// parseOscalFileToMap reads and unmarshals the OSCAL JSON schema file
+// into a map[string]interface{} structure for further processing/testing.
+func parseOscalFileToMap() (map[string]interface{}, error) {
+	oscalMap := make(map[string]interface{})
+
+	oscalBytes, err := os.ReadFile(oscalJSONSchemaFile)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = json.Unmarshal(oscalBytes, &oscalMap); err != nil {
+		return nil, err
+	}
+
+	return oscalMap, nil
 }
