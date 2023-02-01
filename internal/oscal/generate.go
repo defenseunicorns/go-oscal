@@ -13,6 +13,22 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+const headerComment string = `/*
+	This file was auto-generated with go-oscal.
+
+	To regenerate:
+	
+	go-oscal \
+		--input-file <path_to_oscal_json_schema_file> \
+		--output-file <name_of_go_types_file> // the path to this file must already exist \
+		--tags json,yaml // the tags to add to the Go structs \
+		--pkg <name_of_your_go_package> // defaults to "main"
+
+	For more information on how to use go-oscal: go-oscal --help
+
+	Source: https://github.com/defenseunicorns/go-oscal
+	*/`
+
 // commonInitialisms is a set of common initialisms.
 // Only add entries that are highly unlikely to be non-initialisms.
 // For instance, "ID" is fine (Freudian code is rare), but "AND" is not.
@@ -278,7 +294,7 @@ func generateModelTypes(obj map[string]interface{}, structId string, structName 
 
 func generateStruct(structMap map[string][]string, pkgName string) string {
 	existing := make(map[string]bool)
-	typesString := fmt.Sprintf("package %s\n", pkgName)
+	typesString := fmt.Sprintf("%s\n\n package %s\n", headerComment, pkgName)
 	// Begin generation of struct
 	for i, v := range structMap {
 
@@ -296,7 +312,7 @@ func generateStruct(structMap map[string][]string, pkgName string) string {
 				typesString += fmt.Sprintf("\n\t%s", value)
 			}
 		}
-		typesString += fmt.Sprintf("\n}")
+		typesString += fmt.Sprintf("\n}\n")
 	}
 	return typesString
 }
