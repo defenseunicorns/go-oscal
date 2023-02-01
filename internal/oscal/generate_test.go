@@ -9,6 +9,30 @@ import (
 
 var oscalJSONSchemaFile string = "../../test/oscal_component_schema.json"
 
+// TestGenerateModelTypes tests that we generate the top-level "ComponentDefinition" struct name correctly.
+func TestGenerateModelTypes(t *testing.T) {
+	oscalMap, err := parseOscalFileToMap()
+	if err != nil {
+		t.Error(err)
+	}
+
+	// Should we be calling this currently untested function directly? Could we mock this function call?
+	// or is there further decoupling we could do?
+	idMap, id := generateUniqueIdMap(oscalMap)
+
+	// Instantiate variable for storing the data
+	modelTypeMap := make(map[string][]string)
+
+	expected := "ComponentDefinition"
+
+	actual := generateModelTypes(idMap, id, strings.Split(id, "_")[2], []string{""}, modelTypeMap)
+
+	if expected != actual {
+		t.Errorf("error generateModelTypes(): expected: %s | got: %s", expected, actual)
+	}
+
+}
+
 // TestOscalSchemaVersion tests that the OSCAL schema version is correct.
 func TestOscalSchemaVersion(t *testing.T) {
 	oscalSchemaVersion := "1.0.4"

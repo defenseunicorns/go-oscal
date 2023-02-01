@@ -290,7 +290,9 @@ func generateModelTypes(obj map[string]interface{}, structId string, structName 
 		fmt.Println("did not find properties or type")
 	}
 
-	return FmtFieldName(structName)
+	formattedStructName := FmtFieldName(structName)
+
+	return formattedStructName
 }
 
 func generateStruct(structMap map[string][]string, pkgName string) string {
