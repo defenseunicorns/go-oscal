@@ -35,7 +35,7 @@ func TestOscalSchemaVersion(t *testing.T) {
 		actual := strings.Contains(schemaVersionString, oscalSchemaVersion)
 
 		if expected != actual {
-			t.Error("OSCAL JSON schema version 1.0.4 was not found. The version may have been updated.")
+			t.Errorf("OSCAL JSON schema version %s was not found. The version may have been updated.", oscalSchemaVersion)
 		}
 	} else {
 		t.Error("The top-level '$id' field was not found or is not populated. Please verify that the OSCAL JSON schema file is valid.")
