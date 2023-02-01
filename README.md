@@ -30,8 +30,6 @@ To view the available CLI flags and their use-case:
 
 ## Development
 
-***Note***: The unit tests are not in a passing state currently. There is an [issue](https://github.com/defenseunicorns/go-oscal/issues/9) to address this
-
 For development, the `Makefile` can be used to build, test, and generate the Go structs:
 
 ```bash
