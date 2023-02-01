@@ -7,8 +7,6 @@ import (
 	"testing"
 )
 
-var oscalJSONSchemaFile string = "../../test/oscal_component_schema.json"
-
 // TestGenerateModelTypes tests that we can generate the top-level "ComponentDefinition" struct name correctly.
 func TestGenerateModelTypes(t *testing.T) {
 	oscalMap, err := parseOscalFileToMap()
@@ -89,6 +87,8 @@ func TestFmtFieldName(t *testing.T) {
 // parseOscalFileToMap reads and unmarshals the OSCAL JSON schema file
 // into a map[string]interface{} structure for further processing/testing.
 func parseOscalFileToMap() (map[string]interface{}, error) {
+	oscalJSONSchemaFile := "../../test/oscal_component_schema.json"
+
 	oscalMap := make(map[string]interface{})
 
 	oscalBytes, err := os.ReadFile(oscalJSONSchemaFile)
