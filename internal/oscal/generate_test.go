@@ -9,7 +9,7 @@ import (
 
 var oscalJSONSchemaFile string = "../../test/oscal_component_schema.json"
 
-// Test that the OSCAL schema version is correct
+// TestOscalSchemaVersion tests that the OSCAL schema version is correct
 func TestOscalSchemaVersion(t *testing.T) {
 	oscalSchemaVersion := "1.0.4"
 
