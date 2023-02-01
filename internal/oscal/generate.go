@@ -198,6 +198,7 @@ func getRequiredFields(obj map[string]interface{}, structId string) map[string]b
 	return requiredFields
 }
 
+// formatStructTags formats Go struct tags
 func formatStructTags(obj map[string]interface{}, structId string, key string, tags []string) []string {
 	requiredFields := getRequiredFields(obj, structId)
 
