@@ -2,6 +2,7 @@ package oscal
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -60,6 +61,63 @@ func TestFmtFieldName(t *testing.T) {
 	}
 }
 
+// TestGenerateUniqueIdMap tests that the generateUniqueIdMap function
+// returns the correct '$id' and 'properties'.
+func TestGenerateUniqueIdMap(t *testing.T) {
+	var actualProperties string
+
+	oscalMap, err := parseOscalFileToMap()
+	if err != nil {
+		t.Error(err)
+	}
+
+	actualMap, actualId := generateUniqueIdMap(oscalMap)
+
+	expectedId := "#assembly_oscal-component-definition_component-definition"
+
+	if expectedId != actualId {
+		t.Errorf("error generateUniqueIdMap(): expected: %s | got: %s", expectedId, actualId)
+	}
+
+	// Check if there's a properties field.
+	// If there is, loop over to collect the properties and assert we have the correct properties.
+	// If there isn't, fail the test and print error message.
+	if properties := actualMap[actualId].(map[string]interface{})["properties"]; properties != nil {
+		properties := actualMap[actualId].(map[string]interface{})["properties"]
+
+		for property := range properties.(map[string]interface{}) {
+			actualProperties += fmt.Sprintf("%s\n", property)
+		}
+	} else {
+		t.Error("The 'properties' field was not found. Please verify the OSCAL JSON schema file is valid.")
+	}
+
+	if !strings.Contains(actualProperties, "uuid") {
+		t.Errorf("error generateUniqueIdMap(): expected 'uuid' property to be present, but wasn't found. \n%s", actualProperties)
+	}
+
+	if !strings.Contains(actualProperties, "metadata") {
+		t.Errorf("error generateUniqueIdMap(): expected 'metadata' property to be present, but wasn't found. \n%s", actualProperties)
+	}
+
+	if !strings.Contains(actualProperties, "import-component-definitions") {
+		t.Errorf("error generateUniqueIdMap(): expected 'import-component-definitions' property to be present, but wasn't found. \n%s", actualProperties)
+	}
+
+	if !strings.Contains(actualProperties, "components") {
+		t.Errorf("error generateUniqueIdMap(): expected 'components' property to be present, but wasn't found. \n%s", actualProperties)
+	}
+
+	if !strings.Contains(actualProperties, "capabilities") {
+		t.Errorf("error generateUniqueIdMap(): expected 'capabilities' property to be present, but wasn't found. \n%s", actualProperties)
+	}
+
+	if !strings.Contains(actualProperties, "back-matter") {
+		t.Errorf("error generateUniqueIdMap(): expected 'back-matter' property to be present, but wasn't found. \n%s", actualProperties)
+	}
+
+}
+
 // TestGenerateModelTypes tests that we can generate the top-level "ComponentDefinition" struct name correctly.
 func TestGenerateModelTypes(t *testing.T) {
 	oscalMap, err := parseOscalFileToMap()
@@ -67,11 +125,8 @@ func TestGenerateModelTypes(t *testing.T) {
 		t.Error(err)
 	}
 
-	// Should we be calling this currently untested function directly? Could we mock this function call?
-	// or is there further decoupling we could do?
 	idMap, id := generateUniqueIdMap(oscalMap)
 
-	// Instantiate variable for storing the data
 	modelTypeMap := make(map[string][]string)
 
 	expected := "ComponentDefinition"
