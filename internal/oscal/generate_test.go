@@ -172,6 +172,7 @@ func TestBuildStructData(t *testing.T) {
 
 	expectedStructDataString := string(expectedStructDataBytes)
 
+	// Why is this passing locally but failing in CI?
 	if expectedStructDataString != actualStructDataString {
 		t.Errorf("error buildStructData():\n\nexpected: \n%s\n\ngot: \n%s", expectedStructDataString, actualStructDataString)
 	}
