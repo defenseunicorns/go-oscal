@@ -17,9 +17,9 @@ func TestOscalSchemaVersion(t *testing.T) {
 		t.Error(err)
 	}
 
-	// Check whether the top-level "$id" field is empty or not
-	// if it is, fail the test and print error message
-	// if it isn't, validate the string contains the proper version number
+	// Check whether the top-level "$id" field is empty or not.
+	// If it is, fail the test and print error message.
+	// If it isn't, validate the string contains the proper version number.
 	if schemaVersionString := oscalMap["$id"].(string); schemaVersionString != "" {
 		schemaVersionString = oscalMap["$id"].(string)
 
@@ -116,6 +116,26 @@ func TestGenerateUniqueIdMap(t *testing.T) {
 		t.Errorf("error generateUniqueIdMap(): expected 'back-matter' property to be present, but wasn't found. \n%s", actualProperties)
 	}
 
+}
+
+// TestFormatStructTags tests that we can format Go struct tags correctly.
+func TestFormatStructTags(t *testing.T) {
+	oscalMap, err := parseOscalFileToMap()
+	if err != nil {
+		t.Error(err)
+	}
+
+	idMap, id := generateUniqueIdMap(oscalMap)
+
+	actualTagList := formatStructTags(idMap, id, "uuid", []string{"json", "yaml"})
+
+	actualTagString := strings.Join(actualTagList, " ")
+
+	expectedTagString := "json:\"uuid\" yaml:\"uuid\""
+
+	if expectedTagString != actualTagString {
+		t.Errorf("error formatStructTags(): expected: %s | got: %s", expectedTagString, actualTagString)
+	}
 }
 
 // TestGenerateModelTypes tests that we can generate the top-level "ComponentDefinition" struct name correctly.

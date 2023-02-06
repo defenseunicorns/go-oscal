@@ -145,7 +145,6 @@ func Generate(input io.Reader, parser Parser, pkgName string, tags []string, con
 	// Instantiate variable for storing the data
 	modelTypeMap := make(map[string][]string)
 
-	// should modelTypeMap be passed in as a reference?
 	generateModelTypes(idMap, id, strings.Split(id, "_")[2], tags, modelTypeMap)
 
 	// generate the struct file from modelTypeMap
@@ -205,7 +204,7 @@ func formatStructTags(obj map[string]interface{}, structId string, key string, t
 	tagList := make([]string, 0)
 
 	for _, tag := range tags {
-		// If this field is not required, then add omitempty to tag
+		// If this field is not required, then add omitempty to tag.
 		if _, required := requiredFields[key]; !required {
 			omitEmpty := ",omitempty"
 			tagList = append(tagList, fmt.Sprintf("%s:\"%s%s\"", tag, key, omitEmpty))
@@ -218,7 +217,7 @@ func formatStructTags(obj map[string]interface{}, structId string, key string, t
 }
 
 // handlePropertiesField loops through "properties" fields
-// and constructs data for Go structs
+// and constructs data for Go structs.
 func handlePropertiesField(prop interface{}, obj map[string]interface{}, structId string, tags []string, structData []string, modelMap map[string][]string) []string {
 	for k, v := range prop.(map[string]interface{}) {
 		valueName := FmtFieldName(k)
