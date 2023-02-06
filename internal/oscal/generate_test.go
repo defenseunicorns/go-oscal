@@ -138,6 +138,45 @@ func TestFormatStructTags(t *testing.T) {
 	}
 }
 
+// TestBuildStructData tests that we can construct Go struct data correctly.
+func TestBuildStructData(t *testing.T) {
+	var actualStructDataString string
+	expectedStructDataFile := "../../testdata/expected-struct-data.txt"
+
+	oscalMap, err := parseOscalFileToMap()
+	if err != nil {
+		t.Error(err)
+	}
+
+	idMap, id := generateUniqueIdMap(oscalMap)
+
+	modelTypeMap := make(map[string][]string)
+
+	// Check if there's a properties field.
+	// If there is, call the buildStructData function and store the result as a string for assertion.
+	// If there isn't, fail the test and print error message.
+	if properties := idMap[id].(map[string]interface{})["properties"]; properties != nil {
+		actualStructData := buildStructData(properties, idMap, id, []string{"json", "yaml"}, []string{"ComponentDefinition"}, modelTypeMap)
+
+		for _, data := range actualStructData {
+			actualStructDataString += fmt.Sprintf("%s\n", data)
+		}
+	} else {
+		t.Error("The 'properties' field was not found. Please verify the OSCAL JSON schema file is valid.")
+	}
+
+	expectedStructDataBytes, err := os.ReadFile(expectedStructDataFile)
+	if err != nil {
+		t.Error(err)
+	}
+
+	expectedStructDataString := string(expectedStructDataBytes)
+
+	if expectedStructDataString != actualStructDataString {
+		t.Errorf("error buildStructData():\n\nexpected: \n%s\n\ngot: \n%s", expectedStructDataString, actualStructDataString)
+	}
+}
+
 // TestGenerateModelTypes tests that we can generate the top-level "ComponentDefinition" struct name correctly.
 func TestGenerateModelTypes(t *testing.T) {
 	oscalMap, err := parseOscalFileToMap()

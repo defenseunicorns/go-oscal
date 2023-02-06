@@ -1,0 +1,7 @@
+ComponentDefinition
+UUID string `json:"uuid" yaml:"uuid"`
+Metadata Metadata `json:"metadata" yaml:"metadata"`
+ImportComponentDefinitions []ImportComponentDefinition `json:"import-component-definitions,omitempty" yaml:"import-component-definitions,omitempty"`
+Components []DefinedComponent `json:"components,omitempty" yaml:"components,omitempty"`
+Capabilities []Capability `json:"capabilities,omitempty" yaml:"capabilities,omitempty"`
+BackMatter BackMatter `json:"back-matter,omitempty" yaml:"back-matter,omitempty"`

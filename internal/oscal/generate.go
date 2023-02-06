@@ -216,9 +216,9 @@ func formatStructTags(obj map[string]interface{}, structId string, key string, t
 	return tagList
 }
 
-// handlePropertiesField loops through "properties" fields
+// buildStructData loops through "properties" fields
 // and constructs data for Go structs.
-func handlePropertiesField(prop interface{}, obj map[string]interface{}, structId string, tags []string, structData []string, modelMap map[string][]string) []string {
+func buildStructData(prop interface{}, obj map[string]interface{}, structId string, tags []string, structData []string, modelMap map[string][]string) []string {
 	for k, v := range prop.(map[string]interface{}) {
 		valueName := FmtFieldName(k)
 		tagList := formatStructTags(obj, structId, k, tags)
@@ -271,7 +271,7 @@ func generateModelTypes(obj map[string]interface{}, structId string, structName 
 	// else it may be the property itself and we need to get the type
 	if prop := obj[structId].(map[string]interface{})["properties"]; prop != nil {
 		structData := []string{FmtFieldName(structName)}
-		structData = handlePropertiesField(prop, obj, structId, tags, structData, modelMap)
+		structData = buildStructData(prop, obj, structId, tags, structData, modelMap)
 		modelMap[structId] = structData
 
 	} else if objType := obj[structId].(map[string]interface{})["type"]; objType != nil {
