@@ -66,6 +66,7 @@ func TestFmtFieldName(t *testing.T) {
 // returns the correct '$id' and 'properties'.
 func TestGenerateUniqueIdMap(t *testing.T) {
 	var actualProperties string
+	expectedPropertiesFile := "../../testdata/expected-properties.txt"
 
 	oscalMap, err := parseOscalFileToMap()
 	if err != nil {
@@ -86,35 +87,32 @@ func TestGenerateUniqueIdMap(t *testing.T) {
 	if properties := actualMap[actualId].(map[string]interface{})["properties"]; properties != nil {
 		properties := actualMap[actualId].(map[string]interface{})["properties"]
 
+		// Store the properties fields to a string slice and sort it.
+		propertiesSlice := make([]string, 0)
 		for property := range properties.(map[string]interface{}) {
+			propertiesSlice = append(propertiesSlice, property)
+		}
+		sort.Strings(propertiesSlice)
+
+		// Convert the sorted string slice to a string so that we can assert the output.
+		for _, property := range propertiesSlice {
 			actualProperties += fmt.Sprintf("%s\n", property)
 		}
 	} else {
 		t.Error("The 'properties' field was not found. Please verify the OSCAL JSON schema file is valid.")
 	}
 
-	if !strings.Contains(actualProperties, "uuid") {
-		t.Errorf("error generateUniqueIdMap(): expected 'uuid' property to be present, but wasn't found. \n%s", actualProperties)
+	expectedPropertiesBytes, err := os.ReadFile(expectedPropertiesFile)
+	if err != nil {
+		t.Error(err)
 	}
 
-	if !strings.Contains(actualProperties, "metadata") {
-		t.Errorf("error generateUniqueIdMap(): expected 'metadata' property to be present, but wasn't found. \n%s", actualProperties)
-	}
+	expected := string(expectedPropertiesBytes)
 
-	if !strings.Contains(actualProperties, "import-component-definitions") {
-		t.Errorf("error generateUniqueIdMap(): expected 'import-component-definitions' property to be present, but wasn't found. \n%s", actualProperties)
-	}
+	actual := strings.TrimSpace(actualProperties)
 
-	if !strings.Contains(actualProperties, "components") {
-		t.Errorf("error generateUniqueIdMap(): expected 'components' property to be present, but wasn't found. \n%s", actualProperties)
-	}
-
-	if !strings.Contains(actualProperties, "capabilities") {
-		t.Errorf("error generateUniqueIdMap(): expected 'capabilities' property to be present, but wasn't found. \n%s", actualProperties)
-	}
-
-	if !strings.Contains(actualProperties, "back-matter") {
-		t.Errorf("error generateUniqueIdMap(): expected 'back-matter' property to be present, but wasn't found. \n%s", actualProperties)
+	if expected != actual {
+		t.Errorf("error generateUniqueIdMap():\n\nexpected: \n%s\n\ngot: \n%s", expected, actual)
 	}
 
 }
