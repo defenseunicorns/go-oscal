@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"sort"
 	"strings"
 	"testing"
 )
@@ -156,7 +157,9 @@ func TestBuildStructData(t *testing.T) {
 	// If there is, call the buildStructData function and store the result as a string for assertion.
 	// If there isn't, fail the test and print error message.
 	if properties := idMap[id].(map[string]interface{})["properties"]; properties != nil {
-		actualStructData := buildStructData(properties, idMap, id, []string{"json", "yaml"}, []string{"ComponentDefinition"}, modelTypeMap)
+		actualStructData := buildStructData(properties, idMap, id, []string{"json", "yaml"}, []string{""}, modelTypeMap)
+		// Sort the data in increasing order so that we always have consistent, predictable output.
+		sort.Strings(actualStructData)
 
 		for _, data := range actualStructData {
 			actualStructDataString += fmt.Sprintf("%s\n", data)
@@ -165,16 +168,18 @@ func TestBuildStructData(t *testing.T) {
 		t.Error("The 'properties' field was not found. Please verify the OSCAL JSON schema file is valid.")
 	}
 
+	// Trim leading and trailing white space from struct data string output.
+	actual := strings.TrimSpace(actualStructDataString)
+
 	expectedStructDataBytes, err := os.ReadFile(expectedStructDataFile)
 	if err != nil {
 		t.Error(err)
 	}
 
-	expectedStructDataString := string(expectedStructDataBytes)
+	expected := string(expectedStructDataBytes)
 
-	// Why is this passing locally but failing in CI?
-	if expectedStructDataString != actualStructDataString {
-		t.Errorf("error buildStructData():\n\nexpected: \n%s\n\ngot: \n%s", expectedStructDataString, actualStructDataString)
+	if expected != actual {
+		t.Errorf("error buildStructData():\n\nexpected: \n%s\n\ngot: \n%s", expected, actual)
 	}
 }
 
