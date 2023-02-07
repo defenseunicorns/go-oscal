@@ -223,7 +223,7 @@ func TestGenerateStruct(t *testing.T) {
 
 	formatted, err := format.Source([]byte(structString))
 	if err != nil {
-		_ = fmt.Errorf("error formatting: %s, was formatting\n%s", err, structString)
+		t.Errorf("error formatting: %s, was formatting\n%s", err, structString)
 	}
 
 	expectedStructBytes, err := os.ReadFile(expectedStructFile)
