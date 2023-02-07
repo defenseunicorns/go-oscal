@@ -211,6 +211,7 @@ func TestGenerateModelTypes(t *testing.T) {
 	}
 }
 
+// TestGenerateStruct tests that we can generate a Go struct correctly.
 func TestGenerateStruct(t *testing.T) {
 	expectedStructFile := "../../testdata/expected-struct.txt"
 	structMap := make(map[string][]string)
