@@ -33,7 +33,6 @@ func TestOscalSchemaVersion(t *testing.T) {
 	} else {
 		t.Error("The top-level '$id' field was not found or is not populated. Please verify that the OSCAL JSON schema file is valid.")
 	}
-
 }
 
 // TestFmtFieldName tests that we handle formatting a json string to a go struct correctly.
@@ -209,7 +208,6 @@ func TestGenerateModelTypes(t *testing.T) {
 	if expected != actual {
 		t.Errorf("error generateModelTypes(): expected: %s | got: %s", expected, actual)
 	}
-
 }
 
 // parseOscalFileToMap reads and unmarshals the OSCAL JSON schema file
