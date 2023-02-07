@@ -62,9 +62,26 @@ func TestFmtFieldName(t *testing.T) {
 	}
 }
 
-// TestGenerateUniqueIdMap tests that the generateUniqueIdMap function
-// returns the correct '$id' and 'properties'.
-func TestGenerateUniqueIdMap(t *testing.T) {
+// TestGenerateUniqueIdMapId tests that the generateUniqueIdMap function
+// returns the correct '$id'.
+func TestGenerateUniqueIdMapId(t *testing.T) {
+	oscalMap, err := parseOscalFileToMap()
+	if err != nil {
+		t.Error(err)
+	}
+
+	_, actualId := generateUniqueIdMap(oscalMap)
+
+	expectedId := "#assembly_oscal-component-definition_component-definition"
+
+	if expectedId != actualId {
+		t.Errorf("error generateUniqueIdMap(): expected: %s | got: %s", expectedId, actualId)
+	}
+}
+
+// TestGenerateUniqueIdMapProperties tests that the generateUniqueIdMap function
+// returns the correct 'properties'.
+func TestGenerateUniqueIdMapProperties(t *testing.T) {
 	var actualProperties string
 	expectedPropertiesFile := "../../testdata/expected-properties.txt"
 
@@ -74,12 +91,6 @@ func TestGenerateUniqueIdMap(t *testing.T) {
 	}
 
 	actualMap, actualId := generateUniqueIdMap(oscalMap)
-
-	expectedId := "#assembly_oscal-component-definition_component-definition"
-
-	if expectedId != actualId {
-		t.Errorf("error generateUniqueIdMap(): expected: %s | got: %s", expectedId, actualId)
-	}
 
 	// Check if there's a properties field.
 	// If there is, loop over to collect the properties and assert we have the correct properties.
@@ -114,7 +125,6 @@ func TestGenerateUniqueIdMap(t *testing.T) {
 	if expected != actual {
 		t.Errorf("error generateUniqueIdMap():\n\nexpected: \n%s\n\ngot: \n%s", expected, actual)
 	}
-
 }
 
 // TestFormatStructTags tests that we can format Go struct tags correctly.
