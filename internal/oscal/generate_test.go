@@ -3,6 +3,7 @@ package oscal
 import (
 	"encoding/json"
 	"fmt"
+	"go/format"
 	"os"
 	"sort"
 	"strings"
@@ -207,6 +208,36 @@ func TestGenerateModelTypes(t *testing.T) {
 
 	if expected != actual {
 		t.Errorf("error generateModelTypes(): expected: %s | got: %s", expected, actual)
+	}
+}
+
+func TestGenerateStruct(t *testing.T) {
+	expectedStructFile := "../../testdata/expected-struct.txt"
+	structMap := make(map[string][]string)
+
+	// Populate structMap with fake data.
+	structMap[""] = []string{"OscalTest", "Example []Example `json:\"example\" yaml:\"example\"`"}
+
+	structString := generateStruct(structMap, "main")
+
+	formatted, err := format.Source([]byte(structString))
+	if err != nil {
+		_ = fmt.Errorf("error formatting: %s, was formatting\n%s", err, structString)
+	}
+
+	expectedStructBytes, err := os.ReadFile(expectedStructFile)
+	if err != nil {
+		t.Error(err)
+	}
+
+	expectedString := string(expectedStructBytes)
+	expected := strings.TrimSpace(expectedString)
+
+	actualString := string(formatted)
+	actual := strings.TrimSpace(actualString)
+
+	if expected != actual {
+		t.Errorf("error generateStruct():\n\nexpected: \n%s\n\ngot: \n%s", expected, actual)
 	}
 }
 
