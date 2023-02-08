@@ -61,26 +61,9 @@ func TestFmtFieldName(t *testing.T) {
 	}
 }
 
-// TestGenerateUniqueIdMapId tests that the generateUniqueIdMap function
-// returns the correct '$id'.
-func TestGenerateUniqueIdMapId(t *testing.T) {
-	oscalMap, err := parseOscalFileToMap()
-	if err != nil {
-		t.Error(err)
-	}
-
-	_, actualId := generateUniqueIdMap(oscalMap)
-
-	const expectedId string = "#assembly_oscal-component-definition_component-definition"
-
-	if expectedId != actualId {
-		t.Errorf("error generateUniqueIdMap(): expected: %s | got: %s", expectedId, actualId)
-	}
-}
-
 // TestGenerateUniqueIdMapProperties tests that the generateUniqueIdMap function
 // returns the correct 'properties'.
-func TestGenerateUniqueIdMapProperties(t *testing.T) {
+func TestGenerateUniqueIdMap(t *testing.T) {
 	var actualProperties string
 	expectedPropertiesFile := "../../testdata/expected-properties.txt"
 
@@ -89,13 +72,13 @@ func TestGenerateUniqueIdMapProperties(t *testing.T) {
 		t.Error(err)
 	}
 
-	actualMap, actualId := generateUniqueIdMap(oscalMap)
+	actualMap := generateUniqueIdMap(oscalMap)
 
 	// Check if there's a properties field.
 	// If there is, loop over to collect the properties and assert we have the correct properties.
 	// If there isn't, fail the test and print error message.
-	if properties := actualMap[actualId].(map[string]interface{})["properties"]; properties != nil {
-		properties := actualMap[actualId].(map[string]interface{})["properties"]
+	if properties := actualMap[id].(map[string]interface{})["properties"]; properties != nil {
+		properties := actualMap[id].(map[string]interface{})["properties"]
 
 		// Store the properties fields to a string slice and sort it.
 		propertiesSlice := make([]string, 0)
@@ -133,7 +116,7 @@ func TestFormatStructTags(t *testing.T) {
 		t.Error(err)
 	}
 
-	idMap, id := generateUniqueIdMap(oscalMap)
+	idMap := generateUniqueIdMap(oscalMap)
 
 	actualTagList := formatStructTags(idMap, id, "uuid", []string{"json", "yaml"})
 
@@ -156,7 +139,7 @@ func TestBuildStructData(t *testing.T) {
 		t.Error(err)
 	}
 
-	idMap, id := generateUniqueIdMap(oscalMap)
+	idMap := generateUniqueIdMap(oscalMap)
 
 	modelTypeMap := make(map[string][]string)
 
@@ -197,7 +180,7 @@ func TestGenerateModelTypes(t *testing.T) {
 		t.Error(err)
 	}
 
-	idMap, id := generateUniqueIdMap(oscalMap)
+	idMap := generateUniqueIdMap(oscalMap)
 
 	modelTypeMap := make(map[string][]string)
 

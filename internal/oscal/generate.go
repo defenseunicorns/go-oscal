@@ -29,6 +29,8 @@ const headerComment string = `/*
 	Source: https://github.com/defenseunicorns/go-oscal
 	*/`
 
+const id string = "#assembly_oscal-component-definition_component-definition"
+
 // commonInitialisms is a set of common initialisms.
 // Only add entries that are highly unlikely to be non-initialisms.
 // For instance, "ID" is fine (Freudian code is rare), but "AND" is not.
@@ -140,7 +142,7 @@ func Generate(input io.Reader, parser Parser, pkgName string, tags []string, con
 	}
 
 	// Generate a map with unique Id as key and existing interface as value
-	idMap, id := generateUniqueIdMap(result)
+	idMap := generateUniqueIdMap(result)
 
 	// Instantiate variable for storing the data
 	modelTypeMap := make(map[string][]string)
@@ -158,18 +160,14 @@ func Generate(input io.Reader, parser Parser, pkgName string, tags []string, con
 	return formatted, err
 }
 
-func generateUniqueIdMap(obj map[string]interface{}) (map[string]interface{}, string) {
+func generateUniqueIdMap(obj map[string]interface{}) map[string]interface{} {
 	result := make(map[string]interface{})
-	var firstId string
 
 	for _, val := range obj["definitions"].(map[string]interface{}) {
-		if val.(map[string]interface{})["title"].(string) == "Component Definition" {
-			firstId = val.(map[string]interface{})["$id"].(string)
-		}
 		result[val.(map[string]interface{})["$id"].(string)] = val
 	}
 
-	return result, firstId
+	return result
 
 }
 
