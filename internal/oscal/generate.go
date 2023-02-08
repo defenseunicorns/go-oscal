@@ -29,6 +29,8 @@ const headerComment string = `/*
 	Source: https://github.com/defenseunicorns/go-oscal
 	*/`
 
+const id string = "#assembly_oscal-component-definition_component-definition"
+
 // commonInitialisms is a set of common initialisms.
 // Only add entries that are highly unlikely to be non-initialisms.
 // For instance, "ID" is fine (Freudian code is rare), but "AND" is not.
@@ -115,7 +117,7 @@ func readFile(input io.Reader) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// Generate a struct definition given a JSON string representation of an object and a name structName.
+// Generate a struct definition given a JSON string representation of an object.
 func Generate(input io.Reader, parser Parser, pkgName string, tags []string, convertFloats bool) ([]byte, error) {
 	var result map[string]interface{}
 
@@ -140,12 +142,11 @@ func Generate(input io.Reader, parser Parser, pkgName string, tags []string, con
 	}
 
 	// Generate a map with unique Id as key and existing interface as value
-	idMap, id := generateUniqueIdMap(result)
+	idMap := generateUniqueIdMap(result)
 
 	// Instantiate variable for storing the data
 	modelTypeMap := make(map[string][]string)
 
-	// should modelTypeMap be passed in as a reference?
 	generateModelTypes(idMap, id, strings.Split(id, "_")[2], tags, modelTypeMap)
 
 	// generate the struct file from modelTypeMap
@@ -159,18 +160,14 @@ func Generate(input io.Reader, parser Parser, pkgName string, tags []string, con
 	return formatted, err
 }
 
-func generateUniqueIdMap(obj map[string]interface{}) (map[string]interface{}, string) {
+func generateUniqueIdMap(obj map[string]interface{}) map[string]interface{} {
 	result := make(map[string]interface{})
-	var firstId string
 
 	for _, val := range obj["definitions"].(map[string]interface{}) {
-		if val.(map[string]interface{})["title"].(string) == "Component Definition" {
-			firstId = val.(map[string]interface{})["$id"].(string)
-		}
 		result[val.(map[string]interface{})["$id"].(string)] = val
 	}
 
-	return result, firstId
+	return result
 
 }
 
@@ -198,13 +195,14 @@ func getRequiredFields(obj map[string]interface{}, structId string) map[string]b
 	return requiredFields
 }
 
+// formatStructTags formats Go struct tags
 func formatStructTags(obj map[string]interface{}, structId string, key string, tags []string) []string {
 	requiredFields := getRequiredFields(obj, structId)
 
 	tagList := make([]string, 0)
 
 	for _, tag := range tags {
-		// If this field is not required, then add omitempty to tag
+		// If this field is not required, then add omitempty to tag.
 		if _, required := requiredFields[key]; !required {
 			omitEmpty := ",omitempty"
 			tagList = append(tagList, fmt.Sprintf("%s:\"%s%s\"", tag, key, omitEmpty))
@@ -216,9 +214,9 @@ func formatStructTags(obj map[string]interface{}, structId string, key string, t
 	return tagList
 }
 
-// handlePropertiesField loops through "properties" fields
-// and constructs data for Go structs
-func handlePropertiesField(prop interface{}, obj map[string]interface{}, structId string, tags []string, structData []string, modelMap map[string][]string) []string {
+// buildStructData loops through "properties" fields
+// and constructs data for Go structs.
+func buildStructData(prop interface{}, obj map[string]interface{}, structId string, tags []string, structData []string, modelMap map[string][]string) []string {
 	for k, v := range prop.(map[string]interface{}) {
 		valueName := FmtFieldName(k)
 		tagList := formatStructTags(obj, structId, k, tags)
@@ -271,7 +269,7 @@ func generateModelTypes(obj map[string]interface{}, structId string, structName 
 	// else it may be the property itself and we need to get the type
 	if prop := obj[structId].(map[string]interface{})["properties"]; prop != nil {
 		structData := []string{FmtFieldName(structName)}
-		structData = handlePropertiesField(prop, obj, structId, tags, structData, modelMap)
+		structData = buildStructData(prop, obj, structId, tags, structData, modelMap)
 		modelMap[structId] = structData
 
 	} else if objType := obj[structId].(map[string]interface{})["type"]; objType != nil {
@@ -289,7 +287,9 @@ func generateModelTypes(obj map[string]interface{}, structId string, structName 
 		fmt.Println("did not find properties or type")
 	}
 
-	return FmtFieldName(structName)
+	formattedStructName := FmtFieldName(structName)
+
+	return formattedStructName
 }
 
 func generateStruct(structMap map[string][]string, pkgName string) string {

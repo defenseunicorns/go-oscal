@@ -19,7 +19,7 @@ GIT_TAG    = $(shell git describe --tags --abbrev=0 --exact-match 2>/dev/null)
 PKG         := ./...
 TAGS        :=
 TESTS       := .
-TESTFLAGS   := -race -v
+TESTFLAGS   := -race -v -failfast
 LDFLAGS     := -w -s
 GOFLAGS     :=
 CGO_ENABLED ?= 0
