@@ -71,7 +71,7 @@ func TestGenerateUniqueIdMapId(t *testing.T) {
 
 	_, actualId := generateUniqueIdMap(oscalMap)
 
-	expectedId := "#assembly_oscal-component-definition_component-definition"
+	const expectedId string = "#assembly_oscal-component-definition_component-definition"
 
 	if expectedId != actualId {
 		t.Errorf("error generateUniqueIdMap(): expected: %s | got: %s", expectedId, actualId)
