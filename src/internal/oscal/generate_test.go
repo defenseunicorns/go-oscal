@@ -209,7 +209,7 @@ func TestGenerateOscalComponentDocumentStruct(t *testing.T) {
 
 	expected := string(expectedBytes)
 
-	actual := generateOscalComponentDocumentStruct(oscalMap, "OscalTest", []string{"json", "yaml"})
+	actual := generateOscalComponentDocumentStruct(oscalMap, "", []string{"json", "yaml"})
 
 	// TODO: Need to figure out a more accurate/reliable way to compare strings read from a file.
 	if expected != actual {
