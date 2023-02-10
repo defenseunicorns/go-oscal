@@ -9,7 +9,7 @@ SHELL := bash
 BINDIR       := $(CURDIR)/bin
 BINNAME      ?= go-oscal
 INSTALL_PATH ?= /usr/local/bin
-SCHEMA_FILE := testdata/schema/oscal_component_schema.json
+OSCAL_JSON_SCHEMA_FILE := testdata/schema/oscal_component_schema.json
 
 # Git vars
 GIT_COMMIT = $(shell git rev-parse HEAD)
@@ -61,11 +61,11 @@ $(BINDIR)/$(BINNAME): $(SRC)
 
 .PHONY: generate-file
 generate-file: clean build ## Generate Go structs from OSCAL JSON schema and output to 'internal/oscal/types.go'
-	$(BINDIR)/$(BINNAME) --input-file $(SCHEMA_FILE) --output-file types.go --tags json,yaml
+	$(BINDIR)/$(BINNAME) --input-file $(OSCAL_JSON_SCHEMA_FILE) --output-file types.go --tags json,yaml
 
 .PHONY: generate-stdout
 generate-stdout: clean build ## Generate Go structs from OSCAL JSON schema and output to stdout
-	$(BINDIR)/$(BINNAME) --input-file $(SCHEMA_FILE) --tags json,yaml
+	$(BINDIR)/$(BINNAME) --input-file $(OSCAL_JSON_SCHEMA_FILE) --tags json,yaml
 
 .PHONY: test
 test: build ## Run automated tests.
