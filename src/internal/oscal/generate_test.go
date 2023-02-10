@@ -65,7 +65,7 @@ func TestFmtFieldName(t *testing.T) {
 // returns the correct 'properties'.
 func TestGenerateUniqueIdMap(t *testing.T) {
 	var actualProperties string
-	expectedPropertiesFile := "../../testdata/expected-properties.txt"
+	expectedPropertiesFile := "../../../testdata/expected-properties.txt"
 
 	oscalMap, err := parseOscalFileToMap()
 	if err != nil {
@@ -132,7 +132,7 @@ func TestFormatStructTags(t *testing.T) {
 // TestBuildStructData tests that we can construct Go struct data correctly.
 func TestBuildStructData(t *testing.T) {
 	var actualStructDataString string
-	expectedStructDataFile := "../../testdata/expected-struct-data.txt"
+	expectedStructDataFile := "../../../testdata/expected-struct-data.txt"
 
 	oscalMap, err := parseOscalFileToMap()
 	if err != nil {
@@ -196,7 +196,7 @@ func TestGenerateModelTypes(t *testing.T) {
 // parseOscalFileToMap reads and unmarshals the OSCAL JSON schema file
 // into a map[string]interface{} structure for further processing/testing.
 func parseOscalFileToMap() (map[string]interface{}, error) {
-	oscalJSONSchemaFile := "../../test/oscal_component_schema.json"
+	oscalJSONSchemaFile := "../../../test/oscal_component_schema.json"
 
 	oscalMap := make(map[string]interface{})
 
