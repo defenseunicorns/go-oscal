@@ -299,7 +299,7 @@ func generateModelTypes(obj map[string]interface{}, structId string, structName 
 	return formattedStructName
 }
 
-// generateOscalDocumentStruct generates the top-level struct for OSCAL data models.
+// generateOscalComponentDocumentStruct generates the top-level struct for OSCAL data models.
 func generateOscalComponentDocumentStruct(obj map[string]interface{}, pkgName string, tags []string) string {
 	// Check if there is a top-level 'required' field.
 	if componentDefinitionField := obj["required"]; componentDefinitionField != nil {
