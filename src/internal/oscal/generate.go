@@ -309,7 +309,7 @@ func generateOscalComponentDocumentStruct(oscalSchema map[string]interface{}, pk
 		// Trim the [] braces away.
 		componentDefinition := strings.Trim(componentDefinitionString, "[]")
 
-		// Format the struct name from 'component-definition' to 'ComponentDefinition'.
+		// Format the string from 'component-definition' to 'ComponentDefinition'.
 		formattedComponentDefinition := FmtFieldName(componentDefinition)
 
 		// Format struct tags.
