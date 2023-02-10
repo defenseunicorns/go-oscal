@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"go/format"
 	"io"
+	"os"
 	"strconv"
 	"strings"
 	"unicode"
@@ -149,8 +150,14 @@ func Generate(input io.Reader, parser Parser, pkgName string, tags []string, con
 
 	generateModelTypes(idMap, id, strings.Split(id, "_")[2], tags, modelTypeMap)
 
-	// generate the struct file from modelTypeMap
-	structString := generateStruct(modelTypeMap, pkgName)
+	// Construct header comment and package name.
+	structString := fmt.Sprintf("%s\n\npackage %s\n", headerComment, pkgName)
+
+	// Construct top-level 'OscalComponentDocument' struct.
+	structString += generateOscalComponentDocumentStruct(result, pkgName, tags)
+
+	// Construct component definition structs.
+	structString += generateStruct(modelTypeMap, pkgName)
 
 	formatted, err := format.Source([]byte(structString))
 	if err != nil {
@@ -292,13 +299,47 @@ func generateModelTypes(obj map[string]interface{}, structId string, structName 
 	return formattedStructName
 }
 
+// generateOscalDocumentStruct generates the top-level struct for OSCAL data models.
+func generateOscalComponentDocumentStruct(obj map[string]interface{}, pkgName string, tags []string) string {
+	// Check if there is a top-level 'required' field.
+	if componentDefinitionField := obj["required"]; componentDefinitionField != nil {
+		// There is, so let's convert it to a string.
+		componentDefinitionString := fmt.Sprintf("%v", componentDefinitionField)
+
+		// Trim the [] braces away.
+		componentDefinition := strings.Trim(componentDefinitionString, "[]")
+
+		// Format the struct name from 'component-definition' to 'ComponentDefinition'.
+		formattedComponentDefinition := FmtFieldName(componentDefinition)
+
+		// Format struct tags.
+		tagList := make([]string, 0)
+		for _, tag := range tags {
+			tagList = append(tagList, fmt.Sprintf("%s:\"%s\"", tag, componentDefinition))
+		}
+
+		structString := fmt.Sprintf("type OscalComponentDocument struct {\n\t%s %s `%s`\n}\n", formattedComponentDefinition, formattedComponentDefinition, strings.Join(tagList, " "))
+
+		formattedStruct, err := format.Source([]byte(structString))
+		if err != nil {
+			fmt.Printf("error formatting:\n%s", structString)
+			os.Exit(1)
+		}
+
+		return string(formattedStruct)
+
+	} else {
+		fmt.Println("Top-level 'required' field not found. Please verify the OSCAL JSON schema file is valid.")
+		os.Exit(1)
+	}
+
+	return ""
+}
+
 func generateStruct(structMap map[string][]string, pkgName string) string {
 	existing := make(map[string]bool)
-	typesString := fmt.Sprintf("%s\n\n package %s\n", headerComment, pkgName)
-	// This technically gives us what we need, but is hacky and hardcoded.
-	// Committing as proof of concept.
-	// Need to look more into dynamically piecing this together from the schema.
-	typesString += "type OscalComponentDocument struct {\n\tComponentDefinition ComponentDefinition `json:\"component-definition\" yaml:\"component-definition\"`\n}\n"
+	var typesString string
+
 	// Begin generation of struct
 	for i, v := range structMap {
 

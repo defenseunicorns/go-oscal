@@ -193,6 +193,30 @@ func TestGenerateModelTypes(t *testing.T) {
 	}
 }
 
+// TestGenerateOscalComponentDocumentStruct tests that we can generate the 'OscalComponentDocument' struct correctly.
+func TestGenerateOscalComponentDocumentStruct(t *testing.T) {
+	expectedOutputFile := "../../../testdata/expected-oscal-component-document-struct.txt"
+
+	oscalMap, err := parseOscalFileToMap()
+	if err != nil {
+		t.Error(err)
+	}
+
+	expectedBytes, err := os.ReadFile(expectedOutputFile)
+	if err != nil {
+		t.Error(err)
+	}
+
+	expected := string(expectedBytes)
+
+	actual := generateOscalComponentDocumentStruct(oscalMap, "OscalTest", []string{"json", "yaml"})
+
+	// TODO: Need to figure out a more accurate/reliable way to compare strings read from a file.
+	if expected != actual {
+		t.Errorf("error generateOscalComponentDocumentStruct():\n\nexpected: \n%s\n\ngot: \n%s", expected, actual)
+	}
+}
+
 // parseOscalFileToMap reads and unmarshals the OSCAL JSON schema file
 // into a map[string]interface{} structure for further processing/testing.
 func parseOscalFileToMap() (map[string]interface{}, error) {
