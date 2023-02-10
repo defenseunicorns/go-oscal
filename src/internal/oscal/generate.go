@@ -300,9 +300,9 @@ func generateModelTypes(obj map[string]interface{}, structId string, structName 
 }
 
 // generateOscalComponentDocumentStruct generates the top-level struct for OSCAL data models.
-func generateOscalComponentDocumentStruct(obj map[string]interface{}, pkgName string, tags []string) string {
+func generateOscalComponentDocumentStruct(oscalSchema map[string]interface{}, pkgName string, tags []string) string {
 	// Check if there is a top-level 'required' field.
-	if componentDefinitionField := obj["required"]; componentDefinitionField != nil {
+	if componentDefinitionField := oscalSchema["required"]; componentDefinitionField != nil {
 		// There is, so let's convert it to a string.
 		componentDefinitionString := fmt.Sprintf("%v", componentDefinitionField)
 
