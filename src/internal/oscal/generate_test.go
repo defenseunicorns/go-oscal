@@ -196,7 +196,7 @@ func TestGenerateModelTypes(t *testing.T) {
 // parseOscalFileToMap reads and unmarshals the OSCAL JSON schema file
 // into a map[string]interface{} structure for further processing/testing.
 func parseOscalFileToMap() (map[string]interface{}, error) {
-	oscalJSONSchemaFile := "../../../test/oscal_component_schema.json"
+	oscalJSONSchemaFile := "../../../testdata/schema/oscal_component_schema.json"
 
 	oscalMap := make(map[string]interface{})
 
