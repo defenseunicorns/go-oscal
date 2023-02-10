@@ -73,7 +73,7 @@ test: build ## Run automated tests.
 
 .PHONY: run-main
 run-main: ## useful for running the main.go file without having to compile
-	go run main.go --input-file $(SCHEMA_FILE) --tags json,yaml
+	go run main.go --input-file $(OSCAL_JSON_SCHEMA_FILE) --tags json,yaml
 
 .PHONY: install
 install: ## Install binary to $INSTALL_PATH.
