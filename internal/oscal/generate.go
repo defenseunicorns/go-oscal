@@ -171,7 +171,7 @@ func generateUniqueIdMap(obj map[string]interface{}) map[string]interface{} {
 
 }
 
-// convertKeysToStrings converts interface{} map keys to strings
+// convertKeysToStrings converts interface{} map keys to strings.
 func convertKeysToStrings(obj map[interface{}]interface{}) map[string]interface{} {
 	res := make(map[string]interface{})
 
@@ -182,7 +182,7 @@ func convertKeysToStrings(obj map[interface{}]interface{}) map[string]interface{
 	return res
 }
 
-// getRequiredFields collects the required fields in each OSCAL data model
+// getRequiredFields collects the required fields in each OSCAL definition.
 func getRequiredFields(obj map[string]interface{}, structId string) map[string]bool {
 	requiredFields := make(map[string]bool)
 
@@ -195,7 +195,7 @@ func getRequiredFields(obj map[string]interface{}, structId string) map[string]b
 	return requiredFields
 }
 
-// formatStructTags formats Go struct tags
+// formatStructTags formats Go struct tags.
 func formatStructTags(obj map[string]interface{}, structId string, key string, tags []string) []string {
 	requiredFields := getRequiredFields(obj, structId)
 
@@ -295,6 +295,10 @@ func generateModelTypes(obj map[string]interface{}, structId string, structName 
 func generateStruct(structMap map[string][]string, pkgName string) string {
 	existing := make(map[string]bool)
 	typesString := fmt.Sprintf("%s\n\n package %s\n", headerComment, pkgName)
+	// This technically gives us what we need, but is hacky and hardcoded.
+	// Committing as proof of concept.
+	// Need to look more into dynamically piecing this together from the schema.
+	typesString += "type OscalComponentDocument struct {\n\tComponentDefinition ComponentDefinition `json:\"component-definition\" yaml:\"component-definition\"`\n}\n"
 	// Begin generation of struct
 	for i, v := range structMap {
 
@@ -314,6 +318,7 @@ func generateStruct(structMap map[string][]string, pkgName string) string {
 		}
 		typesString += fmt.Sprintf("\n}\n")
 	}
+
 	return typesString
 }
 
