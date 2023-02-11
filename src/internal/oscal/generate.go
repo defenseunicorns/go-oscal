@@ -318,8 +318,10 @@ func generateOscalComponentDocumentStruct(oscalSchema map[string]interface{}, pk
 			tagList = append(tagList, fmt.Sprintf("%s:\"%s\"", tag, componentDefinition))
 		}
 
+		// Construct the struct string.
 		structString := fmt.Sprintf("type OscalComponentDocument struct {\n\t%s %s `%s`\n}\n", formattedComponentDefinition, formattedComponentDefinition, strings.Join(tagList, " "))
 
+		// Format the Go struct.
 		formattedStruct, err := format.Source([]byte(structString))
 		if err != nil {
 			fmt.Printf("error formatting:\n%s", structString)

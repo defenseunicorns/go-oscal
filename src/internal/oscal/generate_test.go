@@ -102,6 +102,7 @@ func TestGenerateUniqueIdMap(t *testing.T) {
 
 	expected := string(expectedPropertiesBytes)
 
+	// Trim leading and trailing white space from string.
 	actual := strings.TrimSpace(actualProperties)
 
 	if expected != actual {
@@ -120,6 +121,7 @@ func TestFormatStructTags(t *testing.T) {
 
 	actualTagList := formatStructTags(idMap, id, "uuid", []string{"json", "yaml"})
 
+	// Convert the string slice to a string for assertion.
 	actualTagString := strings.Join(actualTagList, " ")
 
 	expectedTagString := "json:\"uuid\" yaml:\"uuid\""
@@ -151,6 +153,7 @@ func TestBuildStructData(t *testing.T) {
 		// Sort the data in increasing order so that we always have consistent, predictable output.
 		sort.Strings(actualStructData)
 
+		// Convert the sorted string slice to a string so that we can assert the output.
 		for _, data := range actualStructData {
 			actualStructDataString += fmt.Sprintf("%s\n", data)
 		}
@@ -158,7 +161,7 @@ func TestBuildStructData(t *testing.T) {
 		t.Error("The 'properties' field was not found. Please verify the OSCAL JSON schema file is valid.")
 	}
 
-	// Trim leading and trailing white space from struct data string output.
+	// Trim leading and trailing white space from string.
 	actual := strings.TrimSpace(actualStructDataString)
 
 	expectedStructDataBytes, err := os.ReadFile(expectedStructDataFile)
@@ -209,9 +212,11 @@ func TestGenerateOscalComponentDocumentStruct(t *testing.T) {
 
 	expected := string(expectedBytes)
 
-	actual := generateOscalComponentDocumentStruct(oscalMap, "", []string{"json", "yaml"})
+	actualString := generateOscalComponentDocumentStruct(oscalMap, "", []string{"json", "yaml"})
 
-	// TODO: Need to figure out a more accurate/reliable way to compare strings read from a file.
+	// Trim leading and trailing white space from string.
+	actual := strings.TrimSpace(actualString)
+
 	if expected != actual {
 		t.Errorf("error generateOscalComponentDocumentStruct():\n\nexpected: \n%s\n\ngot: \n%s", expected, actual)
 	}
