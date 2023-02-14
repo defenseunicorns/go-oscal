@@ -15,7 +15,7 @@ go build .
 Generate Go structs from the OSCAL JSON schema:
 
 ```bash
-./go-oscal --input-file test/oscal_component_schema.json \
+./go-oscal --input-file testdata/schema/oscal_component_schema.json \
            --output-file types.go \
            --tags json,yaml
 ```
