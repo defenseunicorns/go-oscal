@@ -299,6 +299,7 @@ func generateModelTypes(obj map[string]interface{}, structId string, structName 
 	return formattedStructName
 }
 
+// TODO: Make this function extensible to handle multiple OSCAL	models/schemas. Namely, system security plan and assesment plan.
 // generateOscalComponentDocumentStruct generates the top-level struct for OSCAL data models.
 func generateOscalComponentDocumentStruct(oscalSchema map[string]interface{}, pkgName string, tags []string) string {
 	// Check if there is a top-level 'required' field.

@@ -1,3 +1,5 @@
 type OscalComponentDocument struct {
 	ComponentDefinition ComponentDefinition `json:"component-definition" yaml:"component-definition"`
+	SystemSecurityPlan SystemSecurityPlan `json:"system-security-plan" yaml:"system-security-plan"`
+	AssessmentPlan AssessmentPlan `json:"assessment-plan" yaml:"assessment-plan"`
 }
