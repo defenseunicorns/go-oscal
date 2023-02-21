@@ -218,7 +218,7 @@ func TestGenerateOscalModelsStruct(t *testing.T) {
 	actual := strings.TrimSpace(actualString)
 
 	if expected != actual {
-		t.Errorf("error generateOscalComponentDocumentStruct():\n\nexpected: \n%s\n\ngot: \n%s", expected, actual)
+		t.Errorf("error generateOscalModelsStruct():\n\nexpected: \n%s\n\ngot: \n%s", expected, actual)
 	}
 }
 
