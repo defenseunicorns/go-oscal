@@ -153,10 +153,10 @@ func Generate(input io.Reader, parser Parser, pkgName string, tags []string, con
 	// Construct header comment and package name.
 	structString := fmt.Sprintf("%s\n\npackage %s\n", headerComment, pkgName)
 
-	// Construct top-level 'OscalComponentDocument' struct.
-	structString += generateOscalComponentDocumentStruct(result, pkgName, tags)
+	// Construct top-level 'OscalModels' struct.
+	structString += generateOscalModelsStruct(result, pkgName, tags)
 
-	// Construct component definition structs.
+	// Construct structs for oscal models.
 	structString += generateStruct(modelTypeMap, pkgName)
 
 	formatted, err := format.Source([]byte(structString))
@@ -301,7 +301,7 @@ func generateModelTypes(obj map[string]interface{}, structId string, structName 
 
 // TODO: Make this function extensible to handle multiple OSCAL	models/schemas. Namely, system security plan and assesment plan.
 // generateOscalComponentDocumentStruct generates the top-level struct for OSCAL data models.
-func generateOscalComponentDocumentStruct(oscalSchema map[string]interface{}, pkgName string, tags []string) string {
+func generateOscalModelsStruct(oscalSchema map[string]interface{}, pkgName string, tags []string) string {
 	// Check if there is a top-level 'required' field.
 	if componentDefinitionField := oscalSchema["required"]; componentDefinitionField != nil {
 		// There is, so let's convert it to a string.
@@ -320,7 +320,7 @@ func generateOscalComponentDocumentStruct(oscalSchema map[string]interface{}, pk
 		}
 
 		// Construct the struct string.
-		structString := fmt.Sprintf("type OscalComponentDocument struct {\n\t%s %s `%s`\n}\n", formattedComponentDefinition, formattedComponentDefinition, strings.Join(tagList, " "))
+		structString := fmt.Sprintf("type OscalModels struct {\n\t%s %s `%s`\n}\n", formattedComponentDefinition, formattedComponentDefinition, strings.Join(tagList, " "))
 
 		// Format the Go struct.
 		formattedStruct, err := format.Source([]byte(structString))

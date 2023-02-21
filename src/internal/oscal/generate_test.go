@@ -197,8 +197,8 @@ func TestGenerateModelTypes(t *testing.T) {
 }
 
 // TestGenerateOscalComponentDocumentStruct tests that we can generate the 'OscalComponentDocument' struct correctly.
-func TestGenerateOscalComponentDocumentStruct(t *testing.T) {
-	expectedOutputFile := "../../../testdata/expected-oscal-component-document-struct.txt"
+func TestGenerateOscalModelsStruct(t *testing.T) {
+	expectedOutputFile := "../../../testdata/expected-oscal-models-struct.txt"
 
 	oscalMap, err := parseOscalFileToMap()
 	if err != nil {
@@ -207,12 +207,12 @@ func TestGenerateOscalComponentDocumentStruct(t *testing.T) {
 
 	expectedBytes, err := os.ReadFile(expectedOutputFile)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	expected := string(expectedBytes)
 
-	actualString := generateOscalComponentDocumentStruct(oscalMap, "", []string{"json", "yaml"})
+	actualString := generateOscalModelsStruct(oscalMap, "", []string{"json", "yaml"})
 
 	// Trim leading and trailing white space from string.
 	actual := strings.TrimSpace(actualString)
