@@ -74,11 +74,13 @@ func TestGenerateUniqueIdMap(t *testing.T) {
 
 	actualMap := generateUniqueIdMap(oscalMap)
 
+	oscalModelId := setOscalModelRef(oscalMap)
+
 	// Check if there's a properties field.
 	// If there is, loop over to collect the properties and assert we have the correct properties.
 	// If there isn't, fail the test and print error message.
-	if properties := actualMap[id].(map[string]interface{})["properties"]; properties != nil {
-		properties := actualMap[id].(map[string]interface{})["properties"]
+	if properties := actualMap[oscalModelId].(map[string]interface{})["properties"]; properties != nil {
+		properties := actualMap[oscalModelId].(map[string]interface{})["properties"]
 
 		// Store the properties fields to a string slice and sort it.
 		propertiesSlice := make([]string, 0)
@@ -119,7 +121,9 @@ func TestFormatStructTags(t *testing.T) {
 
 	idMap := generateUniqueIdMap(oscalMap)
 
-	actualTagList := formatStructTags(idMap, id, "uuid", []string{"json", "yaml"})
+	oscalModelId := setOscalModelRef(oscalMap)
+
+	actualTagList := formatStructTags(idMap, oscalModelId, "uuid", []string{"json", "yaml"})
 
 	// Convert the string slice to a string for assertion.
 	actualTagString := strings.Join(actualTagList, " ")
@@ -143,13 +147,15 @@ func TestBuildStructData(t *testing.T) {
 
 	idMap := generateUniqueIdMap(oscalMap)
 
+	oscalModelId := setOscalModelRef(oscalMap)
+
 	modelTypeMap := make(map[string][]string)
 
 	// Check if there's a properties field.
 	// If there is, call the buildStructData function and store the result as a string for assertion.
 	// If there isn't, fail the test and print error message.
-	if properties := idMap[id].(map[string]interface{})["properties"]; properties != nil {
-		actualStructData := buildStructData(properties, idMap, id, []string{"json", "yaml"}, []string{""}, modelTypeMap)
+	if properties := idMap[oscalModelId].(map[string]interface{})["properties"]; properties != nil {
+		actualStructData := buildStructData(properties, idMap, oscalModelId, []string{"json", "yaml"}, []string{""}, modelTypeMap)
 		// Sort the data in increasing order so that we always have consistent, predictable output.
 		sort.Strings(actualStructData)
 
@@ -185,11 +191,13 @@ func TestGenerateModelTypes(t *testing.T) {
 
 	idMap := generateUniqueIdMap(oscalMap)
 
+	oscalModelId := setOscalModelRef(oscalMap)
+
 	modelTypeMap := make(map[string][]string)
 
 	expected := "ComponentDefinition"
 
-	actual := generateModelTypes(idMap, id, strings.Split(id, "_")[2], []string{""}, modelTypeMap)
+	actual := generateModelTypes(idMap, oscalModelId, strings.Split(oscalModelId, "_")[2], []string{""}, modelTypeMap)
 
 	if expected != actual {
 		t.Errorf("error generateModelTypes(): expected: %s | got: %s", expected, actual)
@@ -212,7 +220,7 @@ func TestGenerateOscalModelsStruct(t *testing.T) {
 
 	expected := string(expectedBytes)
 
-	actualString := generateOscalModelsStruct(oscalMap, "", []string{"json", "yaml"})
+	actualString := generateOscalModelStruct(oscalMap, "", []string{"json", "yaml"})
 
 	// Trim leading and trailing white space from string.
 	actual := strings.TrimSpace(actualString)

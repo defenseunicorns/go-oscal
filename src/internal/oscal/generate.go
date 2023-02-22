@@ -30,8 +30,6 @@ const headerComment string = `/*
 	Source: https://github.com/defenseunicorns/go-oscal
 	*/`
 
-const id string = "#assembly_oscal-component-definition_component-definition"
-
 // commonInitialisms is a set of common initialisms.
 // Only add entries that are highly unlikely to be non-initialisms.
 // For instance, "ID" is fine (Freudian code is rare), but "AND" is not.
@@ -142,6 +140,8 @@ func Generate(input io.Reader, parser Parser, pkgName string, tags []string, con
 		return nil, fmt.Errorf("unexpected type: %T", interfaceResult)
 	}
 
+	id := setOscalModelRef(result)
+
 	// Generate a map with unique Id as key and existing interface as value
 	idMap := generateUniqueIdMap(result)
 
@@ -154,7 +154,7 @@ func Generate(input io.Reader, parser Parser, pkgName string, tags []string, con
 	structString := fmt.Sprintf("%s\n\npackage %s\n", headerComment, pkgName)
 
 	// Construct top-level 'OscalModels' struct.
-	structString += generateOscalModelsStruct(result, pkgName, tags)
+	structString += generateOscalModelStruct(result, pkgName, tags)
 
 	// Construct structs for oscal models.
 	structString += generateStruct(modelTypeMap, pkgName)
@@ -165,6 +165,42 @@ func Generate(input io.Reader, parser Parser, pkgName string, tags []string, con
 	}
 
 	return formatted, err
+}
+
+// getOscalModel determines which OSCAL model we're working with.
+func getOscalModel(oscalSchema map[string]interface{}) (oscalModel string) {
+	if oscalModelField := oscalSchema["required"]; oscalModelField != nil {
+		oscalModelString := fmt.Sprintf("%v", oscalModelField)
+
+		// Trim the [] braces away.
+		oscalModel = strings.Trim(oscalModelString, "[]")
+
+		return
+	} else {
+		fmt.Println("Top-level required field is not populated as expected, please verify the provided schema is valid.")
+		os.Exit(1)
+	}
+
+	return ""
+}
+
+// setOscalModelRef determines which OSCAL model $ref to use based on the model name.
+func setOscalModelRef(oscalSchema map[string]interface{}) (oscalModelRef string) {
+	oscalModel := getOscalModel(oscalSchema)
+
+	// Check which OSCAL model we're working with, and set the $ref accordingly.
+	switch oscalModel {
+	case "system-security-plan":
+		oscalModelRef = "#assembly_oscal-ssp_system-security-plan"
+		return
+	case "component-definition":
+		oscalModelRef = "#assembly_oscal-component-definition_component-definition"
+		return
+	default:
+		fmt.Println("Do not recognize this model name.")
+	}
+
+	return ""
 }
 
 func generateUniqueIdMap(obj map[string]interface{}) map[string]interface{} {
@@ -300,27 +336,27 @@ func generateModelTypes(obj map[string]interface{}, structId string, structName 
 }
 
 // TODO: Make this function extensible to handle multiple OSCAL	models/schemas. Namely, system security plan and assesment plan.
-// generateOscalComponentDocumentStruct generates the top-level struct for OSCAL data models.
-func generateOscalModelsStruct(oscalSchema map[string]interface{}, pkgName string, tags []string) string {
+// generateOscalModelStruct generates the top-level struct for OSCAL data models.
+func generateOscalModelStruct(oscalSchema map[string]interface{}, pkgName string, tags []string) string {
 	// Check if there is a top-level 'required' field.
-	if componentDefinitionField := oscalSchema["required"]; componentDefinitionField != nil {
+	if oscalModelField := oscalSchema["required"]; oscalModelField != nil {
 		// There is, so let's convert it to a string.
-		componentDefinitionString := fmt.Sprintf("%v", componentDefinitionField)
+		oscalModelString := fmt.Sprintf("%v", oscalModelField)
 
 		// Trim the [] braces away.
-		componentDefinition := strings.Trim(componentDefinitionString, "[]")
+		oscalModelName := strings.Trim(oscalModelString, "[]")
 
 		// Format the string from 'component-definition' to 'ComponentDefinition'.
-		formattedComponentDefinition := FmtFieldName(componentDefinition)
+		formattedOscalModelName := FmtFieldName(oscalModelName)
 
 		// Format struct tags.
 		tagList := make([]string, 0)
 		for _, tag := range tags {
-			tagList = append(tagList, fmt.Sprintf("%s:\"%s\"", tag, componentDefinition))
+			tagList = append(tagList, fmt.Sprintf("%s:\"%s\"", tag, oscalModelName))
 		}
 
 		// Construct the struct string.
-		structString := fmt.Sprintf("type OscalModels struct {\n\t%s %s `%s`\n}\n", formattedComponentDefinition, formattedComponentDefinition, strings.Join(tagList, " "))
+		structString := fmt.Sprintf("type OscalModel struct {\n\t%s %s `%s`\n}\n", formattedOscalModelName, formattedOscalModelName, strings.Join(tagList, " "))
 
 		// Format the Go struct.
 		formattedStruct, err := format.Source([]byte(structString))
