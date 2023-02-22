@@ -61,7 +61,7 @@ $(BINDIR)/$(BINNAME): $(SRC)
 
 .PHONY: generate-file
 generate-file: clean build ## Generate Go structs from OSCAL JSON schema and output to 'internal/oscal/types.go'
-	$(BINDIR)/$(BINNAME) --input-file $(OSCAL_JSON_SCHEMA_FILE) --output-file types.go --tags json,yaml
+	$(BINDIR)/$(BINNAME) --input-file $(OSCAL_JSON_SCHEMA_FILE) --output-file src/pkg/component-definition/types.go --tags json,yaml
 
 .PHONY: generate-stdout
 generate-stdout: clean build ## Generate Go structs from OSCAL JSON schema and output to stdout
