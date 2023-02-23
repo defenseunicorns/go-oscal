@@ -78,8 +78,11 @@ var intToWordMap = []string{
 }
 
 // Generate a struct definition given a JSON string representation of an object.
-func Generate(oscalMap map[string]interface{}, pkgName string, tags []string) ([]byte, error) {
-	id := setOscalModelRef(oscalMap)
+func Generate(oscalMap map[string]interface{}, pkgName string, tags []string) (formattedStruct []byte, err error) {
+	id, err := setOscalModelRef(oscalMap)
+	if err != nil {
+		return
+	}
 
 	// Generate a map with unique Id as key and existing interface as value
 	idMap := generateUniqueIdMap(oscalMap)
@@ -98,34 +101,32 @@ func Generate(oscalMap map[string]interface{}, pkgName string, tags []string) ([
 	// Construct structs for oscal models.
 	structString += generateStruct(modelTypeMap, pkgName)
 
-	formatted, err := format.Source([]byte(structString))
+	formattedStruct, err = format.Source([]byte(structString))
 	if err != nil {
 		err = fmt.Errorf("error formatting: %s, was formatting\n%s", err, structString)
 	}
 
-	return formatted, err
+	return
 }
 
 // getOscalModel determines which OSCAL model we're working with.
-func getOscalModel(oscalSchema map[string]interface{}) (oscalModel string) {
+func getOscalModel(oscalSchema map[string]interface{}) (oscalModel string, err error) {
 	if oscalModelField := oscalSchema["required"]; oscalModelField != nil {
 		oscalModelString := fmt.Sprintf("%v", oscalModelField)
-
-		// Trim the [] braces away.
 		oscalModel = strings.Trim(oscalModelString, "[]")
-
 		return
 	} else {
-		fmt.Println("Top-level required field is not populated as expected, please verify the provided schema is valid.")
-		os.Exit(1)
+		err = fmt.Errorf("top-level required field is not populated as expected, please verify the provided schema is valid")
+		return
 	}
-
-	return ""
 }
 
 // setOscalModelRef determines which OSCAL model $ref to use based on the model name.
-func setOscalModelRef(oscalSchema map[string]interface{}) (oscalModelRef string) {
-	oscalModel := getOscalModel(oscalSchema)
+func setOscalModelRef(oscalSchema map[string]interface{}) (oscalModelRef string, err error) {
+	oscalModel, err := getOscalModel(oscalSchema)
+	if err != nil {
+		return "", err
+	}
 
 	// Check which OSCAL model we're working with, and set the $ref accordingly.
 	switch oscalModel {
@@ -139,7 +140,7 @@ func setOscalModelRef(oscalSchema map[string]interface{}) (oscalModelRef string)
 		fmt.Println("Do not recognize this model name.")
 	}
 
-	return ""
+	return
 }
 
 func generateUniqueIdMap(obj map[string]interface{}) map[string]interface{} {

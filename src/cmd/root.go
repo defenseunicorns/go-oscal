@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// baseFlags represent command-line flags for the base go-oscal command.
+// baseFlags represents command-line flags for the base go-oscal command.
 type baseFlags struct {
 	inputFiles []string // -f / --input-file
 	outputFile string   // -o / --output-file

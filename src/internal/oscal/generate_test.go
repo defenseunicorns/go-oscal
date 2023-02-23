@@ -74,7 +74,10 @@ func TestGenerateUniqueIdMap(t *testing.T) {
 
 	actualMap := generateUniqueIdMap(oscalMap)
 
-	oscalModelId := setOscalModelRef(oscalMap)
+	oscalModelId, err := setOscalModelRef(oscalMap)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	// Check if there's a properties field.
 	// If there is, loop over to collect the properties and assert we have the correct properties.
@@ -121,7 +124,10 @@ func TestFormatStructTags(t *testing.T) {
 
 	idMap := generateUniqueIdMap(oscalMap)
 
-	oscalModelId := setOscalModelRef(oscalMap)
+	oscalModelId, err := setOscalModelRef(oscalMap)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	actualTagList := formatStructTags(idMap, oscalModelId, "uuid", []string{"json", "yaml"})
 
@@ -147,7 +153,10 @@ func TestBuildStructData(t *testing.T) {
 
 	idMap := generateUniqueIdMap(oscalMap)
 
-	oscalModelId := setOscalModelRef(oscalMap)
+	oscalModelId, err := setOscalModelRef(oscalMap)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	modelTypeMap := make(map[string][]string)
 
@@ -191,7 +200,10 @@ func TestGenerateModelTypes(t *testing.T) {
 
 	idMap := generateUniqueIdMap(oscalMap)
 
-	oscalModelId := setOscalModelRef(oscalMap)
+	oscalModelId, err := setOscalModelRef(oscalMap)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	modelTypeMap := make(map[string][]string)
 
