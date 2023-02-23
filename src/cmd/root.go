@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// baseFlags represent command-line flags for the base go-oscal command.
 type baseFlags struct {
 	inputFiles []string // -f / --input-file
 	outputFile string   // -o / --output-file
@@ -91,20 +92,27 @@ func parseOscalInterface() (map[string]interface{}, error) {
 // parseJson reads user-provided oscal json schema files as input,
 // stores them to an interface pointer, and returns the interface.
 func parseJson() (interface{}, error) {
+	var bytes []byte
+	var err error
 	var result interface{}
 
 	// User specified schema files via -f/--input-file
 	for _, filePath := range opts.inputFiles {
-
-		bytes, err := os.ReadFile(filePath)
+		bytes, err = os.ReadFile(filePath)
 		if err != nil {
 			return nil, err
 		}
-
-		if err := json.Unmarshal(bytes, &result); err != nil {
-			return nil, err
-		}
 	}
+	if err := json.Unmarshal(bytes, &result); err != nil {
+		return nil, err
+	}
+
+	// TODO: We may need to unmarshal the oscal json data directly into a map[string]interface{} structure.
+	// I don't think we will run into a situation where the data won't be in this format.
+	// If so, there are other ways to check/validate that this is the case.
+	// So we can probably skip unmarshalling the data into an interface{}, and then parsing it with parseOscalInterface().
+	// The purpose of this would be to allow getting the data into the map[string]interface{} format,
+	// and then merging the maps into one monolithic map to be able to process multiple oscal schemas at once.
 
 	return result, nil
 }
@@ -131,8 +139,8 @@ func generateStructs(oscalMap map[string]interface{}, pkg string, tagList []stri
 	return
 }
 
-// writeOutput writes the generated Go structs to either a file if provided,
-// or stdout by default.
+// writeOutput writes the generated Go structs to an output file
+// if provided via -o/--output-file or stdout by default.
 func writeOutput(output []byte) {
 	if opts.outputFile != "" {
 		err := os.WriteFile(opts.outputFile, output, 0644)
