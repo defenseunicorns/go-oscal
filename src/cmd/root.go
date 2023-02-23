@@ -12,13 +12,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	pkg            string
-	inputFileName  string
-	outputFileName string
-	format         string
-	tags           string
-)
+type baseFlags struct {
+	inputFile  string // -f / --input-file
+	outputFile string // -o / --output-file
+	pkg        string // -p / --pkg
+	tags       string // -t / --tags
+	format     string // --fmt
+}
+
+var opts = &baseFlags{}
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -41,11 +43,11 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.Flags().StringVarP(&pkg, "pkg", "p", "main", "the name of the package for the generated code")
-	rootCmd.Flags().StringVarP(&inputFileName, "input-file", "i", "", "the name of the input file containing JSON (if input not provided via STDIN)")
-	rootCmd.Flags().StringVarP(&outputFileName, "output-file", "o", "", "the name of the file to write the output to (outputs to STDOUT by default)")
-	rootCmd.Flags().StringVar(&format, "fmt", "json", "the format of the input data (json or yaml)")
-	rootCmd.Flags().StringVar(&tags, "tags", format, "comma seperated list of the tags to put on the struct, default is the same as fmt")
+	rootCmd.Flags().StringVarP(&opts.inputFile, "input-file", "f", "", "the name of the input file containing JSON (if input not provided via STDIN)")
+	rootCmd.Flags().StringVarP(&opts.outputFile, "output-file", "o", "", "the name of the file to write the output to (outputs to STDOUT by default)")
+	rootCmd.Flags().StringVarP(&opts.pkg, "pkg", "p", "main", "the name of the package for the generated code")
+	rootCmd.Flags().StringVarP(&opts.tags, "tags", "t", opts.format, "comma seperated list of the tags to put on the struct, default is the same as fmt")
+	rootCmd.Flags().StringVar(&opts.format, "fmt", "json", "the format of the input data (json or yaml)")
 }
 
 func run() {
@@ -55,8 +57,8 @@ func run() {
 
 	// Read provided input.
 	var input = os.Stdin
-	if inputFileName != "" {
-		f, err := os.Open(inputFileName)
+	if opts.inputFile != "" {
+		f, err := os.Open(opts.inputFile)
 		if err != nil {
 			log.Fatalf("reading input file: %s", err)
 		}
@@ -68,7 +70,7 @@ func run() {
 	parser, convertFloats := parseInput()
 
 	// Generate the Go structs.
-	output := generateStructs(input, parser, pkg, tagList, convertFloats)
+	output := generateStructs(input, parser, opts.pkg, tagList, convertFloats)
 
 	// Write the Go struct output to either stdout or a file.
 	writeOutput(output)
@@ -81,7 +83,7 @@ func checkForEmptyInput() {
 	if err != nil {
 		log.Fatalf("reading STDIN: %s", err)
 	}
-	if stats.Size() == 0 && inputFileName == "" {
+	if stats.Size() == 0 && opts.inputFile == "" {
 		fmt.Println("You must provide input either via STDIN or the --input-file flag.")
 		fmt.Println("Use the --help flag to see available flags.")
 		os.Exit(1)
@@ -91,7 +93,7 @@ func checkForEmptyInput() {
 // checkInputDataFormat checks if the input data format is json or yaml.
 // If it isn't, it exits the program.
 func checkInputDataFormat() {
-	if format != "json" && format != "yaml" {
+	if opts.format != "json" && opts.format != "yaml" {
 		fmt.Fprintln(os.Stderr, "fmt must be json or yaml")
 		os.Exit(1)
 	}
@@ -99,10 +101,10 @@ func checkInputDataFormat() {
 
 // formatTags formats Go struct tags.
 func formatTags() (tagList []string) {
-	if tags == "" || tags == format {
-		tagList = append(tagList, format)
+	if opts.tags == "" || opts.tags == opts.format {
+		tagList = append(tagList, opts.format)
 	} else {
-		tagList = strings.Split(tags, ",")
+		tagList = strings.Split(opts.tags, ",")
 	}
 
 	return
@@ -111,7 +113,7 @@ func formatTags() (tagList []string) {
 // parseInput determines which parsing method we will use
 // based on the format of the input data.
 func parseInput() (parser oscal.Parser, convertFloats bool) {
-	switch format {
+	switch opts.format {
 	case "json":
 		parser = oscal.ParseJson
 		convertFloats = true
@@ -136,8 +138,8 @@ func generateStructs(input io.Reader, parser oscal.Parser, pkg string, tagList [
 // writeOutput writes the generated Go structs to either a file if provided,
 // or stdout by default.
 func writeOutput(output []byte) {
-	if outputFileName != "" {
-		err := os.WriteFile(outputFileName, output, 0644)
+	if opts.outputFile != "" {
+		err := os.WriteFile(opts.outputFile, output, 0644)
 		if err != nil {
 			log.Fatalf("writing output: %s", err)
 		}
