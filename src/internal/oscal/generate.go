@@ -116,7 +116,7 @@ func getOscalModel(oscalSchema map[string]interface{}) (oscalModel string, err e
 		oscalModel = strings.Trim(oscalModelString, "[]")
 		return
 	} else {
-		err = fmt.Errorf("top-level required field is not populated as expected, please verify the provided schema is valid")
+		err = fmt.Errorf("top-level required field: please verify the provided schema is valid")
 		return
 	}
 }

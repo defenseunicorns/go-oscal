@@ -50,7 +50,7 @@ func init() {
 }
 
 func run() error {
-	oscalMap, err := parseOscalInterface()
+	oscalMap, err := parseJson()
 	if err != nil {
 		return err
 	}
@@ -66,55 +66,52 @@ func run() error {
 	return nil
 }
 
-// parseOscalInterface parses an interface containing oscal data
-// to determine what type it is, and ensures we get a map[string]interface{}.
-func parseOscalInterface() (map[string]interface{}, error) {
-	var oscalMap map[string]interface{}
-
-	interfaceResult, err := parseJson()
-	if err != nil {
-		return nil, err
-	}
-
-	// Parse input interface and perform necessary data transformations.
-	switch interfaceResultType := interfaceResult.(type) {
-	case map[interface{}]interface{}:
-		oscalMap = oscal.ConvertKeysToStrings(interfaceResultType)
-	case map[string]interface{}:
-		oscalMap = interfaceResultType
-	default:
-		return nil, fmt.Errorf("unexpected type: %T", interfaceResult)
-	}
-
-	return oscalMap, nil
-}
-
-// parseJson reads user-provided oscal json schema files as input,
-// stores them to an interface pointer, and returns the interface.
-func parseJson() (interface{}, error) {
-	var bytes []byte
-	var err error
-	var result interface{}
+/*
+parseJson reads user-provided oscal json schema files as input,
+stores each one of them to a map[string]interface{} pointer,
+merges the maps into a single map, and returns the map[string]interface{}.
+*/
+func parseJson() (map[string]interface{}, error) {
+	base := map[string]interface{}{}
 
 	// User specified schema files via -f/--input-file
 	for _, filePath := range opts.inputFiles {
-		bytes, err = os.ReadFile(filePath)
+		currentMap := map[string]interface{}{}
+
+		bytes, err := os.ReadFile(filePath)
 		if err != nil {
 			return nil, err
 		}
-	}
-	if err := json.Unmarshal(bytes, &result); err != nil {
-		return nil, err
+
+		if err := json.Unmarshal(bytes, &currentMap); err != nil {
+			return nil, err
+		}
+		// Merge with the previous map
+		base = mergeMaps(base, currentMap)
 	}
 
-	// TODO: We may need to unmarshal the oscal json data directly into a map[string]interface{} structure.
-	// I don't think we will run into a situation where the data won't be in this format.
-	// If so, there are other ways to check/validate that this is the case.
-	// So we can probably skip unmarshalling the data into an interface{}, and then parsing it with parseOscalInterface().
-	// The purpose of this would be to allow getting the data into the map[string]interface{} format,
-	// and then merging the maps into one monolithic map to be able to process multiple oscal schemas at once.
+	return base, nil
+}
 
-	return result, nil
+// copy-pasted logic from Helm that merges maps together.
+// this will need to be tweaked as it overwrites duplicate values with the last map that's processed
+func mergeMaps(a, b map[string]interface{}) map[string]interface{} {
+	out := make(map[string]interface{}, len(a))
+	for k, v := range a {
+		out[k] = v
+	}
+	for k, v := range b {
+		if v, ok := v.(map[string]interface{}); ok {
+			if bv, ok := out[k]; ok {
+				if bv, ok := bv.(map[string]interface{}); ok {
+					out[k] = mergeMaps(bv, v)
+					continue
+				}
+			}
+		}
+		out[k] = v
+	}
+	return out
 }
 
 // formatTags formats Go struct tags.
