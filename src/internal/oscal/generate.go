@@ -1,17 +1,12 @@
 package oscal
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"go/format"
-	"io"
 	"os"
 	"strconv"
 	"strings"
 	"unicode"
-
-	"gopkg.in/yaml.v2"
 )
 
 const headerComment string = `/*
@@ -82,68 +77,12 @@ var intToWordMap = []string{
 	"nine",
 }
 
-type Parser func(io.Reader) (interface{}, error)
-
-// ParseJson reads encoded JSON as input, stores to an interface pointer, and returns the interface.
-func ParseJson(input io.Reader) (interface{}, error) {
-	var result interface{}
-	if err := json.NewDecoder(input).Decode(&result); err != nil {
-		return nil, err
-	}
-	return result, nil
-}
-
-// ParseYaml reads encoded YAML as input, stores to an interface pointer, and returns the interface.
-func ParseYaml(input io.Reader) (interface{}, error) {
-	var result interface{}
-	b, err := readFile(input)
-	if err != nil {
-		return nil, err
-	}
-	if err := yaml.Unmarshal(b, &result); err != nil {
-		return nil, err
-	}
-	return result, nil
-}
-
-// readFile stores the input data as a buffer and returns the buffer's bytes.
-func readFile(input io.Reader) ([]byte, error) {
-	buf := bytes.NewBuffer(nil)
-	_, err := io.Copy(buf, input)
-	if err != nil {
-		return []byte{}, nil
-	}
-	return buf.Bytes(), nil
-}
-
 // Generate a struct definition given a JSON string representation of an object.
-func Generate(input io.Reader, parser Parser, pkgName string, tags []string, convertFloats bool) ([]byte, error) {
-	var result map[string]interface{}
-
-	interfaceResult, err := parser(input)
-	if err != nil {
-		return nil, err
-	}
-
-	// Parse input interface and perform necessary data transformations
-	switch interfaceResultType := interfaceResult.(type) {
-
-	// Convert interface map keys to string map keys
-	case map[interface{}]interface{}:
-		result = convertKeysToStrings(interfaceResultType)
-
-	// No transformations, this is what we want
-	case map[string]interface{}:
-		result = interfaceResultType
-
-	default:
-		return nil, fmt.Errorf("unexpected type: %T", interfaceResult)
-	}
-
-	id := setOscalModelRef(result)
+func Generate(oscalMap map[string]interface{}, pkgName string, tags []string) ([]byte, error) {
+	id := setOscalModelRef(oscalMap)
 
 	// Generate a map with unique Id as key and existing interface as value
-	idMap := generateUniqueIdMap(result)
+	idMap := generateUniqueIdMap(oscalMap)
 
 	// Instantiate variable for storing the data
 	modelTypeMap := make(map[string][]string)
@@ -154,7 +93,7 @@ func Generate(input io.Reader, parser Parser, pkgName string, tags []string, con
 	structString := fmt.Sprintf("%s\n\npackage %s\n", headerComment, pkgName)
 
 	// Construct top-level 'OscalModels' struct.
-	structString += generateOscalModelStruct(result, pkgName, tags)
+	structString += generateOscalModelStruct(oscalMap, pkgName, tags)
 
 	// Construct structs for oscal models.
 	structString += generateStruct(modelTypeMap, pkgName)
@@ -215,7 +154,7 @@ func generateUniqueIdMap(obj map[string]interface{}) map[string]interface{} {
 }
 
 // convertKeysToStrings converts interface{} map keys to strings.
-func convertKeysToStrings(obj map[interface{}]interface{}) map[string]interface{} {
+func ConvertKeysToStrings(obj map[interface{}]interface{}) map[string]interface{} {
 	res := make(map[string]interface{})
 
 	for key, value := range obj {
