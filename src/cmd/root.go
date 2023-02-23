@@ -49,12 +49,12 @@ func init() {
 }
 
 func run() error {
-	tagList := formatTags()
-
 	oscalMap, err := parseOscalInterface()
 	if err != nil {
 		return err
 	}
+
+	tagList := formatTags()
 
 	// Generate the Go structs.
 	output := generateStructs(oscalMap, opts.pkg, tagList)
@@ -65,27 +65,8 @@ func run() error {
 	return nil
 }
 
-// parseJson reads user-provided oscal json schema files as input,
-// stores them to an interface pointer, and returns the interface.
-func parseJson() (interface{}, error) {
-	var result interface{}
-
-	// User specified schema files via -f/--values
-	for _, filePath := range opts.inputFiles {
-
-		bytes, err := os.ReadFile(filePath)
-		if err != nil {
-			return nil, err
-		}
-
-		if err := json.Unmarshal(bytes, &result); err != nil {
-			return nil, err
-		}
-	}
-
-	return result, nil
-}
-
+// parseOscalInterface parses an interface containing oscal data
+// to determine what type it is, and ensures we get a map[string]interface{}.
 func parseOscalInterface() (map[string]interface{}, error) {
 	var oscalMap map[string]interface{}
 
@@ -105,6 +86,27 @@ func parseOscalInterface() (map[string]interface{}, error) {
 	}
 
 	return oscalMap, nil
+}
+
+// parseJson reads user-provided oscal json schema files as input,
+// stores them to an interface pointer, and returns the interface.
+func parseJson() (interface{}, error) {
+	var result interface{}
+
+	// User specified schema files via -f/--input-file
+	for _, filePath := range opts.inputFiles {
+
+		bytes, err := os.ReadFile(filePath)
+		if err != nil {
+			return nil, err
+		}
+
+		if err := json.Unmarshal(bytes, &result); err != nil {
+			return nil, err
+		}
+	}
+
+	return result, nil
 }
 
 // formatTags formats Go struct tags.
