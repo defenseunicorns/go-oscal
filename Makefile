@@ -11,7 +11,6 @@ BINNAME      ?= go-oscal
 INSTALL_PATH ?= /usr/local/bin
 OSCAL_COMPONENT_SCHEMA_FILE := testdata/schema/oscal_component_schema.json
 OSCAL_SSP_SCHEMA_FILE := testdata/schema/oscal_ssp_schema.json
-OSCAL_ASSESSMENT_PLAN_SCHEMA_FILE := testdata/schema/oscal_assessment-plan_schema.json
 
 # Git vars
 GIT_COMMIT = $(shell git rev-parse HEAD)
@@ -41,7 +40,7 @@ SRC := $(shell find . -type f -name '*.go' -print) go.mod go.sum
 #//////////////////////////////////////////////////////////////////////////////
 #
 .PHONY: all
-all: clean build test generate-file
+all: clean build test generate-compdef-file generate-ssp-file
 
 .PHONY: help
 help: ## Show this help message.
@@ -61,13 +60,17 @@ build: $(BINDIR)/$(BINNAME) ## Build the project.
 $(BINDIR)/$(BINNAME): $(SRC)
 	CGO_ENABLED=$(CGO_ENABLED) go build $(GOFLAGS) -trimpath -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o '$(BINDIR)/$(BINNAME)' .
 
-.PHONY: generate-file
-generate-file: clean build ## Generate Go structs from OSCAL JSON schema and output to 'internal/oscal/types.go'
-	$(BINDIR)/$(BINNAME) -f $(OSCAL_COMPONENT_SCHEMA_FILE) -f $(OSCAL_SSP_SCHEMA_FILE) -o types.go --tags json,yaml
+.PHONY: generate-compdef-file
+generate-compdef-file: clean build ## Generate Go structs from OSCAL component-definition JSON schema and output to 'src/internal/component-definition/types.go'
+	$(BINDIR)/$(BINNAME) -f $(OSCAL_COMPONENT_SCHEMA_FILE) -o src/internal/component-definition/types.go --pkg componentDefinition --tags json,yaml
+
+.PHONY: generate-ssp-file
+generate-ssp-file: clean build ## Generate Go structs from OSCAL system-security-plan JSON schema and output to 'src/internal/ssp/types.go'
+	$(BINDIR)/$(BINNAME) -f $(OSCAL_SSP_SCHEMA_FILE) -o src/internal/ssp/types.go --pkg ssp --tags json,yaml
 
 .PHONY: generate-stdout
 generate-stdout: clean build ## Generate Go structs from OSCAL JSON schema and output to stdout
-	$(BINDIR)/$(BINNAME) -f $(OSCAL_COMPONENT_SCHEMA_FILE) -f $(OSCAL_SSP_SCHEMA_FILE) --tags json,yaml
+	$(BINDIR)/$(BINNAME) -f $(OSCAL_COMPONENT_SCHEMA_FILE) --tags json,yaml
 
 .PHONY: test
 test: build ## Run automated tests.
@@ -75,7 +78,7 @@ test: build ## Run automated tests.
 
 .PHONY: run-main
 run-main: ## useful for running the main.go file without having to compile
-	go run main.go -f $(OSCAL_COMPONENT_SCHEMA_FILE) -f $(OSCAL_SSP_SCHEMA_FILE) --tags json,yaml
+	go run main.go -f $(OSCAL_COMPONENT_SCHEMA_FILE) --tags json,yaml
 
 .PHONY: install
 install: ## Install binary to $INSTALL_PATH.

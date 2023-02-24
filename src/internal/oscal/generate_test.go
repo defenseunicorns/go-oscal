@@ -1,7 +1,6 @@
 package oscal
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"sort"
@@ -9,29 +8,68 @@ import (
 	"testing"
 )
 
-// TestOscalSchemaVersion tests that the OSCAL schema version is correct.
-func TestOscalSchemaVersion(t *testing.T) {
+const (
+	oscalComponentSchemaFilePath = "../../../testdata/schema/component/oscal_component_schema.json"
+	oscalSSPSchemaFilePath       = "../../../testdata/schema/ssp/oscal_ssp_schema.json"
+)
+
+// TestOscalComponentSchemaVersion tests that the OSCAL component schema version is correct.
+func TestOscalComponentSchemaVersion(t *testing.T) {
 	oscalSchemaVersion := "1.0.4"
 
-	oscalMap, err := parseOscalFileToMap()
-	if err != nil {
-		t.Error(err)
+	testdata := &BaseFlags{
+		InputFile: oscalComponentSchemaFilePath,
 	}
 
-	// Check whether the top-level "$id" field is empty or not.
-	// If it is, fail the test and print error message.
-	// If it isn't, validate the string contains the proper version number.
-	if schemaVersionString := oscalMap["$id"].(string); schemaVersionString != "" {
+	oscalMap, err := ParseJson(testdata)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Check whether the top-level "$id" field exists and whether it is empty or not.
+	// If it doesn't exist or is empty, fail the test and print error message.
+	// If it exists and is populated, validate the string contains the proper version number.
+	if schemaVersionString, ok := oscalMap["$id"].(string); ok && schemaVersionString != "" {
 		schemaVersionString = oscalMap["$id"].(string)
 
 		expected := true
 		actual := strings.Contains(schemaVersionString, oscalSchemaVersion)
 
 		if expected != actual {
-			t.Errorf("OSCAL JSON schema version %s was not found. The version may have been updated.", oscalSchemaVersion)
+			t.Fatalf("OSCAL JSON schema version %s was not found. The version may have been updated.", oscalSchemaVersion)
 		}
 	} else {
-		t.Error("The top-level '$id' field was not found or is not populated. Please verify that the OSCAL JSON schema file is valid.")
+		t.Fatal("The top-level '$id' field was not found or is not populated. Please verify that the OSCAL JSON schema file is valid.")
+	}
+}
+
+// TestOscalSSPSchemaVersion tests that the OSCAL SSP schema version is correct.
+func TestOscalSSPSchemaVersion(t *testing.T) {
+	oscalSchemaVersion := "1.0.4"
+
+	testdata := &BaseFlags{
+		InputFile: oscalSSPSchemaFilePath,
+	}
+
+	oscalMap, err := ParseJson(testdata)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Check whether the top-level "$id" field exists and whether it is empty or not.
+	// If it doesn't exist or is empty, fail the test and print error message.
+	// If it exists and is populated, validate the string contains the proper version number.
+	if schemaVersionString, ok := oscalMap["$id"].(string); ok && schemaVersionString != "" {
+		schemaVersionString = oscalMap["$id"].(string)
+
+		expected := true
+		actual := strings.Contains(schemaVersionString, oscalSchemaVersion)
+
+		if expected != actual {
+			t.Fatalf("OSCAL JSON schema version %s was not found. The version may have been updated.", oscalSchemaVersion)
+		}
+	} else {
+		t.Fatal("The top-level '$id' field was not found or is not populated. Please verify that the OSCAL JSON schema file is valid.")
 	}
 }
 
@@ -56,20 +94,24 @@ func TestFmtFieldName(t *testing.T) {
 		actual := FmtFieldName(testCase.in)
 		expected := testCase.out
 		if expected != actual {
-			t.Errorf("error FmtFieldName(): expected: %s | got: %s", expected, actual)
+			t.Fatalf("error FmtFieldName(): expected: %s | got: %s", expected, actual)
 		}
 	}
 }
 
-// TestGenerateUniqueIdMapProperties tests that the generateUniqueIdMap function
-// returns the correct 'properties'.
-func TestGenerateUniqueIdMap(t *testing.T) {
+// TestGenerateUniqueIdMapComponent tests that the generateUniqueIdMap function
+// returns the correct 'properties' from the OSCAL component schema.
+func TestGenerateUniqueIdMapComponent(t *testing.T) {
 	var actualProperties string
-	expectedPropertiesFile := "../../../testdata/expected-properties.txt"
+	expectedPropertiesFile := "../../../testdata/schema/component/expected-properties.txt"
 
-	oscalMap, err := parseOscalFileToMap()
+	testdata := &BaseFlags{
+		InputFile: oscalComponentSchemaFilePath,
+	}
+
+	oscalMap, err := ParseJson(testdata)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	actualMap := generateUniqueIdMap(oscalMap)
@@ -79,10 +121,10 @@ func TestGenerateUniqueIdMap(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// Check if there's a properties field.
+	// Check if there's a properties field and whether it is populated.
 	// If there is, loop over to collect the properties and assert we have the correct properties.
 	// If there isn't, fail the test and print error message.
-	if properties := actualMap[oscalModelId].(map[string]interface{})["properties"]; properties != nil {
+	if properties, ok := actualMap[oscalModelId].(map[string]interface{})["properties"]; ok && properties != nil {
 		properties := actualMap[oscalModelId].(map[string]interface{})["properties"]
 
 		// Store the properties fields to a string slice and sort it.
@@ -97,12 +139,12 @@ func TestGenerateUniqueIdMap(t *testing.T) {
 			actualProperties += fmt.Sprintf("%s\n", property)
 		}
 	} else {
-		t.Error("The 'properties' field was not found. Please verify the OSCAL JSON schema file is valid.")
+		t.Fatal("The 'properties' field was not found or is not populated. Please verify the OSCAL JSON schema file is valid.")
 	}
 
 	expectedPropertiesBytes, err := os.ReadFile(expectedPropertiesFile)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	expected := string(expectedPropertiesBytes)
@@ -111,15 +153,77 @@ func TestGenerateUniqueIdMap(t *testing.T) {
 	actual := strings.TrimSpace(actualProperties)
 
 	if expected != actual {
-		t.Errorf("error generateUniqueIdMap():\n\nexpected: \n%s\n\ngot: \n%s", expected, actual)
+		t.Fatalf("error generateUniqueIdMap():\n\nexpected: \n%s\n\ngot: \n%s", expected, actual)
 	}
 }
 
-// TestFormatStructTags tests that we can format Go struct tags correctly.
-func TestFormatStructTags(t *testing.T) {
-	oscalMap, err := parseOscalFileToMap()
+// TestGenerateUniqueIdMapSSP tests that the generateUniqueIdMap function
+// returns the correct 'properties' from the OSCAL SSP schema.
+func TestGenerateUniqueIdMapSSP(t *testing.T) {
+	var actualProperties string
+	expectedPropertiesFile := "../../../testdata/schema/ssp/expected-properties.txt"
+
+	testdata := &BaseFlags{
+		InputFile: oscalSSPSchemaFilePath,
+	}
+
+	oscalMap, err := ParseJson(testdata)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
+	}
+
+	actualMap := generateUniqueIdMap(oscalMap)
+
+	oscalModelId, err := setOscalModelRef(oscalMap)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Check if there's a properties field and whether it is populated.
+	// If there is, loop over to collect the properties and assert we have the correct properties.
+	// If there isn't, fail the test and print error message.
+	if properties, ok := actualMap[oscalModelId].(map[string]interface{})["properties"]; ok && properties != nil {
+		properties := actualMap[oscalModelId].(map[string]interface{})["properties"]
+
+		// Store the properties fields to a string slice and sort it.
+		propertiesSlice := make([]string, 0)
+		for property := range properties.(map[string]interface{}) {
+			propertiesSlice = append(propertiesSlice, property)
+		}
+		sort.Strings(propertiesSlice)
+
+		// Convert the sorted string slice to a string so that we can assert the output.
+		for _, property := range propertiesSlice {
+			actualProperties += fmt.Sprintf("%s\n", property)
+		}
+	} else {
+		t.Fatal("The 'properties' field was not found or is not populated. Please verify the OSCAL JSON schema file is valid.")
+	}
+
+	expectedPropertiesBytes, err := os.ReadFile(expectedPropertiesFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expected := string(expectedPropertiesBytes)
+
+	// Trim leading and trailing white space from string.
+	actual := strings.TrimSpace(actualProperties)
+
+	if expected != actual {
+		t.Fatalf("error generateUniqueIdMap():\n\nexpected: \n%s\n\ngot: \n%s", expected, actual)
+	}
+}
+
+// TestFormatStructTagsComponent tests that we can format Go struct tags from the OSCAL component schema correctly.
+func TestFormatStructTagsComponent(t *testing.T) {
+	testdata := &BaseFlags{
+		InputFile: oscalComponentSchemaFilePath,
+	}
+
+	oscalMap, err := ParseJson(testdata)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	idMap := generateUniqueIdMap(oscalMap)
@@ -132,23 +236,57 @@ func TestFormatStructTags(t *testing.T) {
 	actualTagList := formatStructTags(idMap, oscalModelId, "uuid", []string{"json", "yaml"})
 
 	// Convert the string slice to a string for assertion.
-	actualTagString := strings.Join(actualTagList, " ")
+	actual := strings.Join(actualTagList, " ")
 
-	expectedTagString := "json:\"uuid\" yaml:\"uuid\""
+	expected := "json:\"uuid\" yaml:\"uuid\""
 
-	if expectedTagString != actualTagString {
-		t.Errorf("error formatStructTags(): expected: %s | got: %s", expectedTagString, actualTagString)
+	if expected != actual {
+		t.Fatalf("error formatStructTags(): expected: %s | got: %s", expected, actual)
 	}
 }
 
-// TestBuildStructData tests that we can construct Go struct data correctly.
-func TestBuildStructData(t *testing.T) {
-	var actualStructDataString string
-	expectedStructDataFile := "../../../testdata/expected-struct-data.txt"
+// TestFormatStructTagsSSP tests that we can format Go struct tags from the OSCAL SSP schema correctly.
+func TestFormatStructTagsSSP(t *testing.T) {
+	testdata := &BaseFlags{
+		InputFile: oscalSSPSchemaFilePath,
+	}
 
-	oscalMap, err := parseOscalFileToMap()
+	oscalMap, err := ParseJson(testdata)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
+	}
+
+	idMap := generateUniqueIdMap(oscalMap)
+
+	oscalModelId, err := setOscalModelRef(oscalMap)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	actualTagList := formatStructTags(idMap, oscalModelId, "uuid", []string{"json", "yaml"})
+
+	// Convert the string slice to a string for assertion.
+	actual := strings.Join(actualTagList, " ")
+
+	expected := "json:\"uuid\" yaml:\"uuid\""
+
+	if expected != actual {
+		t.Fatalf("error formatStructTags(): expected: %s | got: %s", expected, actual)
+	}
+}
+
+// TestBuildStructDataComponent tests that we can construct Go struct data for the OSCAL component schema correctly.
+func TestBuildStructDataComponent(t *testing.T) {
+	var actualStructDataString string
+	expectedStructDataFile := "../../../testdata/schema/component/expected-struct-data.txt"
+
+	testdata := &BaseFlags{
+		InputFile: oscalComponentSchemaFilePath,
+	}
+
+	oscalMap, err := ParseJson(testdata)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	idMap := generateUniqueIdMap(oscalMap)
@@ -160,10 +298,10 @@ func TestBuildStructData(t *testing.T) {
 
 	modelTypeMap := make(map[string][]string)
 
-	// Check if there's a properties field.
+	// Check if there's a properties field and whether it is populated.
 	// If there is, call the buildStructData function and store the result as a string for assertion.
 	// If there isn't, fail the test and print error message.
-	if properties := idMap[oscalModelId].(map[string]interface{})["properties"]; properties != nil {
+	if properties, ok := idMap[oscalModelId].(map[string]interface{})["properties"]; ok && properties != nil {
 		actualStructData := buildStructData(properties, idMap, oscalModelId, []string{"json", "yaml"}, []string{""}, modelTypeMap)
 		// Sort the data in increasing order so that we always have consistent, predictable output.
 		sort.Strings(actualStructData)
@@ -173,7 +311,7 @@ func TestBuildStructData(t *testing.T) {
 			actualStructDataString += fmt.Sprintf("%s\n", data)
 		}
 	} else {
-		t.Error("The 'properties' field was not found. Please verify the OSCAL JSON schema file is valid.")
+		t.Fatal("The 'properties' field was not found or is not populated. Please verify the OSCAL JSON schema file is valid.")
 	}
 
 	// Trim leading and trailing white space from string.
@@ -181,21 +319,79 @@ func TestBuildStructData(t *testing.T) {
 
 	expectedStructDataBytes, err := os.ReadFile(expectedStructDataFile)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	expected := string(expectedStructDataBytes)
 
 	if expected != actual {
-		t.Errorf("error buildStructData():\n\nexpected: \n%s\n\ngot: \n%s", expected, actual)
+		t.Fatalf("error buildStructData():\n\nexpected: \n%s\n\ngot: \n%s", expected, actual)
 	}
 }
 
-// TestGenerateModelTypes tests that we can generate the top-level "ComponentDefinition" struct name correctly.
-func TestGenerateModelTypes(t *testing.T) {
-	oscalMap, err := parseOscalFileToMap()
+// TestBuildStructDataSSP tests that we can construct Go struct data for the OSCAL SSP schema correctly.
+func TestBuildStructDataSSP(t *testing.T) {
+	var actualStructDataString string
+	expectedStructDataFile := "../../../testdata/schema/ssp/expected-struct-data.txt"
+
+	testdata := &BaseFlags{
+		InputFile: oscalSSPSchemaFilePath,
+	}
+
+	oscalMap, err := ParseJson(testdata)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
+	}
+
+	idMap := generateUniqueIdMap(oscalMap)
+
+	oscalModelId, err := setOscalModelRef(oscalMap)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	modelTypeMap := make(map[string][]string)
+
+	// Check if there's a properties field and whether it is populated.
+	// If there is, call the buildStructData function and store the result as a string for assertion.
+	// If there isn't, fail the test and print error message.
+	if properties, ok := idMap[oscalModelId].(map[string]interface{})["properties"]; ok && properties != nil {
+		actualStructData := buildStructData(properties, idMap, oscalModelId, []string{"json", "yaml"}, []string{""}, modelTypeMap)
+		// Sort the data in increasing order so that we always have consistent, predictable output.
+		sort.Strings(actualStructData)
+
+		// Convert the sorted string slice to a string so that we can assert the output.
+		for _, data := range actualStructData {
+			actualStructDataString += fmt.Sprintf("%s\n", data)
+		}
+	} else {
+		t.Fatal("The 'properties' field was not found or is not populated. Please verify the OSCAL JSON schema file is valid.")
+	}
+
+	// Trim leading and trailing white space from string.
+	actual := strings.TrimSpace(actualStructDataString)
+
+	expectedStructDataBytes, err := os.ReadFile(expectedStructDataFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expected := string(expectedStructDataBytes)
+
+	if expected != actual {
+		t.Fatalf("error buildStructData():\n\nexpected: \n%s\n\ngot: \n%s", expected, actual)
+	}
+}
+
+// TestGenerateModelTypesComponent tests that we can generate the top-level "ComponentDefinition" struct name correctly for the OSCAL component schema.
+func TestGenerateModelTypesComponent(t *testing.T) {
+	testdata := &BaseFlags{
+		InputFile: oscalComponentSchemaFilePath,
+	}
+
+	oscalMap, err := ParseJson(testdata)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	idMap := generateUniqueIdMap(oscalMap)
@@ -212,17 +408,50 @@ func TestGenerateModelTypes(t *testing.T) {
 	actual := generateModelTypes(idMap, oscalModelId, strings.Split(oscalModelId, "_")[2], []string{""}, modelTypeMap)
 
 	if expected != actual {
-		t.Errorf("error generateModelTypes(): expected: %s | got: %s", expected, actual)
+		t.Fatalf("error generateModelTypes(): expected: %s | got: %s", expected, actual)
 	}
 }
 
-// TestGenerateOscalComponentDocumentStruct tests that we can generate the 'OscalComponentDocument' struct correctly.
-func TestGenerateOscalModelsStruct(t *testing.T) {
-	expectedOutputFile := "../../../testdata/expected-oscal-models-struct.txt"
+// TestGenerateModelTypesSSP tests that we can generate the top-level "SystemSecurityPlan" struct name correctly for the OSCAL SSP schema.
+func TestGenerateModelTypesSSP(t *testing.T) {
+	testdata := &BaseFlags{
+		InputFile: oscalSSPSchemaFilePath,
+	}
 
-	oscalMap, err := parseOscalFileToMap()
+	oscalMap, err := ParseJson(testdata)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
+	}
+
+	idMap := generateUniqueIdMap(oscalMap)
+
+	oscalModelId, err := setOscalModelRef(oscalMap)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	modelTypeMap := make(map[string][]string)
+
+	expected := "SystemSecurityPlan"
+
+	actual := generateModelTypes(idMap, oscalModelId, strings.Split(oscalModelId, "_")[2], []string{""}, modelTypeMap)
+
+	if expected != actual {
+		t.Fatalf("error generateModelTypes(): expected: %s | got: %s", expected, actual)
+	}
+}
+
+// TestGenerateOscalComponentModelStruct tests that we can generate the 'OscalModel' struct correctly for the OSCAL component schema.
+func TestGenerateOscalComponentModelStruct(t *testing.T) {
+	expectedOutputFile := "../../../testdata/schema/component/expected-oscal-model-struct.txt"
+
+	testdata := &BaseFlags{
+		InputFile: oscalComponentSchemaFilePath,
+	}
+
+	oscalMap, err := ParseJson(testdata)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	expectedBytes, err := os.ReadFile(expectedOutputFile)
@@ -238,25 +467,36 @@ func TestGenerateOscalModelsStruct(t *testing.T) {
 	actual := strings.TrimSpace(actualString)
 
 	if expected != actual {
-		t.Errorf("error generateOscalModelsStruct():\n\nexpected: \n%s\n\ngot: \n%s", expected, actual)
+		t.Fatalf("error generateOscalModelsStruct():\n\nexpected: \n%s\n\ngot: \n%s", expected, actual)
 	}
 }
 
-// parseOscalFileToMap reads and unmarshals the OSCAL JSON schema file
-// into a map[string]interface{} structure for further processing/testing.
-func parseOscalFileToMap() (map[string]interface{}, error) {
-	oscalJSONSchemaFile := "../../../testdata/schema/oscal_component_schema.json"
+// TestGenerateOscalSSPModelStruct tests that we can generate the 'OscalModel' struct correctly for the OSCAL SSP schema.
+func TestGenerateOscalSSPModelStruct(t *testing.T) {
+	expectedOutputFile := "../../../testdata/schema/ssp/expected-oscal-model-struct.txt"
 
-	oscalMap := make(map[string]interface{})
+	testdata := &BaseFlags{
+		InputFile: oscalSSPSchemaFilePath,
+	}
 
-	oscalBytes, err := os.ReadFile(oscalJSONSchemaFile)
+	oscalMap, err := ParseJson(testdata)
 	if err != nil {
-		return nil, err
+		t.Fatal(err)
 	}
 
-	if err = json.Unmarshal(oscalBytes, &oscalMap); err != nil {
-		return nil, err
+	expectedBytes, err := os.ReadFile(expectedOutputFile)
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	return oscalMap, nil
+	expected := string(expectedBytes)
+
+	actualString := generateOscalModelStruct(oscalMap, "", []string{"json", "yaml"})
+
+	// Trim leading and trailing white space from string.
+	actual := strings.TrimSpace(actualString)
+
+	if expected != actual {
+		t.Fatalf("error generateOscalModelStruct():\n\nexpected: \n%s\n\ngot: \n%s", expected, actual)
+	}
 }

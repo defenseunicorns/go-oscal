@@ -1,6 +1,7 @@
 package oscal
 
 import (
+	"encoding/json"
 	"fmt"
 	"go/format"
 	"os"
@@ -8,6 +9,14 @@ import (
 	"strings"
 	"unicode"
 )
+
+// BaseFlags represents command-line flags for the base go-oscal command.
+type BaseFlags struct {
+	InputFile  string // -f / --input-file
+	OutputFile string // -o / --output-file
+	Pkg        string // -p / --pkg
+	Tags       string // -t / --tags
+}
 
 const headerComment string = `/*
 	This file was auto-generated with go-oscal.
@@ -78,10 +87,10 @@ var intToWordMap = []string{
 }
 
 // Generate a struct definition given a JSON string representation of an object.
-func Generate(oscalMap map[string]interface{}, pkgName string, tags []string) (formattedStruct []byte, err error) {
+func Generate(oscalMap map[string]interface{}, pkgName string, tags []string) ([]byte, error) {
 	id, err := setOscalModelRef(oscalMap)
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	// Generate a map with unique Id as key and existing interface as value
@@ -95,23 +104,44 @@ func Generate(oscalMap map[string]interface{}, pkgName string, tags []string) (f
 	// Construct header comment and package name.
 	structString := fmt.Sprintf("%s\n\npackage %s\n", headerComment, pkgName)
 
-	// Construct top-level 'OscalModels' struct.
+	// Construct top-level OscalModel struct.
 	structString += generateOscalModelStruct(oscalMap, pkgName, tags)
 
 	// Construct structs for oscal models.
 	structString += generateStruct(modelTypeMap, pkgName)
 
-	formattedStruct, err = format.Source([]byte(structString))
+	formattedStruct, err := format.Source([]byte(structString))
 	if err != nil {
 		err = fmt.Errorf("error formatting: %s, was formatting\n%s", err, structString)
+		return nil, err
 	}
 
-	return
+	return formattedStruct, nil
+}
+
+/*
+parseJson reads a user-provided oscal json schema file as input,
+stores it to a map[string]interface{} pointer,
+and returns the map[string]interface{}.
+*/
+func ParseJson(opts *BaseFlags) (map[string]interface{}, error) {
+	oscalMap := map[string]interface{}{}
+
+	bytes, err := os.ReadFile(opts.InputFile)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := json.Unmarshal(bytes, &oscalMap); err != nil {
+		return nil, err
+	}
+
+	return oscalMap, nil
 }
 
 // getOscalModel determines which OSCAL model we're working with.
 func getOscalModel(oscalSchema map[string]interface{}) (oscalModel string, err error) {
-	if oscalModelField := oscalSchema["required"]; oscalModelField != nil {
+	if oscalModelField, ok := oscalSchema["required"]; ok && oscalModelField != nil {
 		oscalModelString := fmt.Sprintf("%v", oscalModelField)
 		oscalModel = strings.Trim(oscalModelString, "[]")
 		return
@@ -136,6 +166,9 @@ func setOscalModelRef(oscalSchema map[string]interface{}) (oscalModelRef string,
 	case "component-definition":
 		oscalModelRef = "#assembly_oscal-component-definition_component-definition"
 		return
+	case "assessment-plan":
+		oscalModelRef = "#assembly_oscal-ap_assessment-plan"
+		return
 	default:
 		fmt.Println("Do not recognize this model name.")
 	}
@@ -146,30 +179,21 @@ func setOscalModelRef(oscalSchema map[string]interface{}) (oscalModelRef string,
 func generateUniqueIdMap(obj map[string]interface{}) map[string]interface{} {
 	result := make(map[string]interface{})
 
-	for _, val := range obj["definitions"].(map[string]interface{}) {
-		result[val.(map[string]interface{})["$id"].(string)] = val
+	if definitions, ok := obj["definitions"].(map[string]interface{}); ok && definitions != nil {
+		for _, val := range definitions {
+			result[val.(map[string]interface{})["$id"].(string)] = val
+		}
+
 	}
 
 	return result
-
-}
-
-// convertKeysToStrings converts interface{} map keys to strings.
-func ConvertKeysToStrings(obj map[interface{}]interface{}) map[string]interface{} {
-	res := make(map[string]interface{})
-
-	for key, value := range obj {
-		res[fmt.Sprintf("%v", key)] = value
-	}
-
-	return res
 }
 
 // getRequiredFields collects the required fields in each OSCAL definition.
 func getRequiredFields(obj map[string]interface{}, structId string) map[string]bool {
 	requiredFields := make(map[string]bool)
 
-	if required := obj[structId].(map[string]interface{})["required"]; required != nil {
+	if required, ok := obj[structId].(map[string]interface{})["required"]; ok && required != nil {
 		for _, v := range required.([]interface{}) {
 			requiredFields[v.(string)] = true
 		}
@@ -186,9 +210,8 @@ func formatStructTags(obj map[string]interface{}, structId string, key string, t
 
 	for _, tag := range tags {
 		// If this field is not required, then add omitempty to tag.
-		if _, required := requiredFields[key]; !required {
-			omitEmpty := ",omitempty"
-			tagList = append(tagList, fmt.Sprintf("%s:\"%s%s\"", tag, key, omitEmpty))
+		if _, ok := requiredFields[key]; !ok {
+			tagList = append(tagList, fmt.Sprintf("%s:\"%s,%s\"", tag, key, "omitempty"))
 		} else {
 			tagList = append(tagList, fmt.Sprintf("%s:\"%s\"", tag, key))
 		}
@@ -204,7 +227,7 @@ func buildStructData(prop interface{}, obj map[string]interface{}, structId stri
 		valueName := FmtFieldName(k)
 		tagList := formatStructTags(obj, structId, k, tags)
 
-		if valueType := v.(map[string]interface{})["type"]; valueType != nil {
+		if valueType, ok := v.(map[string]interface{})["type"]; ok && valueType != nil {
 			switch value := valueType.(string); value {
 			case "string":
 				structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, value, strings.Join(tagList, " ")))
@@ -244,18 +267,18 @@ func buildStructData(prop interface{}, obj map[string]interface{}, structId stri
 
 func generateModelTypes(obj map[string]interface{}, structId string, structName string, tags []string, modelMap map[string][]string) string {
 	// use structId to search for existing data in modelMap
-	if existing := modelMap[structId]; existing != nil {
+	if mapId, ok := modelMap[structId]; ok && mapId != nil {
 		return modelMap[structId][0]
 	}
 
 	// If our data has a properties field - evaluate
 	// else it may be the property itself and we need to get the type
-	if prop := obj[structId].(map[string]interface{})["properties"]; prop != nil {
+	if prop, ok := obj[structId].(map[string]interface{})["properties"]; ok && prop != nil {
 		structData := []string{FmtFieldName(structName)}
 		structData = buildStructData(prop, obj, structId, tags, structData, modelMap)
 		modelMap[structId] = structData
 
-	} else if objType := obj[structId].(map[string]interface{})["type"]; objType != nil {
+	} else if objType, ok := obj[structId].(map[string]interface{})["type"]; ok && objType != nil {
 		switch value := objType.(string); value {
 		case "string":
 			return "string"
@@ -263,6 +286,8 @@ func generateModelTypes(obj map[string]interface{}, structId string, structName 
 			return "bool"
 		case "array":
 			return "array"
+		// case "object":
+		// 	return "object"
 		default:
 			fmt.Printf("type not defined: %v", value)
 		}
@@ -278,12 +303,10 @@ func generateModelTypes(obj map[string]interface{}, structId string, structName 
 // TODO: Make this function extensible to handle multiple OSCAL	models/schemas. Namely, system security plan and assesment plan.
 // generateOscalModelStruct generates the top-level struct for OSCAL data models.
 func generateOscalModelStruct(oscalSchema map[string]interface{}, pkgName string, tags []string) string {
-	// Check if there is a top-level 'required' field.
-	if oscalModelField := oscalSchema["required"]; oscalModelField != nil {
-		// There is, so let's convert it to a string.
+	if oscalModelField, ok := oscalSchema["required"]; ok && oscalModelField != nil {
+
 		oscalModelString := fmt.Sprintf("%v", oscalModelField)
 
-		// Trim the [] braces away.
 		oscalModelName := strings.Trim(oscalModelString, "[]")
 
 		// Format the string from 'component-definition' to 'ComponentDefinition'.
@@ -296,7 +319,7 @@ func generateOscalModelStruct(oscalSchema map[string]interface{}, pkgName string
 		}
 
 		// Construct the struct string.
-		structString := fmt.Sprintf("type OscalModel struct {\n\t%s %s `%s`\n}\n", formattedOscalModelName, formattedOscalModelName, strings.Join(tagList, " "))
+		structString := fmt.Sprintf("type Oscal%sModel struct {\n\t%s %s `%s`\n}\n", formattedOscalModelName, formattedOscalModelName, formattedOscalModelName, strings.Join(tagList, " "))
 
 		// Format the Go struct.
 		formattedStruct, err := format.Source([]byte(structString))
@@ -308,7 +331,7 @@ func generateOscalModelStruct(oscalSchema map[string]interface{}, pkgName string
 		return string(formattedStruct)
 
 	} else {
-		fmt.Println("Top-level 'required' field not found. Please verify the OSCAL JSON schema file is valid.")
+		fmt.Println("Top-level 'required' field not found or is not populated. Please verify the OSCAL JSON schema file is valid.")
 		os.Exit(1)
 	}
 
