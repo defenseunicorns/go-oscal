@@ -87,25 +87,24 @@ var intToWordMap = []string{
 }
 
 // Generate a struct definition given a JSON string representation of an object.
-func Generate(oscalMap map[string]interface{}, pkgName string, tags []string) ([]byte, error) {
-	id, err := setOscalModelRef(oscalMap)
-	if err != nil {
-		return nil, err
-	}
+func Generate(oscalSchema map[string]interface{}, pkgName string, tags []string) ([]byte, error) {
+	oscalModel := getOscalModel(oscalSchema)
+
+	modelId := setOscalModelRef(oscalModel)
 
 	// Generate a map with unique Id as key and existing interface as value
-	idMap := generateUniqueIdMap(oscalMap)
+	idMap := generateUniqueIdMap(oscalSchema)
 
 	// Instantiate variable for storing the data
 	modelTypeMap := make(map[string][]string)
 
-	generateModelTypes(idMap, id, strings.Split(id, "_")[2], tags, modelTypeMap)
+	generateModelTypes(idMap, modelId, strings.Split(modelId, "_")[2], tags, modelTypeMap)
 
 	// Construct header comment and package name.
 	structString := fmt.Sprintf("%s\n\npackage %s\n", headerComment, pkgName)
 
 	// Construct top-level OscalModel struct.
-	structString += generateOscalModelStruct(oscalMap, pkgName, tags)
+	structString += generateOscalModelStruct(oscalSchema, pkgName, tags)
 
 	// Construct structs for oscal models.
 	structString += generateStruct(modelTypeMap, pkgName)
@@ -120,7 +119,7 @@ func Generate(oscalMap map[string]interface{}, pkgName string, tags []string) ([
 }
 
 /*
-parseJson reads a user-provided oscal json schema file as input,
+ParseJson reads a user-provided oscal json schema file as input,
 stores it to a map[string]interface{} pointer,
 and returns the map[string]interface{}.
 */
@@ -139,41 +138,36 @@ func ParseJson(opts *BaseFlags) (map[string]interface{}, error) {
 	return oscalMap, nil
 }
 
-// getOscalModel determines which OSCAL model we're working with.
-func getOscalModel(oscalSchema map[string]interface{}) (oscalModel string, err error) {
-	if oscalModelField, ok := oscalSchema["required"]; ok && oscalModelField != nil {
-		oscalModelString := fmt.Sprintf("%v", oscalModelField)
-		oscalModel = strings.Trim(oscalModelString, "[]")
-		return
-	} else {
-		err = fmt.Errorf("top-level required field: please verify the provided schema is valid")
-		return
-	}
-}
-
 // setOscalModelRef determines which OSCAL model $ref to use based on the model name.
-func setOscalModelRef(oscalSchema map[string]interface{}) (oscalModelRef string, err error) {
-	oscalModel, err := getOscalModel(oscalSchema)
-	if err != nil {
-		return "", err
-	}
-
+func setOscalModelRef(oscalModel string) string {
 	// Check which OSCAL model we're working with, and set the $ref accordingly.
 	switch oscalModel {
 	case "system-security-plan":
-		oscalModelRef = "#assembly_oscal-ssp_system-security-plan"
-		return
+		oscalModelRef := "#assembly_oscal-ssp_system-security-plan"
+		return oscalModelRef
 	case "component-definition":
-		oscalModelRef = "#assembly_oscal-component-definition_component-definition"
-		return
-	case "assessment-plan":
-		oscalModelRef = "#assembly_oscal-ap_assessment-plan"
-		return
+		oscalModelRef := "#assembly_oscal-component-definition_component-definition"
+		return oscalModelRef
 	default:
-		fmt.Println("Do not recognize this model name.")
+		fmt.Println("Unsupported OSCAL model. Currently supported OSCAL models are Component Definition and System Security Plan.")
+		os.Exit(1)
 	}
 
-	return
+	return ""
+}
+
+// getOscalModel determines which OSCAL model we're working with.
+func getOscalModel(oscalSchema map[string]interface{}) string {
+	if checkTopLevelRequiredField(oscalSchema) {
+		requiredFieldValue := getRequiredFieldValue(oscalSchema)
+		oscalModel := convertRequiredFieldInterfaceToString(requiredFieldValue)
+		return oscalModel
+	} else {
+		fmt.Println("Top-level 'required' field not found or is not populated. Please verify the OSCAL JSON schema file is valid.")
+		os.Exit(1)
+	}
+
+	return ""
 }
 
 func generateUniqueIdMap(obj map[string]interface{}) map[string]interface{} {
@@ -189,7 +183,7 @@ func generateUniqueIdMap(obj map[string]interface{}) map[string]interface{} {
 	return result
 }
 
-// getRequiredFields collects the required fields in each OSCAL definition.
+// getRequiredFields collects the required fields in each OSCAL model definition.
 func getRequiredFields(obj map[string]interface{}, structId string) map[string]bool {
 	requiredFields := make(map[string]bool)
 
@@ -273,9 +267,10 @@ func generateModelTypes(obj map[string]interface{}, structId string, structName 
 
 	// If our data has a properties field - evaluate
 	// else it may be the property itself and we need to get the type
-	if prop, ok := obj[structId].(map[string]interface{})["properties"]; ok && prop != nil {
+	if checkPropertiesField(obj, structId) {
 		structData := []string{FmtFieldName(structName)}
-		structData = buildStructData(prop, obj, structId, tags, structData, modelMap)
+		properties := getPropertiesFieldValue(obj, structId)
+		structData = buildStructData(properties, obj, structId, tags, structData, modelMap)
 		modelMap[structId] = structData
 
 	} else if objType, ok := obj[structId].(map[string]interface{})["type"]; ok && objType != nil {
@@ -286,8 +281,6 @@ func generateModelTypes(obj map[string]interface{}, structId string, structName 
 			return "bool"
 		case "array":
 			return "array"
-		// case "object":
-		// 	return "object"
 		default:
 			fmt.Printf("type not defined: %v", value)
 		}
@@ -300,42 +293,30 @@ func generateModelTypes(obj map[string]interface{}, structId string, structName 
 	return formattedStructName
 }
 
-// TODO: Make this function extensible to handle multiple OSCAL	models/schemas. Namely, system security plan and assesment plan.
 // generateOscalModelStruct generates the top-level struct for OSCAL data models.
 func generateOscalModelStruct(oscalSchema map[string]interface{}, pkgName string, tags []string) string {
-	if oscalModelField, ok := oscalSchema["required"]; ok && oscalModelField != nil {
+	oscalModelName := getOscalModel(oscalSchema)
 
-		oscalModelString := fmt.Sprintf("%v", oscalModelField)
+	// Example: Format the string from 'oscal-model' to 'OscalModel'.
+	formattedOscalModelName := FmtFieldName(oscalModelName)
 
-		oscalModelName := strings.Trim(oscalModelString, "[]")
+	// Format struct tags.
+	tagList := make([]string, 0)
+	for _, tag := range tags {
+		tagList = append(tagList, fmt.Sprintf("%s:\"%s\"", tag, oscalModelName))
+	}
 
-		// Format the string from 'component-definition' to 'ComponentDefinition'.
-		formattedOscalModelName := FmtFieldName(oscalModelName)
+	// Construct the struct string.
+	structString := fmt.Sprintf("type Oscal%sModel struct {\n\t%s %s `%s`\n}\n", formattedOscalModelName, formattedOscalModelName, formattedOscalModelName, strings.Join(tagList, " "))
 
-		// Format struct tags.
-		tagList := make([]string, 0)
-		for _, tag := range tags {
-			tagList = append(tagList, fmt.Sprintf("%s:\"%s\"", tag, oscalModelName))
-		}
-
-		// Construct the struct string.
-		structString := fmt.Sprintf("type Oscal%sModel struct {\n\t%s %s `%s`\n}\n", formattedOscalModelName, formattedOscalModelName, formattedOscalModelName, strings.Join(tagList, " "))
-
-		// Format the Go struct.
-		formattedStruct, err := format.Source([]byte(structString))
-		if err != nil {
-			fmt.Printf("error formatting:\n%s", structString)
-			os.Exit(1)
-		}
-
-		return string(formattedStruct)
-
-	} else {
-		fmt.Println("Top-level 'required' field not found or is not populated. Please verify the OSCAL JSON schema file is valid.")
+	// Format the Go struct.
+	formattedStruct, err := format.Source([]byte(structString))
+	if err != nil {
+		fmt.Printf("error formatting:\n%s", structString)
 		os.Exit(1)
 	}
 
-	return ""
+	return string(formattedStruct)
 }
 
 func generateStruct(structMap map[string][]string, pkgName string) string {
@@ -363,6 +344,65 @@ func generateStruct(structMap map[string][]string, pkgName string) string {
 	}
 
 	return typesString
+}
+
+// checkTopLevelRequiredField checks if an OSCAL schema file has a valid top-level 'required' key-value pair.
+// If the key-value pair is valid, it returns true.
+// If the key-value pair is invalid, it returns false.
+func checkTopLevelRequiredField(oscalSchema map[string]interface{}) bool {
+	// Check if the top-level 'required' key is present, and that the value is populated.
+	// Return true if the key is present and populated.
+	if oscalModelField, ok := oscalSchema["required"]; ok && oscalModelField != nil {
+		return true
+	}
+
+	// Check if the top-level 'required' key is not present, or if the value is not populated (nil).
+	// Return false if the key is not present, or if the value is not populated.
+	if oscalModelField, ok := oscalSchema["required"]; !ok || oscalModelField == nil {
+		return false
+	}
+
+	return false
+}
+
+// getRequiredFieldValue returns the value of the top-level 'required' field of an OSCAL schema file.
+func getRequiredFieldValue(oscalSchema map[string]interface{}) interface{} {
+	requiredFieldValue := oscalSchema["required"]
+	return requiredFieldValue
+}
+
+// convertRequiredFieldInterfaceToString converts the value of the top-level 'required' field of an OSCAL schema file
+// from type interface{} to type string and trims away the surrounding [] braces.
+func convertRequiredFieldInterfaceToString(requiredFieldValue interface{}) string {
+	oscalModelString := fmt.Sprintf("%v", requiredFieldValue)
+	trimmedOscalModelString := strings.Trim(oscalModelString, "[]")
+
+	return trimmedOscalModelString
+}
+
+// checkPropertiesField checks if an OSCAL schema file has a valid 'properties' key-value pair.
+// If the key-value pair is valid, it returns true.
+// If the key-value pair is invalid, it returns false.
+func checkPropertiesField(oscalSchema map[string]interface{}, modelId string) bool {
+	// Check if the 'properties' key is present, and that the value is populated.
+	// Return true if the key is present and populated.
+	if properties, ok := oscalSchema[modelId].(map[string]interface{})["properties"]; ok && properties != nil {
+		return true
+	}
+
+	// Check if the 'properties' key is not present, or if the value is not populated (nil).
+	// Return false if the key is not present, or if the value is not populated.
+	if properties, ok := oscalSchema[modelId].(map[string]interface{})["properties"]; !ok || properties == nil {
+		return false
+	}
+
+	return false
+}
+
+// getPropertiesFieldValue returns the value of the 'properties' field of an OSCAL schema file.
+func getPropertiesFieldValue(oscalSchema map[string]interface{}, modelId string) interface{} {
+	propertiesFieldValue := oscalSchema[modelId].(map[string]interface{})["properties"]
+	return propertiesFieldValue
 }
 
 /*
