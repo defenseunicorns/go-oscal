@@ -9,10 +9,10 @@ import (
 )
 
 const (
-	oscalComponentSchemaFilePath = "../../../testdata/schema/component/oscal_component_schema.json"
-	oscalSSPSchemaFilePath       = "../../../testdata/schema/ssp/oscal_ssp_schema.json"
-	fieldsPresentFilePath        = "../../../testdata/fields-present.json"
-	fieldsMissingFilePath        = "../../../testdata/fields-missing.json"
+	oscalComponentSchemaFilePath string = "../../../testdata/schema/component/oscal_component_schema.json"
+	oscalSSPSchemaFilePath       string = "../../../testdata/schema/ssp/oscal_ssp_schema.json"
+	fieldsPresentFilePath        string = "../../../testdata/fields-present.json"
+	fieldsMissingFilePath        string = "../../../testdata/fields-missing.json"
 )
 
 // TestOscalComponentSchemaVersion tests that the OSCAL Component Definition schema version is correct.
