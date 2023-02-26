@@ -107,7 +107,7 @@ func Generate(oscalSchema map[string]interface{}, pkgName string, tags []string)
 	structString += generateOscalModelStruct(oscalSchema, pkgName, tags)
 
 	// Construct structs for oscal models.
-	structString += generateStruct(modelTypeMap, pkgName)
+	structString += generateStruct(modelTypeMap)
 
 	formattedStruct, err := format.Source([]byte(structString))
 	if err != nil {
@@ -319,28 +319,20 @@ func generateOscalModelStruct(oscalSchema map[string]interface{}, pkgName string
 	return string(formattedStruct)
 }
 
-func generateStruct(structMap map[string][]string, pkgName string) string {
-	existing := make(map[string]bool)
+func generateStruct(structMap map[string][]string) string {
 	var typesString string
 
 	// Begin generation of struct
-	for i, v := range structMap {
-
+	for _, v := range structMap {
 		for index, value := range v {
+			// TODO: If the index is 0, this is where we need to handle duplicate struct names.
 			if index == 0 {
-				_, ok := existing[value]
-				if !ok {
-					typesString += fmt.Sprintf("\ntype %v struct {", value)
-				} else {
-					// Handle duplicate struct names
-					name := strings.Split(i, "_")
-					typesString += fmt.Sprintf("\ntype %v struct {", strings.Trim(name[0], "#")+"_"+value)
-				}
+				typesString += fmt.Sprintf("\ntype %v struct {", value)
 			} else {
 				typesString += fmt.Sprintf("\n\t%s", value)
 			}
 		}
-		typesString += fmt.Sprintf("\n}\n")
+		typesString += "\n}\n"
 	}
 
 	return typesString
@@ -350,14 +342,10 @@ func generateStruct(structMap map[string][]string, pkgName string) string {
 // If the key-value pair is valid, it returns true.
 // If the key-value pair is invalid, it returns false.
 func checkTopLevelRequiredField(oscalSchema map[string]interface{}) bool {
-	// Check if the top-level 'required' key is present, and that the value is populated.
-	// Return true if the key is present and populated.
 	if oscalModelField, ok := oscalSchema["required"]; ok && oscalModelField != nil {
 		return true
 	}
 
-	// Check if the top-level 'required' key is not present, or if the value is not populated (nil).
-	// Return false if the key is not present, or if the value is not populated.
 	if oscalModelField, ok := oscalSchema["required"]; !ok || oscalModelField == nil {
 		return false
 	}
@@ -384,14 +372,10 @@ func convertRequiredFieldInterfaceToString(requiredFieldValue interface{}) strin
 // If the key-value pair is valid, it returns true.
 // If the key-value pair is invalid, it returns false.
 func checkPropertiesField(oscalSchema map[string]interface{}, modelId string) bool {
-	// Check if the 'properties' key is present, and that the value is populated.
-	// Return true if the key is present and populated.
 	if properties, ok := oscalSchema[modelId].(map[string]interface{})["properties"]; ok && properties != nil {
 		return true
 	}
 
-	// Check if the 'properties' key is not present, or if the value is not populated (nil).
-	// Return false if the key is not present, or if the value is not populated.
 	if properties, ok := oscalSchema[modelId].(map[string]interface{})["properties"]; !ok || properties == nil {
 		return false
 	}
