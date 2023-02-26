@@ -523,7 +523,7 @@ func TestGenerateOscalSSPModelStruct(t *testing.T) {
 	}
 }
 
-// sortPropertiesStringsForAssertion converts 'properties' values in an OSCAL schema file
+// preparePropertiesForAssertion converts 'properties' values in an OSCAL schema file
 // to strings and sorts them in alphabetical order for asserting the output against test data.
 func preparePropertiesForAssertion(properties interface{}) string {
 	// Store the properties fields to a string slice and sort it.
