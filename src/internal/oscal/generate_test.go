@@ -18,9 +18,11 @@ const (
 // TestOscalComponentSchemaVersion tests that the OSCAL Component Definition schema version is correct.
 func TestOscalComponentSchemaVersion(t *testing.T) {
 	oscalSchemaVersion := "1.0.4"
+
 	testdata := &BaseFlags{
 		InputFile: oscalComponentSchemaFilePath,
 	}
+
 	oscalMap, err := ParseJson(testdata)
 	if err != nil {
 		t.Fatal(err)
