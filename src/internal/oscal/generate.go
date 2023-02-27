@@ -322,23 +322,20 @@ func handleDuplicateStructNames(existingValueMap map[string]bool, key, value str
 	var i int = 0
 
 	// If the struct name does not already exist, mark it as existing and generate a struct for it.
-	// Else if it does already exist, we need to make the struct name unique to prevent duplicate names.
 	if _, ok := existingValueMap[value]; !ok {
 		existingValueMap[value] = true
 		typesString += fmt.Sprintf("\ntype %s struct {", value)
-	} else {
+	} else if strings.Contains(key, "#assembly") {
 		// If the key for this value contains "#assembly" in the string,
 		// let's use the key itself as the struct name.
-		if strings.Contains(key, "#assembly") {
-			structName := strings.Trim(key, "#")
-			formattedStructName := FmtFieldName(structName)
-			typesString += fmt.Sprintf("\ntype %s struct {", formattedStructName)
-		} else {
-			// In this case, the key is identical to the value,
-			// which means we need to add a unique identifier to the struct name.
-			i++
-			typesString += fmt.Sprintf("\ntype %s%v struct {", key, i)
-		}
+		structName := strings.Trim(key, "#")
+		formattedStructName := FmtFieldName(structName)
+		typesString += fmt.Sprintf("\ntype %s struct {", formattedStructName)
+	} else {
+		// In this case, the key is identical to the value,
+		// which means we need to add a unique identifier to the struct name.
+		i++
+		typesString += fmt.Sprintf("\ntype %s%v struct {", key, i)
 	}
 
 	return typesString
