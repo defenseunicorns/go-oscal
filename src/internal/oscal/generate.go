@@ -200,8 +200,7 @@ func getRequiredFields(obj map[string]interface{}, structId string) map[string]b
 func formatStructTags(obj map[string]interface{}, structId string, key string, tags []string) []string {
 	requiredFields := getRequiredFields(obj, structId)
 
-	tagList := make([]string, 0)
-
+	tagList := []string{}
 	for _, tag := range tags {
 		// If this field is not required, then add omitempty to tag.
 		if _, ok := requiredFields[key]; !ok {
@@ -231,7 +230,7 @@ func buildStructData(prop interface{}, obj map[string]interface{}, structId stri
 				value = "int"
 				structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, value, strings.Join(tagList, " ")))
 			case "array":
-				if ref := v.(map[string]interface{})["items"].(map[string]interface{})["$ref"]; ref != nil {
+				if ref, ok := v.(map[string]interface{})["items"].(map[string]interface{})["$ref"]; ok && ref != nil {
 					objectType := generateModelTypes(obj, ref.(string), strings.Split(ref.(string), "_")[2], tags, modelMap)
 					structData = append(structData, fmt.Sprintf("%s []%s `%s`", valueName, objectType, strings.Join(tagList, " ")))
 				} else {
@@ -244,7 +243,6 @@ func buildStructData(prop interface{}, obj map[string]interface{}, structId stri
 				obj[valueName] = v
 				objectType := generateModelTypes(obj, valueName, valueName, tags, modelMap)
 				structData = append(structData, fmt.Sprintf("%s []%s `%s`", valueName, objectType, strings.Join(tagList, " ")))
-
 			default:
 				fmt.Printf("type not defined: %v", value)
 			}
@@ -266,13 +264,12 @@ func generateModelTypes(obj map[string]interface{}, structId string, structName 
 	}
 
 	// If our data has a properties field - evaluate
-	// else it may be the property itself and we need to get the type
 	if checkPropertiesField(obj, structId) {
-		structData := []string{FmtFieldName(structName)}
 		properties := getPropertiesFieldValue(obj, structId)
-		structData = buildStructData(properties, obj, structId, tags, structData, modelMap)
+		formattedStructName := []string{FmtFieldName(structName)}
+		structData := buildStructData(properties, obj, structId, tags, formattedStructName, modelMap)
 		modelMap[structId] = structData
-
+		// else it may be the property itself and we need to get the type
 	} else if objType, ok := obj[structId].(map[string]interface{})["type"]; ok && objType != nil {
 		switch value := objType.(string); value {
 		case "string":
@@ -301,7 +298,7 @@ func generateOscalModelStruct(oscalSchema map[string]interface{}, pkgName string
 	formattedOscalModelName := FmtFieldName(oscalModelName)
 
 	// Format struct tags.
-	tagList := make([]string, 0)
+	tagList := []string{}
 	for _, tag := range tags {
 		tagList = append(tagList, fmt.Sprintf("%s:\"%s\"", tag, oscalModelName))
 	}
@@ -319,15 +316,43 @@ func generateOscalModelStruct(oscalSchema map[string]interface{}, pkgName string
 	return string(formattedStruct)
 }
 
+// handleDuplicateStructNames ensures we do not generate structs with duplicate struct names.
+func handleDuplicateStructNames(existingValueMap map[string]bool, key, value string) string {
+	var typesString string
+	var i int = 0
+
+	// If the struct name does not already exist, mark it as existing and generate a struct for it.
+	// Else if it does already exist, we need to make the struct name unique to prevent duplicate names.
+	if _, ok := existingValueMap[value]; !ok {
+		existingValueMap[value] = true
+		typesString += fmt.Sprintf("\ntype %s struct {", value)
+	} else {
+		// If the key for this value contains "#assembly" in the string,
+		// let's use the key itself as the struct name.
+		if strings.Contains(key, "#assembly") {
+			structName := strings.Trim(key, "#")
+			formattedStructName := FmtFieldName(structName)
+			typesString += fmt.Sprintf("\ntype %s struct {", formattedStructName)
+		} else {
+			// In this case, the key is identical to the value,
+			// which means we need to add a unique identifier to the struct name.
+			i++
+			typesString += fmt.Sprintf("\ntype %s%v struct {", key, i)
+		}
+	}
+
+	return typesString
+}
+
 func generateStruct(structMap map[string][]string) string {
 	var typesString string
+	existingValueMap := map[string]bool{}
 
 	// Begin generation of struct
-	for _, v := range structMap {
+	for k, v := range structMap {
 		for index, value := range v {
-			// TODO: If the index is 0, this is where we need to handle duplicate struct names.
 			if index == 0 {
-				typesString += fmt.Sprintf("\ntype %v struct {", value)
+				typesString += handleDuplicateStructNames(existingValueMap, k, value)
 			} else {
 				typesString += fmt.Sprintf("\n\t%s", value)
 			}

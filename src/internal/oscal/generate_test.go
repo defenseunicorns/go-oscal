@@ -523,6 +523,42 @@ func TestGenerateOscalSSPModelStruct(t *testing.T) {
 	}
 }
 
+// TestHandleDuplicateStructNamesWithAssemblyKey tests that we can handle duplicate struct names correctly when map keys begin with #assembly.
+func TestHandleDuplicateStructNamesWithAssemblyKey(t *testing.T) {
+	existingValueMap := map[string]bool{}
+
+	// Populate the map with a random value to test against.
+	existingValueMap["RandomValue"] = true
+
+	// The fake data we're passing in mocks a map key that begins with #assembly,
+	// and a map value (RandomValue) that already exists, so we're expecting the handleDuplicateStructNames() function
+	// to format the map key and use it as the struct name.
+	expected := fmt.Sprintf("\ntype %s struct {", "AssemblyTestDataRandom")
+	actual := handleDuplicateStructNames(existingValueMap, "#assembly_test-data_random", "RandomValue")
+
+	if expected != actual {
+		t.Fatalf("error handleDuplicateStructNames():\nexpected:%s\n\ngot: %s", expected, actual)
+	}
+}
+
+// TestHandleDuplicateStructNamesWithIdenticalKeyValue tests that we can handle duplicate struct names correctly when a map key is identical to its value.
+func TestHandleDuplicateStructNamesWithIdenticalKeyValue(t *testing.T) {
+	existingValueMap := map[string]bool{}
+
+	// Populate the map with a random value to test against.
+	existingValueMap["RandomValue"] = true
+
+	// The fake data we're passing in mocks a map key that is identical to its value,
+	// so the key and value is RandomValue, which already exists, so we're expecting the handleDuplicateStructNames() function
+	// to append a number to the value as a unique identifier.
+	expected := fmt.Sprintf("\ntype %s struct {", "RandomValue1")
+	actual := handleDuplicateStructNames(existingValueMap, "RandomValue", "RandomValue")
+
+	if expected != actual {
+		t.Fatalf("error handleDuplicateStructNames():\nexpected:%s\n\ngot: %s", expected, actual)
+	}
+}
+
 // preparePropertiesForAssertion converts 'properties' values in an OSCAL schema file
 // to strings and sorts them in alphabetical order for asserting the output against test data.
 func preparePropertiesForAssertion(properties interface{}) string {
