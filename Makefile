@@ -9,6 +9,8 @@ SHELL := bash
 BINDIR       := $(CURDIR)/bin
 BINNAME      ?= go-oscal
 INSTALL_PATH ?= /usr/local/bin
+OSCAL_COMPONENT_SCHEMA_FILE := testdata/schema/component/oscal_component_schema.json
+OSCAL_SSP_SCHEMA_FILE := testdata/schema/ssp/oscal_ssp_schema.json
 
 # Git vars
 GIT_COMMIT = $(shell git rev-parse HEAD)
@@ -38,7 +40,7 @@ SRC := $(shell find . -type f -name '*.go' -print) go.mod go.sum
 #//////////////////////////////////////////////////////////////////////////////
 #
 .PHONY: all
-all: clean build test generate-file
+all: clean build test generate-compdef-stdout generate-ssp-stdout
 
 .PHONY: help
 help: ## Show this help message.
@@ -58,21 +60,25 @@ build: $(BINDIR)/$(BINNAME) ## Build the project.
 $(BINDIR)/$(BINNAME): $(SRC)
 	CGO_ENABLED=$(CGO_ENABLED) go build $(GOFLAGS) -trimpath -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o '$(BINDIR)/$(BINNAME)' .
 
-.PHONY: generate-file
-generate-file: clean build ## Generate Go structs from OSCAL JSON schema and output to 'internal/oscal/types.go'
-	$(BINDIR)/$(BINNAME) --input-file test/oscal_component_schema.json --output-file types.go --tags json,yaml
+.PHONY: generate-compdef-stdout
+generate-compdef-stdout: clean build ## Generate Go structs from OSCAL component-definition JSON schema and outputs to stdout.
+	$(BINDIR)/$(BINNAME) -f $(OSCAL_COMPONENT_SCHEMA_FILE) --pkg componentDefinition --tags json,yaml
 
-.PHONY: generate-stdout
-generate-stdout: clean build ## Generate Go structs from OSCAL JSON schema and output to stdout
-	$(BINDIR)/$(BINNAME) --input-file test/oscal_component_schema.json --tags json,yaml
+.PHONY: generate-ssp-stdout
+generate-ssp-stdout: clean build ## Generate Go structs from OSCAL system-security-plan JSON schema and outputs to stdout.
+	$(BINDIR)/$(BINNAME) -f $(OSCAL_SSP_SCHEMA_FILE) --pkg ssp --tags json,yaml
 
 .PHONY: test
 test: build ## Run automated tests.
 	go test $(GOFLAGS) -run $(TESTS) $(PKG) $(TESTFLAGS)
 
-.PHONY: run-main
-run-main: ## useful for running the main.go file without having to compile
-	go run main.go --input-file test/oscal_component_schema.json --tags json,yaml
+.PHONY: run-main-compdef
+run-main-compdef: ## useful for running the main.go file without having to compile
+	go run main.go -f $(OSCAL_COMPONENT_SCHEMA_FILE) --tags json,yaml
+
+.PHONY: run-main-ssp
+run-main-ssp: ## useful for running the main.go file without having to compile
+	go run main.go -f $(OSCAL_SSP_SCHEMA_FILE) --tags json,yaml
 
 .PHONY: install
 install: ## Install binary to $INSTALL_PATH.
