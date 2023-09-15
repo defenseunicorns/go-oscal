@@ -41,18 +41,31 @@ func init() {
 }
 
 func run() error {
-	oscalMap, err := oscal.ParseJson(opts)
+
+	// Remove the transfer of objects across packages
+	// aggregate file IO to root
+
+	bytes, err := os.ReadFile(opts.InputFile)
 	if err != nil {
 		return err
 	}
 
+	// oscalMap, err := oscal.ParseJson(opts)
+	// if err != nil {
+	// 	return err
+	// }
+
 	tagList := formatTags()
 
 	// Generate the Go structs.
-	output := generateStructs(oscalMap, opts.Pkg, tagList)
-
+	output, err := oscal.Generate(bytes, opts.Pkg, tagList)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "error parsing", err)
+		os.Exit(1)
+	}
+	fmt.Print(string(output))
 	// Write the Go struct output to either stdout or a file.
-	writeOutput(output)
+	// writeOutput(output)
 
 	return nil
 }
@@ -63,17 +76,6 @@ func formatTags() (tagList []string) {
 		tagList = append(tagList, "json")
 	} else {
 		tagList = strings.Split(opts.Tags, ",")
-	}
-
-	return
-}
-
-// generateStructs reads input and generates Go structs from a OSCAL JSON schema file.
-func generateStructs(oscalMap map[string]interface{}, pkg string, tagList []string) (output []byte) {
-	output, err := oscal.Generate(oscalMap, pkg, tagList)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "error parsing", err)
-		os.Exit(1)
 	}
 
 	return

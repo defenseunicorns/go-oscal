@@ -1,13 +1,13 @@
 package oscal
 
 import (
-	"encoding/json"
 	"fmt"
-	"go/format"
 	"os"
 	"strconv"
 	"strings"
 	"unicode"
+
+	"github.com/swaggest/jsonschema-go"
 )
 
 // BaseFlags represents command-line flags for the base go-oscal command.
@@ -87,89 +87,80 @@ var intToWordMap = []string{
 }
 
 // Generate a struct definition given a JSON string representation of an object.
-func Generate(oscalSchema map[string]interface{}, pkgName string, tags []string) ([]byte, error) {
-	oscalModel := getOscalModel(oscalSchema)
+func Generate(oscalSchema []byte, pkgName string, tags []string) ([]byte, error) {
 
-	modelId := setOscalModelRef(oscalModel)
+	// unmarshall to the schema object
+	schema := jsonschema.Schema{}
+	schema.UnmarshalJSON(oscalSchema)
 
-	// Generate a map with unique Id as key and existing interface as value
-	idMap := generateUniqueIdMap(oscalSchema)
-
-	// Instantiate variable for storing the data
-	modelTypeMap := make(map[string][]string)
-
-	generateModelTypes(idMap, modelId, strings.Split(modelId, "_")[2], tags, modelTypeMap)
-
-	// Construct header comment and package name.
-	structString := fmt.Sprintf("%s\n\npackage %s\n", headerComment, pkgName)
-
-	// Construct top-level OscalModel struct.
-	structString += generateOscalModelStruct(oscalSchema, pkgName, tags)
-
-	// Construct structs for oscal models.
-	structString += generateStruct(modelTypeMap)
-
-	formattedStruct, err := format.Source([]byte(structString))
-	if err != nil {
-		err = fmt.Errorf("error formatting: %s, was formatting\n%s", err, structString)
-		return nil, err
-	}
-
-	return formattedStruct, nil
-}
-
-/*
-ParseJson reads a user-provided oscal json schema file as input,
-stores it to a map[string]interface{} pointer,
-and returns the map[string]interface{}.
-*/
-func ParseJson(opts *BaseFlags) (map[string]interface{}, error) {
-	oscalMap := map[string]interface{}{}
-
-	bytes, err := os.ReadFile(opts.InputFile)
+	// Identify the OSCAL model under generation
+	model, err := getOscalModel(schema.Required)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := json.Unmarshal(bytes, &oscalMap); err != nil {
+	fmt.Printf("oscalModel = %s\n", model)
+	// Get the $id for the OSCAL model under generation
+	modelId, err := setOscalModelRef(model)
+	if err != nil {
 		return nil, err
 	}
 
-	return oscalMap, nil
+	// // Generate a map with unique Id as key and existing interface as value
+	// idMap := generateUniqueIdMap(oscalSchema)
+
+	// // Instantiate variable for storing the data
+	// modelTypeMap := make(map[string][]string)
+
+	// generateModelTypes(idMap, modelId, strings.Split(modelId, "_")[2], tags, modelTypeMap)
+
+	// // Construct header comment and package name.
+	// structString := fmt.Sprintf("%s\n\npackage %s\n", headerComment, pkgName)
+
+	// // Construct top-level OscalModel struct.
+	// structString += generateOscalModelStruct(oscalSchema, pkgName, tags)
+
+	// // Construct structs for oscal models.
+	// structString += generateStruct(modelTypeMap)
+
+	// formattedStruct, err := format.Source([]byte(structString))
+	// if err != nil {
+	// 	err = fmt.Errorf("error formatting: %s, was formatting\n%s", err, structString)
+	// 	return nil, err
+	// }
+
+	return nil, nil
+	// return formattedStruct, nil
 }
 
 // setOscalModelRef determines which OSCAL model $ref to use based on the model name.
-func setOscalModelRef(oscalModel string) string {
+func setOscalModelRef(oscalModel string) (string, error) {
 	// Check which OSCAL model we're working with, and set the $ref accordingly.
-	switch oscalModel {
-	case "system-security-plan":
-		oscalModelRef := "#assembly_oscal-ssp_system-security-plan"
-		return oscalModelRef
-	case "component-definition":
-		oscalModelRef := "#assembly_oscal-component-definition_component-definition"
-		return oscalModelRef
-	default:
-		fmt.Println("Unsupported OSCAL model. Currently supported OSCAL models are Component Definition and System Security Plan.")
-		os.Exit(1)
+	if oscalModel == "system-security-plan" {
+		return "#assembly_oscal-ssp_system-security-plan", nil
 	}
 
-	return ""
+	if oscalModel == "component-definition" {
+		return "#assembly_oscal-component-definition_component-definition", nil
+	}
+
+	return "", fmt.Errorf("Unsupported OSCAL model. Currently supported OSCAL models are Component Definition and System Security Plan.")
 }
 
 // getOscalModel determines which OSCAL model we're working with.
-func getOscalModel(oscalSchema map[string]interface{}) string {
-	if checkTopLevelRequiredField(oscalSchema) {
-		requiredFieldValue := getRequiredFieldValue(oscalSchema)
-		oscalModel := convertRequiredFieldInterfaceToString(requiredFieldValue)
-		return oscalModel
-	} else {
-		fmt.Println("Top-level 'required' field not found or is not populated. Please verify the OSCAL JSON schema file is valid.")
-		os.Exit(1)
+func getOscalModel(required []string) (string, error) {
+	// error if more than one required field - not supported
+	if len(required) > 1 {
+		return "", fmt.Errorf("Processing more than one model is unsupported")
+	}
+	if len(required) == 1 {
+		return required[0], nil
 	}
 
-	return ""
+	return "", fmt.Errorf("Top-level 'required' field not found or is not populated. Please verify the OSCAL JSON schema file is valid.")
 }
 
+// TODO: move to jsonschema.schema and create map from ID / schema type?
 func generateUniqueIdMap(obj map[string]interface{}) map[string]interface{} {
 	result := make(map[string]interface{})
 
@@ -290,31 +281,31 @@ func generateModelTypes(obj map[string]interface{}, structId string, structName 
 	return formattedStructName
 }
 
-// generateOscalModelStruct generates the top-level struct for OSCAL data models.
-func generateOscalModelStruct(oscalSchema map[string]interface{}, pkgName string, tags []string) string {
-	oscalModelName := getOscalModel(oscalSchema)
+// // generateOscalModelStruct generates the top-level struct for OSCAL data models.
+// func generateOscalModelStruct(oscalSchema map[string]interface{}, pkgName string, tags []string) string {
+// 	oscalModelName := getOscalModel(oscalSchema)
 
-	// Example: Format the string from 'oscal-model' to 'OscalModel'.
-	formattedOscalModelName := FmtFieldName(oscalModelName)
+// 	// Example: Format the string from 'oscal-model' to 'OscalModel'.
+// 	formattedOscalModelName := FmtFieldName(oscalModelName)
 
-	// Format struct tags.
-	tagList := []string{}
-	for _, tag := range tags {
-		tagList = append(tagList, fmt.Sprintf("%s:\"%s\"", tag, oscalModelName))
-	}
+// 	// Format struct tags.
+// 	tagList := []string{}
+// 	for _, tag := range tags {
+// 		tagList = append(tagList, fmt.Sprintf("%s:\"%s\"", tag, oscalModelName))
+// 	}
 
-	// Construct the struct string.
-	structString := fmt.Sprintf("type Oscal%sModel struct {\n\t%s %s `%s`\n}\n", formattedOscalModelName, formattedOscalModelName, formattedOscalModelName, strings.Join(tagList, " "))
+// 	// Construct the struct string.
+// 	structString := fmt.Sprintf("type Oscal%sModel struct {\n\t%s %s `%s`\n}\n", formattedOscalModelName, formattedOscalModelName, formattedOscalModelName, strings.Join(tagList, " "))
 
-	// Format the Go struct.
-	formattedStruct, err := format.Source([]byte(structString))
-	if err != nil {
-		fmt.Printf("error formatting:\n%s", structString)
-		os.Exit(1)
-	}
+// 	// Format the Go struct.
+// 	formattedStruct, err := format.Source([]byte(structString))
+// 	if err != nil {
+// 		fmt.Printf("error formatting:\n%s", structString)
+// 		os.Exit(1)
+// 	}
 
-	return string(formattedStruct)
-}
+// 	return string(formattedStruct)
+// }
 
 // handleDuplicateStructNames ensures we do not generate structs with duplicate struct names.
 func handleDuplicateStructNames(existingValueMap map[string]bool, key, value string) string {
@@ -377,6 +368,7 @@ func checkTopLevelRequiredField(oscalSchema map[string]interface{}) bool {
 
 // getRequiredFieldValue returns the value of the top-level 'required' field of an OSCAL schema file.
 func getRequiredFieldValue(oscalSchema map[string]interface{}) interface{} {
+
 	requiredFieldValue := oscalSchema["required"]
 	return requiredFieldValue
 }
