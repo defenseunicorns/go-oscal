@@ -37,7 +37,7 @@ func init() {
 	rootCmd.Flags().StringVarP(&opts.InputFile, "input-file", "f", "", "the path to a oscal json schema file")
 	rootCmd.Flags().StringVarP(&opts.OutputFile, "output-file", "o", "", "the name of the file to write the output to (outputs to STDOUT by default)")
 	rootCmd.Flags().StringVarP(&opts.Pkg, "pkg", "p", "main", "the name of the package for the generated code")
-	rootCmd.Flags().StringVarP(&opts.Tags, "tags", "t", "json", "comma seperated list of the tags to put on the struct")
+	rootCmd.Flags().StringVarP(&opts.Tags, "tags", "t", "json", "comma separated list of the tags to put on the struct")
 }
 
 func run() error {

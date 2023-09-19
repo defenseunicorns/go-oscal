@@ -264,11 +264,13 @@ func buildStructData(prop map[string]jsonschema.SchemaOrBool, obj map[string]jso
 
 					// if array and no ref populated - check for items
 					if items := v.TypeObject.Items.SchemaOrBool; items != nil {
+						singular := *v.TypeObject.Items.SchemaOrBool.TypeObject.Title
 						obj[valueName] = *v.TypeObject.Items.SchemaOrBool
-						objectType, err := generateModelTypes(obj, valueName, valueName, tags, modelMap)
+						objectType, err := generateModelTypes(obj, valueName, singular, tags, modelMap)
 						if err != nil {
 							return nil, err
 						}
+						fmt.Printf("valuename: %s / objectType: %s\n", valueName, objectType)
 						structData = append(structData, fmt.Sprintf("%s []%s `%s`", valueName, objectType, strings.Join(tagList, " ")))
 					} else {
 						// TODO: Convert this to an error as data will be missing - identify what primary key was the issue
