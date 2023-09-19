@@ -2,7 +2,7 @@ package oscal
 
 import (
 	"fmt"
-	"os"
+	// "os"
 	"strconv"
 	"strings"
 	"unicode"
@@ -106,13 +106,29 @@ func Generate(oscalSchema []byte, pkgName string, tags []string) ([]byte, error)
 		return nil, err
 	}
 
-	// // Generate a map with unique Id as key and existing interface as value
-	// idMap := generateUniqueIdMap(oscalSchema)
+	// Generate a map with unique Id as key and existing interface as value
+	idMap, err := generateUniqueIdMap(schema)
+	if err != nil {
+		return nil, err
+	}
 
-	// // Instantiate variable for storing the data
-	// modelTypeMap := make(map[string][]string)
+	fmt.Println(modelId)
+	//fmt.Println(idMap)
 
-	// generateModelTypes(idMap, modelId, strings.Split(modelId, "_")[2], tags, modelTypeMap)
+	// for i, v := range idMap {
+	// 	// fmt.Printf("%s / %s\n", i, v)
+	// 	fmt.Println(i)
+	// 	if v.TypeObject.Properties != nil {
+	// 		fmt.Println(v.TypeObject.Properties)
+	// 	}
+	// }
+
+	// Instantiate variable for storing the data
+	modelTypeMap := make(map[string][]string)
+
+	generateModelTypes(idMap, modelId, strings.Split(modelId, "_")[2], tags, modelTypeMap)
+
+	fmt.Println(modelTypeMap)
 
 	// // Construct header comment and package name.
 	// structString := fmt.Sprintf("%s\n\npackage %s\n", headerComment, pkgName)
@@ -160,27 +176,33 @@ func getOscalModel(required []string) (string, error) {
 	return "", fmt.Errorf("Top-level 'required' field not found or is not populated. Please verify the OSCAL JSON schema file is valid.")
 }
 
-// TODO: move to jsonschema.schema and create map from ID / schema type?
-func generateUniqueIdMap(obj map[string]interface{}) map[string]interface{} {
-	result := make(map[string]interface{})
+// TODO: Look into full definition naming when processing multiple schemas - unsupported at this time
+// create a map with $id primary keys and the object values
+func generateUniqueIdMap(schema jsonschema.Schema) (map[string]jsonschema.SchemaOrBool, error) {
+	result := make(map[string]jsonschema.SchemaOrBool)
 
-	if definitions, ok := obj["definitions"].(map[string]interface{}); ok && definitions != nil {
-		for _, val := range definitions {
-			result[val.(map[string]interface{})["$id"].(string)] = val
+	for definition, item := range schema.Definitions {
+		if strings.Contains(definition, "Datatype") {
+			result["#/definitions/"+definition] = item
+		} else if definition == "json-schema-definition" {
+			// Skipping - TODO: determine relevance in the golang structs
+			continue
+		} else {
+			result[*item.TypeObject.ID] = item
 		}
 
 	}
 
-	return result
+	return result, nil
 }
 
 // getRequiredFields collects the required fields in each OSCAL model definition.
-func getRequiredFields(obj map[string]interface{}, structId string) map[string]bool {
+func getRequiredFields(obj map[string]jsonschema.SchemaOrBool, structId string) map[string]bool {
 	requiredFields := make(map[string]bool)
 
-	if required, ok := obj[structId].(map[string]interface{})["required"]; ok && required != nil {
-		for _, v := range required.([]interface{}) {
-			requiredFields[v.(string)] = true
+	if required := obj[structId].TypeObject.Required; required != nil {
+		for _, v := range required {
+			requiredFields[v] = true
 		}
 	}
 
@@ -188,7 +210,7 @@ func getRequiredFields(obj map[string]interface{}, structId string) map[string]b
 }
 
 // formatStructTags formats Go struct tags.
-func formatStructTags(obj map[string]interface{}, structId string, key string, tags []string) []string {
+func formatStructTags(obj map[string]jsonschema.SchemaOrBool, structId string, key string, tags []string) []string {
 	requiredFields := getRequiredFields(obj, structId)
 
 	tagList := []string{}
@@ -206,13 +228,38 @@ func formatStructTags(obj map[string]interface{}, structId string, key string, t
 
 // buildStructData loops through "properties" fields
 // and constructs data for Go structs.
-func buildStructData(prop interface{}, obj map[string]interface{}, structId string, tags []string, structData []string, modelMap map[string][]string) []string {
-	for k, v := range prop.(map[string]interface{}) {
+
+// TODO: UNDER CONSTRUCTION
+func buildStructData(prop map[string]jsonschema.SchemaOrBool, obj map[string]jsonschema.SchemaOrBool, structId string, tags []string, structData []string, modelMap map[string][]string) ([]string, error) {
+	for k, v := range prop {
+
+		// // Only modified the above soo far
+
+		// fmt.Println(k)
+
+		// // If a type identifier is present
+		// if v.TypeObject.Type != nil {
+		// 	simple, err := v.ToSimpleMap()
+		// 	if err != nil {
+		// 		return nil, err
+		// 	}
+
+		// 	fmt.Printf("\tType: %s\n", simple["type"].(string))
+		// 	fmt.Println(*v.TypeObject.Items.SchemaOrBool.TypeObject.Ref)
+		// }
+		fmt.Println(k)
+
+		simple, err := v.ToSimpleMap()
+
+		if err != nil {
+			return nil, err
+		}
+		fmt.Println(simple)
 		valueName := FmtFieldName(k)
 		tagList := formatStructTags(obj, structId, k, tags)
 
-		if valueType, ok := v.(map[string]interface{})["type"]; ok && valueType != nil {
-			switch value := valueType.(string); value {
+		if v.TypeObject.Type != nil {
+			switch value := simple["type"].(string); value {
 			case "string":
 				structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, value, strings.Join(tagList, " ")))
 			case "bool":
@@ -221,67 +268,130 @@ func buildStructData(prop interface{}, obj map[string]interface{}, structId stri
 				value = "int"
 				structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, value, strings.Join(tagList, " ")))
 			case "array":
-				if ref, ok := v.(map[string]interface{})["items"].(map[string]interface{})["$ref"]; ok && ref != nil {
-					objectType := generateModelTypes(obj, ref.(string), strings.Split(ref.(string), "_")[2], tags, modelMap)
+				fmt.Println("type is an array - check for ref then items")
+				if ref := v.TypeObject.Items.SchemaOrBool.TypeObject.Ref; ref != nil {
+					fmt.Printf("ref: %s", *ref)
+					fmt.Println(v.ToSimpleMap()``)
+					var objectType string
+					if strings.Contains(*ref, "Datatype") {
+						objectType, err = generateModelTypes(obj, *ref, strings.Split(*ref, "/")[2], tags, modelMap)
+						if err != nil {
+							return nil, err
+						}
+					} else {
+						objectType, err = generateModelTypes(obj, *ref, strings.Split(*ref, "_")[2], tags, modelMap)
+						if err != nil {
+							return nil, err
+						}
+					}
+
 					structData = append(structData, fmt.Sprintf("%s []%s `%s`", valueName, objectType, strings.Join(tagList, " ")))
 				} else {
 					// If there is no $ref - then we must be attempting to determine type without a ref
-					obj[valueName] = v.(map[string]interface{})["items"]
-					objectType := generateModelTypes(obj, valueName, valueName, tags, modelMap)
+					// Could be an array of items
+					fmt.Println("no ref for array - getting items ")
+
+					fmt.Println()
+					fmt.Println()
+					fmt.Println()
+					obj[valueName] = *v.TypeObject.Items.SchemaOrBool
+					objectType, err := generateModelTypes(obj, valueName, valueName, tags, modelMap)
+					if err != nil {
+						return nil, err
+					}
 					structData = append(structData, fmt.Sprintf("%s []%s `%s`", valueName, objectType, strings.Join(tagList, " ")))
+
 				}
 			case "object":
 				obj[valueName] = v
-				objectType := generateModelTypes(obj, valueName, valueName, tags, modelMap)
+				objectType, err := generateModelTypes(obj, valueName, valueName, tags, modelMap)
+				if err != nil {
+					return nil, err
+				}
 				structData = append(structData, fmt.Sprintf("%s []%s `%s`", valueName, objectType, strings.Join(tagList, " ")))
 			default:
 				fmt.Printf("type not defined: %v", value)
 			}
-		} else if ref := v.(map[string]interface{})["$ref"]; ref != nil {
-			objectType := generateModelTypes(obj, ref.(string), strings.Split(ref.(string), "_")[2], tags, modelMap)
+		} else if ref := *v.TypeObject.Ref; ref != "" {
+			var objectType string
+			if strings.Contains(ref, "Datatype") {
+				objectType, err = generateModelTypes(obj, ref, strings.Split(ref, "/")[2], tags, modelMap)
+				if err != nil {
+					return nil, err
+				}
+			} else {
+				objectType, err = generateModelTypes(obj, ref, strings.Split(ref, "_")[2], tags, modelMap)
+				if err != nil {
+					return nil, err
+				}
+			}
 			structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, objectType, strings.Join(tagList, " ")))
 		} else {
 			fmt.Printf("no type or ref for: %v", v)
 		}
 	}
 
-	return structData
+	return structData, nil
 }
 
-func generateModelTypes(obj map[string]interface{}, structId string, structName string, tags []string, modelMap map[string][]string) string {
+func generateModelTypes(obj map[string]jsonschema.SchemaOrBool, structId string, structName string, tags []string, modelMap map[string][]string) (string, error) {
 	// use structId to search for existing data in modelMap
 	if mapId, ok := modelMap[structId]; ok && mapId != nil {
-		return modelMap[structId][0]
+		return modelMap[structId][0], nil
 	}
 
-	// If our data has a properties field - evaluate
-	if checkPropertiesField(obj, structId) {
-		properties := getPropertiesFieldValue(obj, structId)
+	// If the object has properties
+	if obj[structId].TypeObject.Properties != nil {
+		properties := obj[structId].TypeObject.Properties
 		formattedStructName := []string{FmtFieldName(structName)}
-		structData := buildStructData(properties, obj, structId, tags, formattedStructName, modelMap)
+		structData, err := buildStructData(properties, obj, structId, tags, formattedStructName, modelMap)
+		if err != nil {
+			return "", err
+		}
 		modelMap[structId] = structData
-		// else it may be the property itself and we need to get the type
-	} else if objType, ok := obj[structId].(map[string]interface{})["type"]; ok && objType != nil {
-		switch value := objType.(string); value {
+	} else if objType := obj[structId].TypeObject.Type; objType != nil {
+		simple, err := obj[structId].ToSimpleMap()
+		if err != nil {
+			return "", err
+		}
+		switch value := simple["type"].(string); value {
 		case "string":
-			return "string"
+			return "string", nil
 		case "bool":
-			return "bool"
+			return "bool", nil
 		case "array":
-			return "array"
+			return "array", nil
 		default:
 			fmt.Printf("type not defined: %v", value)
 		}
+	} else if ref := obj[structId].TypeObject.Ref; ref != nil {
+
+		// TODO: Build a stub here for what will need to become the definition of datatypes
+		reference, err := obj[*ref].ToSimpleMap()
+		if err != nil {
+			return "", err
+		}
+		switch value := reference["type"].(string); value {
+		case "string":
+			return "string", nil
+		case "bool":
+			return "bool", nil
+		case "array":
+			return "array", nil
+		default:
+			fmt.Printf("type not defined: %v", value)
+		}
+
 	} else {
 		fmt.Println("did not find properties or type")
 	}
 
 	formattedStructName := FmtFieldName(structName)
 
-	return formattedStructName
+	return formattedStructName, nil
 }
 
-// // generateOscalModelStruct generates the top-level struct for OSCAL data models.
+// generateOscalModelStruct generates the top-level struct for OSCAL data models.
 // func generateOscalModelStruct(oscalSchema map[string]interface{}, pkgName string, tags []string) string {
 // 	oscalModelName := getOscalModel(oscalSchema)
 
