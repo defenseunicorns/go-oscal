@@ -271,7 +271,7 @@ func buildStructData(prop map[string]jsonschema.SchemaOrBool, obj map[string]jso
 				fmt.Println("type is an array - check for ref then items")
 				if ref := v.TypeObject.Items.SchemaOrBool.TypeObject.Ref; ref != nil {
 					fmt.Printf("ref: %s", *ref)
-					fmt.Println(v.ToSimpleMap()``)
+					fmt.Println(v.ToSimpleMap())
 					var objectType string
 					if strings.Contains(*ref, "Datatype") {
 						objectType, err = generateModelTypes(obj, *ref, strings.Split(*ref, "/")[2], tags, modelMap)
