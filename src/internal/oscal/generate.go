@@ -3,6 +3,7 @@ package oscal
 import (
 	"fmt"
 	// "os"
+	"go/format"
 	"strconv"
 	"strings"
 	"unicode"
@@ -112,41 +113,31 @@ func Generate(oscalSchema []byte, pkgName string, tags []string) ([]byte, error)
 		return nil, err
 	}
 
-	fmt.Println(modelId)
-	//fmt.Println(idMap)
-
-	// for i, v := range idMap {
-	// 	// fmt.Printf("%s / %s\n", i, v)
-	// 	fmt.Println(i)
-	// 	if v.TypeObject.Properties != nil {
-	// 		fmt.Println(v.TypeObject.Properties)
-	// 	}
-	// }
-
 	// Instantiate variable for storing the data
 	modelTypeMap := make(map[string][]string)
 
 	generateModelTypes(idMap, modelId, strings.Split(modelId, "_")[2], tags, modelTypeMap)
 
-	fmt.Println(modelTypeMap)
+	// Construct header comment and package name.
+	structString := fmt.Sprintf("%s\n\npackage %s\n", headerComment, pkgName)
 
-	// // Construct header comment and package name.
-	// structString := fmt.Sprintf("%s\n\npackage %s\n", headerComment, pkgName)
+	// Construct top-level OscalModel struct.
+	toplevel, err := generateOscalModelStruct(model, pkgName, tags)
+	if err != nil {
+		return nil, err
+	}
+	structString += toplevel
 
-	// // Construct top-level OscalModel struct.
-	// structString += generateOscalModelStruct(oscalSchema, pkgName, tags)
+	// Construct structs for oscal models.
+	structString += generateStruct(modelTypeMap)
 
-	// // Construct structs for oscal models.
-	// structString += generateStruct(modelTypeMap)
+	formattedStruct, err := format.Source([]byte(structString))
+	if err != nil {
+		err = fmt.Errorf("error formatting: %s, was formatting\n%s", err, structString)
+		return nil, err
+	}
 
-	// formattedStruct, err := format.Source([]byte(structString))
-	// if err != nil {
-	// 	err = fmt.Errorf("error formatting: %s, was formatting\n%s", err, structString)
-	// 	return nil, err
-	// }
-
-	return nil, nil
-	// return formattedStruct, nil
+	return formattedStruct, nil
 }
 
 // setOscalModelRef determines which OSCAL model $ref to use based on the model name.
@@ -233,28 +224,11 @@ func formatStructTags(obj map[string]jsonschema.SchemaOrBool, structId string, k
 func buildStructData(prop map[string]jsonschema.SchemaOrBool, obj map[string]jsonschema.SchemaOrBool, structId string, tags []string, structData []string, modelMap map[string][]string) ([]string, error) {
 	for k, v := range prop {
 
-		// // Only modified the above soo far
-
-		// fmt.Println(k)
-
-		// // If a type identifier is present
-		// if v.TypeObject.Type != nil {
-		// 	simple, err := v.ToSimpleMap()
-		// 	if err != nil {
-		// 		return nil, err
-		// 	}
-
-		// 	fmt.Printf("\tType: %s\n", simple["type"].(string))
-		// 	fmt.Println(*v.TypeObject.Items.SchemaOrBool.TypeObject.Ref)
-		// }
-		fmt.Println(k)
-
 		simple, err := v.ToSimpleMap()
 
 		if err != nil {
 			return nil, err
 		}
-		fmt.Println(simple)
 		valueName := FmtFieldName(k)
 		tagList := formatStructTags(obj, structId, k, tags)
 
@@ -268,10 +242,8 @@ func buildStructData(prop map[string]jsonschema.SchemaOrBool, obj map[string]jso
 				value = "int"
 				structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, value, strings.Join(tagList, " ")))
 			case "array":
-				fmt.Println("type is an array - check for ref then items")
+				// If type array and ref is populated
 				if ref := v.TypeObject.Items.SchemaOrBool.TypeObject.Ref; ref != nil {
-					fmt.Printf("ref: %s", *ref)
-					fmt.Println(v.ToSimpleMap())
 					var objectType string
 					if strings.Contains(*ref, "Datatype") {
 						objectType, err = generateModelTypes(obj, *ref, strings.Split(*ref, "/")[2], tags, modelMap)
@@ -287,19 +259,21 @@ func buildStructData(prop map[string]jsonschema.SchemaOrBool, obj map[string]jso
 
 					structData = append(structData, fmt.Sprintf("%s []%s `%s`", valueName, objectType, strings.Join(tagList, " ")))
 				} else {
-					// If there is no $ref - then we must be attempting to determine type without a ref
-					// Could be an array of items
-					fmt.Println("no ref for array - getting items ")
+					// Could be an array of items or anyof/allof
+					// TODO: Are these mutually exclusive?
 
-					fmt.Println()
-					fmt.Println()
-					fmt.Println()
-					obj[valueName] = *v.TypeObject.Items.SchemaOrBool
-					objectType, err := generateModelTypes(obj, valueName, valueName, tags, modelMap)
-					if err != nil {
-						return nil, err
+					// if array and no ref populated - check for items
+					if items := v.TypeObject.Items.SchemaOrBool; items != nil {
+						obj[valueName] = *v.TypeObject.Items.SchemaOrBool
+						objectType, err := generateModelTypes(obj, valueName, valueName, tags, modelMap)
+						if err != nil {
+							return nil, err
+						}
+						structData = append(structData, fmt.Sprintf("%s []%s `%s`", valueName, objectType, strings.Join(tagList, " ")))
+					} else {
+						// TODO: Convert this to an error as data will be missing - identify what primary key was the issue
+						fmt.Println("Did not find ref/items/allof/anyof")
 					}
-					structData = append(structData, fmt.Sprintf("%s []%s `%s`", valueName, objectType, strings.Join(tagList, " ")))
 
 				}
 			case "object":
@@ -308,26 +282,67 @@ func buildStructData(prop map[string]jsonschema.SchemaOrBool, obj map[string]jso
 				if err != nil {
 					return nil, err
 				}
-				structData = append(structData, fmt.Sprintf("%s []%s `%s`", valueName, objectType, strings.Join(tagList, " ")))
+				structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, objectType, strings.Join(tagList, " ")))
 			default:
 				fmt.Printf("type not defined: %v", value)
 			}
-		} else if ref := *v.TypeObject.Ref; ref != "" {
+		} else if ref := v.TypeObject.Ref; ref != nil {
 			var objectType string
-			if strings.Contains(ref, "Datatype") {
-				objectType, err = generateModelTypes(obj, ref, strings.Split(ref, "/")[2], tags, modelMap)
+			if strings.Contains(*ref, "Datatype") {
+				objectType, err = generateModelTypes(obj, *ref, strings.Split(*ref, "/")[2], tags, modelMap)
 				if err != nil {
 					return nil, err
 				}
 			} else {
-				objectType, err = generateModelTypes(obj, ref, strings.Split(ref, "_")[2], tags, modelMap)
+				objectType, err = generateModelTypes(obj, *ref, strings.Split(*ref, "_")[2], tags, modelMap)
 				if err != nil {
 					return nil, err
 				}
 			}
 			structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, objectType, strings.Join(tagList, " ")))
+		} else if anyof := v.TypeObject.AnyOf; anyof != nil {
+			// TODO: support OR operation and enums - for now we will locate the ref
+			for _, schema := range v.TypeObject.AnyOf {
+				if ref := schema.TypeObject.Ref; ref != nil {
+					var objectType string
+					if strings.Contains(*ref, "Datatype") {
+						objectType, err = generateModelTypes(obj, *ref, strings.Split(*ref, "/")[2], tags, modelMap)
+						if err != nil {
+							return nil, err
+						}
+					} else {
+						objectType, err = generateModelTypes(obj, *ref, strings.Split(*ref, "_")[2], tags, modelMap)
+						if err != nil {
+							return nil, err
+						}
+					}
+					structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, objectType, strings.Join(tagList, " ")))
+				}
+			}
+
+		} else if allof := v.TypeObject.AllOf; allof != nil {
+
+			for _, schema := range v.TypeObject.AllOf {
+				// TODO: support AND operation and enums - for now we will locate the ref
+				if ref := schema.TypeObject.Ref; ref != nil {
+					var objectType string
+					if strings.Contains(*ref, "Datatype") {
+						objectType, err = generateModelTypes(obj, *ref, strings.Split(*ref, "/")[2], tags, modelMap)
+						if err != nil {
+							return nil, err
+						}
+					} else {
+						objectType, err = generateModelTypes(obj, *ref, strings.Split(*ref, "_")[2], tags, modelMap)
+						if err != nil {
+							return nil, err
+						}
+					}
+					structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, objectType, strings.Join(tagList, " ")))
+				}
+			}
 		} else {
-			fmt.Printf("no type or ref for: %v", v)
+			fmt.Printf("no type or ref for: %s\n", k)
+
 		}
 	}
 
@@ -362,15 +377,40 @@ func generateModelTypes(obj map[string]jsonschema.SchemaOrBool, structId string,
 		case "array":
 			return "array", nil
 		default:
+			//TODO: Convert to error
 			fmt.Printf("type not defined: %v", value)
 		}
 	} else if ref := obj[structId].TypeObject.Ref; ref != nil {
+		// TODO: Convert this this stub to placeholders for struct functions that will perform validation
 
-		// TODO: Build a stub here for what will need to become the definition of datatypes
+		switch *ref {
+		case "#/definitions/Base64Datatype":
+			return "string", nil
+		case "#/definitions/DateTimeWithTimezoneDatatype":
+			return "string", nil
+		case "#/definitions/EmailAddressDatatype":
+			return "string", nil
+		case "#/definitions/IntegerDatatype":
+			return "int", nil
+		case "#/definitions/NonNegativeIntegerDatatype":
+			return "int", nil
+		case "#/definitions/StringDatatype":
+			return "string", nil
+		case "#/definitions/TokenDatatype":
+			return "string", nil
+		case "#/definitions/URIDatatype":
+			return "string", nil
+		case "#/definitions/URIReferenceDatatype":
+			return "string", nil
+		case "#/definitions/UUIDDatatype":
+			return "string", nil
+		}
+
 		reference, err := obj[*ref].ToSimpleMap()
 		if err != nil {
 			return "", err
 		}
+
 		switch value := reference["type"].(string); value {
 		case "string":
 			return "string", nil
@@ -382,8 +422,38 @@ func generateModelTypes(obj map[string]jsonschema.SchemaOrBool, structId string,
 			fmt.Printf("type not defined: %v", value)
 		}
 
+	} else if allof := obj[structId].TypeObject.AllOf; allof != nil {
+		for _, schema := range allof {
+			// TODO: support AND operation and enums - for now we will locate the ref
+			if ref := schema.TypeObject.Ref; ref != nil {
+				switch *ref {
+				case "#/definitions/Base64Datatype":
+					return "string", nil
+				case "#/definitions/DateTimeWithTimezoneDatatype":
+					return "string", nil
+				case "#/definitions/EmailAddressDatatype":
+					return "string", nil
+				case "#/definitions/IntegerDatatype":
+					return "int", nil
+				case "#/definitions/NonNegativeIntegerDatatype":
+					return "int", nil
+				case "#/definitions/StringDatatype":
+					return "string", nil
+				case "#/definitions/TokenDatatype":
+					return "string", nil
+				case "#/definitions/URIDatatype":
+					return "string", nil
+				case "#/definitions/URIReferenceDatatype":
+					return "string", nil
+				case "#/definitions/UUIDDatatype":
+					return "string", nil
+				}
+			}
+		}
 	} else {
+		// TODO: Convert this to an error
 		fmt.Println("did not find properties or type")
+		fmt.Printf("structId: %s\n", structId)
 	}
 
 	formattedStructName := FmtFieldName(structName)
@@ -392,30 +462,28 @@ func generateModelTypes(obj map[string]jsonschema.SchemaOrBool, structId string,
 }
 
 // generateOscalModelStruct generates the top-level struct for OSCAL data models.
-// func generateOscalModelStruct(oscalSchema map[string]interface{}, pkgName string, tags []string) string {
-// 	oscalModelName := getOscalModel(oscalSchema)
+func generateOscalModelStruct(oscalModel string, pkgName string, tags []string) (string, error) {
 
-// 	// Example: Format the string from 'oscal-model' to 'OscalModel'.
-// 	formattedOscalModelName := FmtFieldName(oscalModelName)
+	// Example: Format the string from 'oscal-model' to 'OscalModel'.
+	formattedOscalModelName := FmtFieldName(oscalModel)
 
-// 	// Format struct tags.
-// 	tagList := []string{}
-// 	for _, tag := range tags {
-// 		tagList = append(tagList, fmt.Sprintf("%s:\"%s\"", tag, oscalModelName))
-// 	}
+	// Format struct tags.
+	tagList := []string{}
+	for _, tag := range tags {
+		tagList = append(tagList, fmt.Sprintf("%s:\"%s\"", tag, oscalModel))
+	}
 
-// 	// Construct the struct string.
-// 	structString := fmt.Sprintf("type Oscal%sModel struct {\n\t%s %s `%s`\n}\n", formattedOscalModelName, formattedOscalModelName, formattedOscalModelName, strings.Join(tagList, " "))
+	// Construct the struct string.
+	structString := fmt.Sprintf("type Oscal%sModel struct {\n\t%s %s `%s`\n}\n", formattedOscalModelName, formattedOscalModelName, formattedOscalModelName, strings.Join(tagList, " "))
 
-// 	// Format the Go struct.
-// 	formattedStruct, err := format.Source([]byte(structString))
-// 	if err != nil {
-// 		fmt.Printf("error formatting:\n%s", structString)
-// 		os.Exit(1)
-// 	}
+	// Format the Go struct.
+	formattedStruct, err := format.Source([]byte(structString))
+	if err != nil {
+		return "", fmt.Errorf("error formatting:\n%s", structString)
+	}
 
-// 	return string(formattedStruct)
-// }
+	return string(formattedStruct), nil
+}
 
 // handleDuplicateStructNames ensures we do not generate structs with duplicate struct names.
 func handleDuplicateStructNames(existingValueMap map[string]bool, key, value string) string {

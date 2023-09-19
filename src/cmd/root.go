@@ -63,9 +63,8 @@ func run() error {
 		fmt.Fprintln(os.Stderr, "error parsing", err)
 		os.Exit(1)
 	}
-	fmt.Print(string(output))
 	// Write the Go struct output to either stdout or a file.
-	// writeOutput(output)
+	writeOutput(output)
 
 	return nil
 }
