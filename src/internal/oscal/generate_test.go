@@ -1,143 +1,47 @@
 package oscal
 
-// import (
-// 	"fmt"
-// 	"os"
-// 	"sort"
-// 	"strings"
-// 	"testing"
-// )
+import (
+	// "fmt"
+	"os"
+	// "sort"
+	// "strings"
+	"testing"
 
-// const (
-// 	oscalComponentSchemaFilePath string = "../../../testdata/schema/component/oscal_component_schema.json"
-// 	oscalSSPSchemaFilePath       string = "../../../testdata/schema/ssp/oscal_ssp_schema.json"
-// 	fieldsPresentFilePath        string = "../../../testdata/fields-present.json"
-// 	fieldsMissingFilePath        string = "../../../testdata/fields-missing.json"
-// )
+	"github.com/swaggest/jsonschema-go"
+)
 
-// // TestOscalComponentSchemaVersion tests that the OSCAL Component Definition schema version is correct.
-// func TestOscalComponentSchemaVersion(t *testing.T) {
-// 	oscalSchemaVersion := "1.0.4"
+const (
+	oscalComponentSchemaFilePath string = "../../../testdata/schema/component/oscal_component_schema-1-1-1.json"
+	oscalSSPSchemaFilePath       string = "../../../testdata/schema/ssp/oscal_ssp_schema.json"
+	fieldsPresentFilePath        string = "../../../testdata/fields-present.json"
+	fieldsMissingFilePath        string = "../../../testdata/fields-missing.json"
+)
 
-// 	testdata := &BaseFlags{
-// 		InputFile: oscalComponentSchemaFilePath,
-// 	}
+// TestGetOscalModel tests that we can get the value of the top-level 'required' field,
+// which is the name of the OSCAL model, and that we can convert it to a string properly.
+func TestGetOscalModel(t *testing.T) {
+	testdata := &BaseFlags{
+		InputFile: fieldsPresentFilePath,
+	}
 
-// 	oscalMap, err := ParseJson(testdata)
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
+	bytes, err := os.ReadFile(testdata.InputFile)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-// 	// Check whether the top-level "$id" field exists and whether it is empty or not.
-// 	// If it doesn't exist or is empty, fail the test and print error message.
-// 	// If it exists and is populated, validate the string contains the proper version number.
-// 	if schemaVersionString, ok := oscalMap["$id"].(string); ok && schemaVersionString != "" {
-// 		schemaVersionString = oscalMap["$id"].(string)
+	schema := jsonschema.Schema{}
+	schema.UnmarshalJSON(bytes)
 
-// 		expected := true
-// 		actual := strings.Contains(schemaVersionString, oscalSchemaVersion)
+	expected := "test-data"
+	actual, err := getOscalModel(schema.Required)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-// 		if expected != actual {
-// 			t.Fatalf("OSCAL JSON schema version %s was not found. The version may have been updated.", oscalSchemaVersion)
-// 		}
-// 	} else {
-// 		t.Fatal("The top-level '$id' field was not found or is not populated. Please verify that the OSCAL JSON schema file is valid.")
-// 	}
-// }
-
-// // TestOscalSSPSchemaVersion tests that the OSCAL SSP schema version is correct.
-// func TestOscalSSPSchemaVersion(t *testing.T) {
-// 	oscalSchemaVersion := "1.0.4"
-
-// 	testdata := &BaseFlags{
-// 		InputFile: oscalSSPSchemaFilePath,
-// 	}
-
-// 	oscalMap, err := ParseJson(testdata)
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
-
-// 	// Check whether the top-level "$id" field exists and whether it is empty or not.
-// 	// If it doesn't exist or is empty, fail the test and print error message.
-// 	// If it exists and is populated, validate the string contains the proper version number.
-// 	if schemaVersionString, ok := oscalMap["$id"].(string); ok && schemaVersionString != "" {
-// 		schemaVersionString = oscalMap["$id"].(string)
-
-// 		expected := true
-// 		actual := strings.Contains(schemaVersionString, oscalSchemaVersion)
-
-// 		if expected != actual {
-// 			t.Fatalf("OSCAL JSON schema version %s was not found. The version may have been updated.", oscalSchemaVersion)
-// 		}
-// 	} else {
-// 		t.Fatal("The top-level '$id' field was not found or is not populated. Please verify that the OSCAL JSON schema file is valid.")
-// 	}
-// }
-
-// // TestCheckTopLevelRequiredFieldExists tests that we can check if an OSCAL schema file has a top-level 'required' field correctly.
-// // This test case uses faked json data that contains a 'required' field, so the checkTopLevelRequiredField() function
-// // that we're testing should return true.
-// func TestCheckTopLevelRequiredFieldExists(t *testing.T) {
-// 	testdata := &BaseFlags{
-// 		InputFile: fieldsPresentFilePath,
-// 	}
-
-// 	testMap, err := ParseJson(testdata)
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
-
-// 	// We expect the checkTopLevelRequiredField() function to return true because the 'required' field is present in our fake data.
-// 	expected := true
-// 	actual := checkTopLevelRequiredField(testMap)
-
-// 	if expected != actual {
-// 		t.Fatal("error checkTopLevelRequiredField(): the function should have returned true if a 'required' field is present.")
-// 	}
-// }
-
-// // TestCheckTopLevelRequiredFieldMissing tests that we can check if an OSCAL schema file is missing a top-level 'required' field correctly.
-// // This test case uses faked json data that does not have a 'required' field, so the checkTopLevelRequiredField() function
-// // that we're testing should return false.
-// func TestCheckTopLevelRequiredFieldMissing(t *testing.T) {
-// 	testdata := &BaseFlags{
-// 		InputFile: fieldsMissingFilePath,
-// 	}
-
-// 	testMap, err := ParseJson(testdata)
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
-
-// 	// We expect the checkTopLevelRequiredField() function to return false because the 'required' field is missing in our fake data.
-// 	expected := false
-// 	actual := checkTopLevelRequiredField(testMap)
-
-// 	if expected != actual {
-// 		t.Fatal("error checkTopLevelRequiredField(): the function should have returned false if a 'required' field is not present.")
-// 	}
-// }
-
-// // TestGetOscalModel tests that we can get the value of the top-level 'required' field,
-// // which is the name of the OSCAL model, and that we can convert it to a string properly.
-// func TestGetOscalModel(t *testing.T) {
-// 	testdata := &BaseFlags{
-// 		InputFile: fieldsPresentFilePath,
-// 	}
-
-// 	testMap, err := ParseJson(testdata)
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
-
-// 	expected := "test-data"
-// 	actual := getOscalModel(testMap)
-
-// 	if expected != actual {
-// 		t.Fatalf("error getOscalModel(): expected: %s | got: %s", expected, actual)
-// 	}
-// }
+	if expected != actual {
+		t.Fatalf("error getOscalModel(): expected: %s | got: %s", expected, actual)
+	}
+}
 
 // // TestSetOscalModelRefComponent tests that we can set the OSCAL model $ref correctly for the OSCAL Component Definition schema.
 // func TestSetOscalModelRefComponent(t *testing.T) {

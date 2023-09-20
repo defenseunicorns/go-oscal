@@ -9,7 +9,7 @@ SHELL := bash
 BINDIR       := $(CURDIR)/bin
 BINNAME      ?= go-oscal
 INSTALL_PATH ?= /usr/local/bin
-OSCAL_COMPONENT_SCHEMA_FILE := testdata/schema/component/oscal_component_schema.json
+OSCAL_COMPONENT_SCHEMA_FILE := testdata/schema/component/oscal_component_schema-1-1-1.json
 OSCAL_SSP_SCHEMA_FILE := testdata/schema/ssp/oscal_ssp_schema.json
 
 # Git vars

@@ -2,8 +2,8 @@ package oscal
 
 import (
 	"fmt"
-	// "os"
 	"go/format"
+	"sort"
 	"strconv"
 	"strings"
 	"unicode"
@@ -100,7 +100,6 @@ func Generate(oscalSchema []byte, pkgName string, tags []string) ([]byte, error)
 		return nil, err
 	}
 
-	fmt.Printf("oscalModel = %s\n", model)
 	// Get the $id for the OSCAL model under generation
 	modelId, err := setOscalModelRef(model)
 	if err != nil {
@@ -219,13 +218,10 @@ func formatStructTags(obj map[string]jsonschema.SchemaOrBool, structId string, k
 
 // buildStructData loops through "properties" fields
 // and constructs data for Go structs.
-
-// TODO: UNDER CONSTRUCTION
 func buildStructData(prop map[string]jsonschema.SchemaOrBool, obj map[string]jsonschema.SchemaOrBool, structId string, tags []string, structData []string, modelMap map[string][]string) ([]string, error) {
 	for k, v := range prop {
 
 		simple, err := v.ToSimpleMap()
-
 		if err != nil {
 			return nil, err
 		}
@@ -259,8 +255,7 @@ func buildStructData(prop map[string]jsonschema.SchemaOrBool, obj map[string]jso
 
 					structData = append(structData, fmt.Sprintf("%s []%s `%s`", valueName, objectType, strings.Join(tagList, " ")))
 				} else {
-					// Could be an array of items or anyof/allof
-					// TODO: Are these mutually exclusive?
+					// TODO: would anyof/allof ever be evaluated here?
 
 					// if array and no ref populated - check for items
 					if items := v.TypeObject.Items.SchemaOrBool; items != nil {
@@ -270,10 +265,9 @@ func buildStructData(prop map[string]jsonschema.SchemaOrBool, obj map[string]jso
 						if err != nil {
 							return nil, err
 						}
-						fmt.Printf("valuename: %s / objectType: %s\n", valueName, objectType)
 						structData = append(structData, fmt.Sprintf("%s []%s `%s`", valueName, objectType, strings.Join(tagList, " ")))
 					} else {
-						// TODO: Convert this to an error as data will be missing - identify what primary key was the issue
+						// TODO: Error Handling
 						fmt.Println("Did not find ref/items/allof/anyof")
 					}
 
@@ -286,6 +280,7 @@ func buildStructData(prop map[string]jsonschema.SchemaOrBool, obj map[string]jso
 				}
 				structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, objectType, strings.Join(tagList, " ")))
 			default:
+				// TODO: Error handling
 				fmt.Printf("type not defined: %v", value)
 			}
 		} else if ref := v.TypeObject.Ref; ref != nil {
@@ -343,6 +338,7 @@ func buildStructData(prop map[string]jsonschema.SchemaOrBool, obj map[string]jso
 				}
 			}
 		} else {
+			// TODO: Error Handling
 			fmt.Printf("no type or ref for: %s\n", k)
 
 		}
@@ -379,7 +375,7 @@ func generateModelTypes(obj map[string]jsonschema.SchemaOrBool, structId string,
 		case "array":
 			return "array", nil
 		default:
-			//TODO: Convert to error
+			//TODO: Error Handling
 			fmt.Printf("type not defined: %v", value)
 		}
 	} else if ref := obj[structId].TypeObject.Ref; ref != nil {
@@ -453,7 +449,7 @@ func generateModelTypes(obj map[string]jsonschema.SchemaOrBool, structId string,
 			}
 		}
 	} else {
-		// TODO: Convert this to an error
+		// TODO: Error Handling
 		fmt.Println("did not find properties or type")
 		fmt.Printf("structId: %s\n", structId)
 	}
@@ -516,9 +512,19 @@ func generateStruct(structMap map[string][]string) string {
 	var typesString string
 	existingValueMap := map[string]bool{}
 
-	// Begin generation of struct
-	for k, v := range structMap {
-		for index, value := range v {
+	// create string array and populate it from the map
+	keys := make([]string, 0, len(structMap))
+
+	for k := range structMap {
+		keys = append(keys, k)
+	}
+
+	// sort the string array
+	sort.Strings(keys)
+
+	// Begin generation of the structs
+	for _, k := range keys {
+		for index, value := range structMap[k] {
 			if index == 0 {
 				typesString += handleDuplicateStructNames(existingValueMap, k, value)
 			} else {
@@ -526,24 +532,10 @@ func generateStruct(structMap map[string][]string) string {
 			}
 		}
 		typesString += "\n}\n"
+
 	}
 
 	return typesString
-}
-
-// checkTopLevelRequiredField checks if an OSCAL schema file has a valid top-level 'required' key-value pair.
-// If the key-value pair is valid, it returns true.
-// If the key-value pair is invalid, it returns false.
-func checkTopLevelRequiredField(oscalSchema map[string]interface{}) bool {
-	if oscalModelField, ok := oscalSchema["required"]; ok && oscalModelField != nil {
-		return true
-	}
-
-	if oscalModelField, ok := oscalSchema["required"]; !ok || oscalModelField == nil {
-		return false
-	}
-
-	return false
 }
 
 // getRequiredFieldValue returns the value of the top-level 'required' field of an OSCAL schema file.
