@@ -106,7 +106,7 @@ func Generate(oscalSchema []byte, pkgName string, tags []string) ([]byte, error)
 		return nil, err
 	}
 
-	// Generate a map with unique Id as key and existing interface as value
+	// Generate a map with unique Id as key and existing schemaOrBool as value
 	idMap, err := generateUniqueIdMap(schema)
 	if err != nil {
 		return nil, err
@@ -536,43 +536,6 @@ func generateStruct(structMap map[string][]string) string {
 	}
 
 	return typesString
-}
-
-// getRequiredFieldValue returns the value of the top-level 'required' field of an OSCAL schema file.
-func getRequiredFieldValue(oscalSchema map[string]interface{}) interface{} {
-
-	requiredFieldValue := oscalSchema["required"]
-	return requiredFieldValue
-}
-
-// convertRequiredFieldInterfaceToString converts the value of the top-level 'required' field of an OSCAL schema file
-// from type interface{} to type string and trims away the surrounding [] braces.
-func convertRequiredFieldInterfaceToString(requiredFieldValue interface{}) string {
-	oscalModelString := fmt.Sprintf("%v", requiredFieldValue)
-	trimmedOscalModelString := strings.Trim(oscalModelString, "[]")
-
-	return trimmedOscalModelString
-}
-
-// checkPropertiesField checks if an OSCAL schema file has a valid 'properties' key-value pair.
-// If the key-value pair is valid, it returns true.
-// If the key-value pair is invalid, it returns false.
-func checkPropertiesField(oscalSchema map[string]interface{}, modelId string) bool {
-	if properties, ok := oscalSchema[modelId].(map[string]interface{})["properties"]; ok && properties != nil {
-		return true
-	}
-
-	if properties, ok := oscalSchema[modelId].(map[string]interface{})["properties"]; !ok || properties == nil {
-		return false
-	}
-
-	return false
-}
-
-// getPropertiesFieldValue returns the value of the 'properties' field of an OSCAL schema file.
-func getPropertiesFieldValue(oscalSchema map[string]interface{}, modelId string) interface{} {
-	propertiesFieldValue := oscalSchema[modelId].(map[string]interface{})["properties"]
-	return propertiesFieldValue
 }
 
 /*
