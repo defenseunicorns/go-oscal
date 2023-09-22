@@ -37,20 +37,32 @@ func init() {
 	rootCmd.Flags().StringVarP(&opts.InputFile, "input-file", "f", "", "the path to a oscal json schema file")
 	rootCmd.Flags().StringVarP(&opts.OutputFile, "output-file", "o", "", "the name of the file to write the output to (outputs to STDOUT by default)")
 	rootCmd.Flags().StringVarP(&opts.Pkg, "pkg", "p", "main", "the name of the package for the generated code")
-	rootCmd.Flags().StringVarP(&opts.Tags, "tags", "t", "json", "comma seperated list of the tags to put on the struct")
+	rootCmd.Flags().StringVarP(&opts.Tags, "tags", "t", "json", "comma separated list of the tags to put on the struct")
 }
 
 func run() error {
-	oscalMap, err := oscal.ParseJson(opts)
+
+	// Remove the transfer of objects across packages
+	// aggregate file IO to root
+
+	bytes, err := os.ReadFile(opts.InputFile)
 	if err != nil {
 		return err
 	}
 
+	// oscalMap, err := oscal.ParseJson(opts)
+	// if err != nil {
+	// 	return err
+	// }
+
 	tagList := formatTags()
 
 	// Generate the Go structs.
-	output := generateStructs(oscalMap, opts.Pkg, tagList)
-
+	output, err := oscal.Generate(bytes, opts.Pkg, tagList)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "error parsing", err)
+		os.Exit(1)
+	}
 	// Write the Go struct output to either stdout or a file.
 	writeOutput(output)
 
@@ -63,17 +75,6 @@ func formatTags() (tagList []string) {
 		tagList = append(tagList, "json")
 	} else {
 		tagList = strings.Split(opts.Tags, ",")
-	}
-
-	return
-}
-
-// generateStructs reads input and generates Go structs from a OSCAL JSON schema file.
-func generateStructs(oscalMap map[string]interface{}, pkg string, tagList []string) (output []byte) {
-	output, err := oscal.Generate(oscalMap, pkg, tagList)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "error parsing", err)
-		os.Exit(1)
 	}
 
 	return
