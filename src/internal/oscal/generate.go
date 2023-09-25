@@ -100,23 +100,17 @@ func Generate(oscalSchema []byte, pkgName string, tags []string) ([]byte, error)
 		return nil, err
 	}
 
-	fmt.Println(model)
-
 	// Get the $id for the OSCAL model under generation
 	modelId, err := setOscalModelRef(model)
 	if err != nil {
 		return nil, err
 	}
 
-	fmt.Printf("modelId: %s", modelId)
-
 	// Generate a map with unique Id as key and existing schemaOrBool as value
 	idMap, err := generateUniqueIdMap(schema)
 	if err != nil {
 		return nil, err
 	}
-
-	fmt.Println(idMap)
 
 	// Instantiate variable for storing the data
 	modelTypeMap := make(map[string][]string)
@@ -248,7 +242,6 @@ func buildStructData(prop map[string]jsonschema.SchemaOrBool, obj map[string]jso
 			return nil, err
 		}
 		valueName := FmtFieldName(k)
-		fmt.Printf("valueName: %s\n", valueName)
 		tagList := formatStructTags(obj, structId, k, tags)
 
 		if v.TypeObject.Type != nil {
