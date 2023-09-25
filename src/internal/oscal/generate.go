@@ -100,17 +100,23 @@ func Generate(oscalSchema []byte, pkgName string, tags []string) ([]byte, error)
 		return nil, err
 	}
 
+	fmt.Println(model)
+
 	// Get the $id for the OSCAL model under generation
 	modelId, err := setOscalModelRef(model)
 	if err != nil {
 		return nil, err
 	}
 
+	fmt.Printf("modelId: %s", modelId)
+
 	// Generate a map with unique Id as key and existing schemaOrBool as value
 	idMap, err := generateUniqueIdMap(schema)
 	if err != nil {
 		return nil, err
 	}
+
+	fmt.Println(idMap)
 
 	// Instantiate variable for storing the data
 	modelTypeMap := make(map[string][]string)
@@ -140,10 +146,26 @@ func Generate(oscalSchema []byte, pkgName string, tags []string) ([]byte, error)
 }
 
 // setOscalModelRef determines which OSCAL model $ref to use based on the model name.
+// TODO: Look at removing this required translation to allow generation of all OSCAL models and de-duplication
 func setOscalModelRef(oscalModel string) (string, error) {
 	// Check which OSCAL model we're working with, and set the $ref accordingly.
 	if oscalModel == "system-security-plan" {
 		return "#assembly_oscal-ssp_system-security-plan", nil
+	}
+
+	// Infinite loop problem - Investigate
+	if oscalModel == "assessment-plan" {
+		return "", fmt.Errorf("Unsupported OSCAL model. Currently supported OSCAL models are Component Definition and System Security Plan.")
+	}
+
+	// Infinite loop problem - Investigate
+	if oscalModel == "assessment-results" {
+		return "", fmt.Errorf("Unsupported OSCAL model. Currently supported OSCAL models are Component Definition and System Security Plan.")
+	}
+
+	// Infinite loop problem - Investigate
+	if oscalModel == "plan-of-action-and-milestones" {
+		return "", fmt.Errorf("Unsupported OSCAL model. Currently supported OSCAL models are Component Definition and System Security Plan.")
 	}
 
 	if oscalModel == "component-definition" {
@@ -226,6 +248,7 @@ func buildStructData(prop map[string]jsonschema.SchemaOrBool, obj map[string]jso
 			return nil, err
 		}
 		valueName := FmtFieldName(k)
+		fmt.Printf("valueName: %s\n", valueName)
 		tagList := formatStructTags(obj, structId, k, tags)
 
 		if v.TypeObject.Type != nil {
