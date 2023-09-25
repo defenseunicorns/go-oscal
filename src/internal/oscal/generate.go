@@ -140,10 +140,26 @@ func Generate(oscalSchema []byte, pkgName string, tags []string) ([]byte, error)
 }
 
 // setOscalModelRef determines which OSCAL model $ref to use based on the model name.
+// TODO: Look at removing this required translation to allow generation of all OSCAL models and de-duplication
 func setOscalModelRef(oscalModel string) (string, error) {
 	// Check which OSCAL model we're working with, and set the $ref accordingly.
 	if oscalModel == "system-security-plan" {
 		return "#assembly_oscal-ssp_system-security-plan", nil
+	}
+
+	// Infinite loop problem - Investigate
+	if oscalModel == "assessment-plan" {
+		return "", fmt.Errorf("Unsupported OSCAL model. Currently supported OSCAL models are Component Definition and System Security Plan.")
+	}
+
+	// Infinite loop problem - Investigate
+	if oscalModel == "assessment-results" {
+		return "", fmt.Errorf("Unsupported OSCAL model. Currently supported OSCAL models are Component Definition and System Security Plan.")
+	}
+
+	// Infinite loop problem - Investigate
+	if oscalModel == "plan-of-action-and-milestones" {
+		return "", fmt.Errorf("Unsupported OSCAL model. Currently supported OSCAL models are Component Definition and System Security Plan.")
 	}
 
 	if oscalModel == "component-definition" {
