@@ -41,39 +41,39 @@ type ComponentDefinition struct {
 }
 
 type ControlImplementation struct {
-	SetParameters           []SetParameter           `json:"set-parameters,omitempty" yaml:"set-parameters,omitempty"`
-	ImplementedRequirements []ImplementedRequirement `json:"implemented-requirements" yaml:"implemented-requirements"`
-	UUID                    string                   `json:"uuid" yaml:"uuid"`
 	Source                  string                   `json:"source" yaml:"source"`
 	Description             string                   `json:"description" yaml:"description"`
 	Props                   []Property               `json:"props,omitempty" yaml:"props,omitempty"`
 	Links                   []Link                   `json:"links,omitempty" yaml:"links,omitempty"`
+	SetParameters           []SetParameter           `json:"set-parameters,omitempty" yaml:"set-parameters,omitempty"`
+	ImplementedRequirements []ImplementedRequirement `json:"implemented-requirements" yaml:"implemented-requirements"`
+	UUID                    string                   `json:"uuid" yaml:"uuid"`
 }
 
 type DefinedComponent struct {
-	Type                   string                  `json:"type" yaml:"type"`
-	Title                  string                  `json:"title" yaml:"title"`
-	Description            string                  `json:"description" yaml:"description"`
-	Links                  []Link                  `json:"links,omitempty" yaml:"links,omitempty"`
-	ResponsibleRoles       []ResponsibleRole       `json:"responsible-roles,omitempty" yaml:"responsible-roles,omitempty"`
-	Protocols              []Protocol              `json:"protocols,omitempty" yaml:"protocols,omitempty"`
-	Remarks                string                  `json:"remarks,omitempty" yaml:"remarks,omitempty"`
 	UUID                   string                  `json:"uuid" yaml:"uuid"`
+	Title                  string                  `json:"title" yaml:"title"`
 	Props                  []Property              `json:"props,omitempty" yaml:"props,omitempty"`
 	ControlImplementations []ControlImplementation `json:"control-implementations,omitempty" yaml:"control-implementations,omitempty"`
+	Protocols              []Protocol              `json:"protocols,omitempty" yaml:"protocols,omitempty"`
+	Remarks                string                  `json:"remarks,omitempty" yaml:"remarks,omitempty"`
+	Type                   string                  `json:"type" yaml:"type"`
+	Description            string                  `json:"description" yaml:"description"`
 	Purpose                string                  `json:"purpose,omitempty" yaml:"purpose,omitempty"`
+	Links                  []Link                  `json:"links,omitempty" yaml:"links,omitempty"`
+	ResponsibleRoles       []ResponsibleRole       `json:"responsible-roles,omitempty" yaml:"responsible-roles,omitempty"`
 }
 
 type ImplementedRequirement struct {
-	Props            []Property        `json:"props,omitempty" yaml:"props,omitempty"`
-	SetParameters    []SetParameter    `json:"set-parameters,omitempty" yaml:"set-parameters,omitempty"`
-	ResponsibleRoles []ResponsibleRole `json:"responsible-roles,omitempty" yaml:"responsible-roles,omitempty"`
-	Remarks          string            `json:"remarks,omitempty" yaml:"remarks,omitempty"`
-	UUID             string            `json:"uuid" yaml:"uuid"`
-	ControlId        string            `json:"control-id" yaml:"control-id"`
 	Description      string            `json:"description" yaml:"description"`
 	Links            []Link            `json:"links,omitempty" yaml:"links,omitempty"`
+	ResponsibleRoles []ResponsibleRole `json:"responsible-roles,omitempty" yaml:"responsible-roles,omitempty"`
 	Statements       []Statement       `json:"statements,omitempty" yaml:"statements,omitempty"`
+	UUID             string            `json:"uuid" yaml:"uuid"`
+	ControlId        string            `json:"control-id" yaml:"control-id"`
+	Remarks          string            `json:"remarks,omitempty" yaml:"remarks,omitempty"`
+	Props            []Property        `json:"props,omitempty" yaml:"props,omitempty"`
+	SetParameters    []SetParameter    `json:"set-parameters,omitempty" yaml:"set-parameters,omitempty"`
 }
 
 type ImportComponentDefinition struct {
@@ -86,26 +86,26 @@ type IncorporatesComponent struct {
 }
 
 type Statement struct {
+	Links            []Link            `json:"links,omitempty" yaml:"links,omitempty"`
+	ResponsibleRoles []ResponsibleRole `json:"responsible-roles,omitempty" yaml:"responsible-roles,omitempty"`
 	Remarks          string            `json:"remarks,omitempty" yaml:"remarks,omitempty"`
 	StatementId      string            `json:"statement-id" yaml:"statement-id"`
 	UUID             string            `json:"uuid" yaml:"uuid"`
 	Description      string            `json:"description" yaml:"description"`
 	Props            []Property        `json:"props,omitempty" yaml:"props,omitempty"`
-	Links            []Link            `json:"links,omitempty" yaml:"links,omitempty"`
-	ResponsibleRoles []ResponsibleRole `json:"responsible-roles,omitempty" yaml:"responsible-roles,omitempty"`
 }
 
 type PortRange struct {
+	Start     int    `json:"start,omitempty" yaml:"start,omitempty"`
 	End       int    `json:"end,omitempty" yaml:"end,omitempty"`
 	Transport string `json:"transport,omitempty" yaml:"transport,omitempty"`
-	Start     int    `json:"start,omitempty" yaml:"start,omitempty"`
 }
 
 type Protocol struct {
-	Name       string      `json:"name" yaml:"name"`
-	Title      string      `json:"title,omitempty" yaml:"title,omitempty"`
 	PortRanges []PortRange `json:"port-ranges,omitempty" yaml:"port-ranges,omitempty"`
 	UUID       string      `json:"uuid,omitempty" yaml:"uuid,omitempty"`
+	Name       string      `json:"name" yaml:"name"`
+	Title      string      `json:"title,omitempty" yaml:"title,omitempty"`
 }
 
 type SetParameter struct {
@@ -115,7 +115,6 @@ type SetParameter struct {
 }
 
 type Action struct {
-	UUID               string             `json:"uuid" yaml:"uuid"`
 	Date               string             `json:"date,omitempty" yaml:"date,omitempty"`
 	Type               string             `json:"type" yaml:"type"`
 	System             string             `json:"system" yaml:"system"`
@@ -123,15 +122,16 @@ type Action struct {
 	Links              []Link             `json:"links,omitempty" yaml:"links,omitempty"`
 	ResponsibleParties []ResponsibleParty `json:"responsible-parties,omitempty" yaml:"responsible-parties,omitempty"`
 	Remarks            string             `json:"remarks,omitempty" yaml:"remarks,omitempty"`
+	UUID               string             `json:"uuid" yaml:"uuid"`
 }
 
 type Address struct {
+	Type       string   `json:"type,omitempty" yaml:"type,omitempty"`
+	AddrLines  []string `json:"addr-lines,omitempty" yaml:"addr-lines,omitempty"`
 	City       string   `json:"city,omitempty" yaml:"city,omitempty"`
 	State      string   `json:"state,omitempty" yaml:"state,omitempty"`
 	PostalCode string   `json:"postal-code,omitempty" yaml:"postal-code,omitempty"`
 	Country    string   `json:"country,omitempty" yaml:"country,omitempty"`
-	Type       string   `json:"type,omitempty" yaml:"type,omitempty"`
-	AddrLines  []string `json:"addr-lines,omitempty" yaml:"addr-lines,omitempty"`
 }
 
 type BackMatter struct {
@@ -148,46 +148,46 @@ type Link struct {
 
 type Metadata struct {
 	LastModified       string                 `json:"last-modified" yaml:"last-modified"`
-	OscalVersion       string                 `json:"oscal-version" yaml:"oscal-version"`
+	DocumentIds        []DocumentId           `json:"document-ids,omitempty" yaml:"document-ids,omitempty"`
 	Links              []Link                 `json:"links,omitempty" yaml:"links,omitempty"`
+	Parties            []Party                `json:"parties,omitempty" yaml:"parties,omitempty"`
 	Actions            []Action               `json:"actions,omitempty" yaml:"actions,omitempty"`
-	ResponsibleParties []ResponsibleParty     `json:"responsible-parties,omitempty" yaml:"responsible-parties,omitempty"`
+	Remarks            string                 `json:"remarks,omitempty" yaml:"remarks,omitempty"`
+	Props              []Property             `json:"props,omitempty" yaml:"props,omitempty"`
+	Title              string                 `json:"title" yaml:"title"`
 	Published          string                 `json:"published,omitempty" yaml:"published,omitempty"`
+	OscalVersion       string                 `json:"oscal-version" yaml:"oscal-version"`
+	Roles              []Role                 `json:"roles,omitempty" yaml:"roles,omitempty"`
+	Locations          []Location             `json:"locations,omitempty" yaml:"locations,omitempty"`
+	ResponsibleParties []ResponsibleParty     `json:"responsible-parties,omitempty" yaml:"responsible-parties,omitempty"`
 	Version            string                 `json:"version" yaml:"version"`
 	Revisions          []RevisionHistoryEntry `json:"revisions,omitempty" yaml:"revisions,omitempty"`
-	Props              []Property             `json:"props,omitempty" yaml:"props,omitempty"`
-	Locations          []Location             `json:"locations,omitempty" yaml:"locations,omitempty"`
-	Parties            []Party                `json:"parties,omitempty" yaml:"parties,omitempty"`
-	DocumentIds        []DocumentId           `json:"document-ids,omitempty" yaml:"document-ids,omitempty"`
-	Roles              []Role                 `json:"roles,omitempty" yaml:"roles,omitempty"`
-	Remarks            string                 `json:"remarks,omitempty" yaml:"remarks,omitempty"`
-	Title              string                 `json:"title" yaml:"title"`
 }
 
 type Property struct {
+	Class   string `json:"class,omitempty" yaml:"class,omitempty"`
+	Group   string `json:"group,omitempty" yaml:"group,omitempty"`
 	Remarks string `json:"remarks,omitempty" yaml:"remarks,omitempty"`
 	Name    string `json:"name" yaml:"name"`
 	UUID    string `json:"uuid,omitempty" yaml:"uuid,omitempty"`
 	Ns      string `json:"ns,omitempty" yaml:"ns,omitempty"`
 	Value   string `json:"value" yaml:"value"`
-	Class   string `json:"class,omitempty" yaml:"class,omitempty"`
-	Group   string `json:"group,omitempty" yaml:"group,omitempty"`
 }
 
 type ResponsibleParty struct {
+	Links      []Link     `json:"links,omitempty" yaml:"links,omitempty"`
+	Remarks    string     `json:"remarks,omitempty" yaml:"remarks,omitempty"`
 	RoleId     string     `json:"role-id" yaml:"role-id"`
 	PartyUuids []string   `json:"party-uuids" yaml:"party-uuids"`
 	Props      []Property `json:"props,omitempty" yaml:"props,omitempty"`
-	Links      []Link     `json:"links,omitempty" yaml:"links,omitempty"`
-	Remarks    string     `json:"remarks,omitempty" yaml:"remarks,omitempty"`
 }
 
 type ResponsibleRole struct {
+	Remarks    string     `json:"remarks,omitempty" yaml:"remarks,omitempty"`
 	RoleId     string     `json:"role-id" yaml:"role-id"`
 	Props      []Property `json:"props,omitempty" yaml:"props,omitempty"`
 	Links      []Link     `json:"links,omitempty" yaml:"links,omitempty"`
 	PartyUuids []string   `json:"party-uuids,omitempty" yaml:"party-uuids,omitempty"`
-	Remarks    string     `json:"remarks,omitempty" yaml:"remarks,omitempty"`
 }
 
 type DocumentId struct {
@@ -206,9 +206,9 @@ type TelephoneNumber struct {
 }
 
 type Base64 struct {
+	Filename  string `json:"filename,omitempty" yaml:"filename,omitempty"`
 	MediaType string `json:"media-type,omitempty" yaml:"media-type,omitempty"`
 	Value     string `json:"value" yaml:"value"`
-	Filename  string `json:"filename,omitempty" yaml:"filename,omitempty"`
 }
 
 type Citation struct {
@@ -218,59 +218,59 @@ type Citation struct {
 }
 
 type PartyExternalIdentifier struct {
-	ID     string `json:"id" yaml:"id"`
 	Scheme string `json:"scheme" yaml:"scheme"`
+	ID     string `json:"id" yaml:"id"`
 }
 
 type Location struct {
-	UUID             string            `json:"uuid" yaml:"uuid"`
 	EmailAddresses   []string          `json:"email-addresses,omitempty" yaml:"email-addresses,omitempty"`
 	TelephoneNumbers []TelephoneNumber `json:"telephone-numbers,omitempty" yaml:"telephone-numbers,omitempty"`
-	Links            []Link            `json:"links,omitempty" yaml:"links,omitempty"`
 	Remarks          string            `json:"remarks,omitempty" yaml:"remarks,omitempty"`
-	Title            string            `json:"title,omitempty" yaml:"title,omitempty"`
-	Address          Address           `json:"address,omitempty" yaml:"address,omitempty"`
 	Urls             []string          `json:"urls,omitempty" yaml:"urls,omitempty"`
 	Props            []Property        `json:"props,omitempty" yaml:"props,omitempty"`
+	Links            []Link            `json:"links,omitempty" yaml:"links,omitempty"`
+	UUID             string            `json:"uuid" yaml:"uuid"`
+	Title            string            `json:"title,omitempty" yaml:"title,omitempty"`
+	Address          Address           `json:"address,omitempty" yaml:"address,omitempty"`
 }
 
 type Party struct {
-	UUID                  string                    `json:"uuid" yaml:"uuid"`
-	Links                 []Link                    `json:"links,omitempty" yaml:"links,omitempty"`
-	LocationUuids         []string                  `json:"location-uuids,omitempty" yaml:"location-uuids,omitempty"`
-	TelephoneNumbers      []TelephoneNumber         `json:"telephone-numbers,omitempty" yaml:"telephone-numbers,omitempty"`
-	Type                  string                    `json:"type" yaml:"type"`
 	ShortName             string                    `json:"short-name,omitempty" yaml:"short-name,omitempty"`
 	Addresses             []Address                 `json:"addresses,omitempty" yaml:"addresses,omitempty"`
-	Name                  string                    `json:"name,omitempty" yaml:"name,omitempty"`
-	ExternalIds           []PartyExternalIdentifier `json:"external-ids,omitempty" yaml:"external-ids,omitempty"`
+	MemberOfOrganizations []string                  `json:"member-of-organizations,omitempty" yaml:"member-of-organizations,omitempty"`
+	UUID                  string                    `json:"uuid" yaml:"uuid"`
 	Props                 []Property                `json:"props,omitempty" yaml:"props,omitempty"`
 	EmailAddresses        []string                  `json:"email-addresses,omitempty" yaml:"email-addresses,omitempty"`
-	MemberOfOrganizations []string                  `json:"member-of-organizations,omitempty" yaml:"member-of-organizations,omitempty"`
+	TelephoneNumbers      []TelephoneNumber         `json:"telephone-numbers,omitempty" yaml:"telephone-numbers,omitempty"`
+	ExternalIds           []PartyExternalIdentifier `json:"external-ids,omitempty" yaml:"external-ids,omitempty"`
+	Links                 []Link                    `json:"links,omitempty" yaml:"links,omitempty"`
+	Type                  string                    `json:"type" yaml:"type"`
+	Name                  string                    `json:"name,omitempty" yaml:"name,omitempty"`
+	LocationUuids         []string                  `json:"location-uuids,omitempty" yaml:"location-uuids,omitempty"`
 	Remarks               string                    `json:"remarks,omitempty" yaml:"remarks,omitempty"`
 }
 
 type Resource struct {
+	UUID        string         `json:"uuid" yaml:"uuid"`
 	Title       string         `json:"title,omitempty" yaml:"title,omitempty"`
 	Description string         `json:"description,omitempty" yaml:"description,omitempty"`
 	Props       []Property     `json:"props,omitempty" yaml:"props,omitempty"`
-	DocumentIds []DocumentId   `json:"document-ids,omitempty" yaml:"document-ids,omitempty"`
 	Citation    Citation       `json:"citation,omitempty" yaml:"citation,omitempty"`
 	Rlinks      []ResourceLink `json:"rlinks,omitempty" yaml:"rlinks,omitempty"`
+	DocumentIds []DocumentId   `json:"document-ids,omitempty" yaml:"document-ids,omitempty"`
 	Base64      Base64         `json:"base64,omitempty" yaml:"base64,omitempty"`
-	UUID        string         `json:"uuid" yaml:"uuid"`
 	Remarks     string         `json:"remarks,omitempty" yaml:"remarks,omitempty"`
 }
 
 type RevisionHistoryEntry struct {
+	Props        []Property `json:"props,omitempty" yaml:"props,omitempty"`
+	Links        []Link     `json:"links,omitempty" yaml:"links,omitempty"`
 	Remarks      string     `json:"remarks,omitempty" yaml:"remarks,omitempty"`
 	Title        string     `json:"title,omitempty" yaml:"title,omitempty"`
 	Published    string     `json:"published,omitempty" yaml:"published,omitempty"`
 	LastModified string     `json:"last-modified,omitempty" yaml:"last-modified,omitempty"`
 	Version      string     `json:"version" yaml:"version"`
 	OscalVersion string     `json:"oscal-version,omitempty" yaml:"oscal-version,omitempty"`
-	Props        []Property `json:"props,omitempty" yaml:"props,omitempty"`
-	Links        []Link     `json:"links,omitempty" yaml:"links,omitempty"`
 }
 
 type ResourceLink struct {
@@ -280,11 +280,11 @@ type ResourceLink struct {
 }
 
 type Role struct {
+	Title       string     `json:"title" yaml:"title"`
+	ShortName   string     `json:"short-name,omitempty" yaml:"short-name,omitempty"`
+	Description string     `json:"description,omitempty" yaml:"description,omitempty"`
 	Props       []Property `json:"props,omitempty" yaml:"props,omitempty"`
 	Links       []Link     `json:"links,omitempty" yaml:"links,omitempty"`
 	Remarks     string     `json:"remarks,omitempty" yaml:"remarks,omitempty"`
 	ID          string     `json:"id" yaml:"id"`
-	Title       string     `json:"title" yaml:"title"`
-	ShortName   string     `json:"short-name,omitempty" yaml:"short-name,omitempty"`
-	Description string     `json:"description,omitempty" yaml:"description,omitempty"`
 }

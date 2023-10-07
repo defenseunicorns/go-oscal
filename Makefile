@@ -10,8 +10,8 @@ BINDIR       := $(CURDIR)/bin
 BINNAME      ?= go-oscal
 INSTALL_PATH ?= /usr/local/bin
 OSCAL_LATEST := 1-1-1
-OSCAL_COMPONENT_SCHEMA_FILE := testdata/schema/component/oscal_component_schema-$(OSCAL_LATEST).json
-OSCAL_SSP_SCHEMA_FILE := testdata/schema/ssp/oscal_ssp_schema.json
+OSCAL_COMPONENT_SCHEMA_FILE := schema/component/oscal_component_schema-$(OSCAL_LATEST).json
+OSCAL_SSP_SCHEMA_FILE := schema/ssp/oscal_ssp_schema.json
 
 # Git vars
 GIT_COMMIT = $(shell git rev-parse HEAD)
