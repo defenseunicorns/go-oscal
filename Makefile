@@ -9,7 +9,8 @@ SHELL := bash
 BINDIR       := $(CURDIR)/bin
 BINNAME      ?= go-oscal
 INSTALL_PATH ?= /usr/local/bin
-OSCAL_COMPONENT_SCHEMA_FILE := testdata/schema/component/oscal_component_schema-1-1-1.json
+OSCAL_LATEST := 1-1-1
+OSCAL_COMPONENT_SCHEMA_FILE := testdata/schema/component/oscal_component_schema-$(OSCAL_LATEST).json
 OSCAL_SSP_SCHEMA_FILE := testdata/schema/ssp/oscal_ssp_schema.json
 
 # Git vars
@@ -83,3 +84,11 @@ run-main-ssp: ## useful for running the main.go file without having to compile
 .PHONY: install
 install: ## Install binary to $INSTALL_PATH.
 	@install "$(BINDIR)/$(BINNAME)" "$(INSTALL_PATH)/$(BINNAME)"
+
+.PHONY: generate-latest-compdef
+generate-latest-compdef: clean build
+	$(BINDIR)/$(BINNAME) -f $(OSCAL_COMPONENT_SCHEMA_FILE) --pkg compdeftypes --tags json,yaml -o src/types/oscal-1-1-1/component-definition/types.go
+
+.PHONY: generate-latest-ssp
+generate-latest-ssp: clean build
+	$(BINDIR)/$(BINNAME) -f $(OSCAL_SSP_SCHEMA_FILE) --pkg ssptypes --tags json,yaml -o src/types/oscal-1-1-1/system-security-plan/types.go
