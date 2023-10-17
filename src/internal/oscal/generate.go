@@ -235,9 +235,6 @@ func formatStructTags(obj map[string]jsonschema.SchemaOrBool, structId string, k
 // buildStructData loops through "properties" fields
 // and constructs data for Go structs.
 func buildStructData(prop map[string]jsonschema.SchemaOrBool, obj map[string]jsonschema.SchemaOrBool, structId string, tags []string, structData []string, modelMap map[string][]string) ([]string, error) {
-
-	// Could we sort the props here?
-
 	keys := make([]string, 0, len(prop))
 
 	for k := range prop {
