@@ -235,16 +235,28 @@ func formatStructTags(obj map[string]jsonschema.SchemaOrBool, structId string, k
 // buildStructData loops through "properties" fields
 // and constructs data for Go structs.
 func buildStructData(prop map[string]jsonschema.SchemaOrBool, obj map[string]jsonschema.SchemaOrBool, structId string, tags []string, structData []string, modelMap map[string][]string) ([]string, error) {
-	for k, v := range prop {
 
-		simple, err := v.ToSimpleMap()
+	// Could we sort the props here?
+
+	keys := make([]string, 0, len(prop))
+
+	for k := range prop {
+		keys = append(keys, k)
+	}
+
+	// sort the string array
+	sort.Strings(keys)
+
+	for _, key := range keys {
+
+		simple, err := prop[key].ToSimpleMap()
 		if err != nil {
 			return nil, err
 		}
-		valueName := FmtFieldName(k)
-		tagList := formatStructTags(obj, structId, k, tags)
+		valueName := FmtFieldName(key)
+		tagList := formatStructTags(obj, structId, key, tags)
 
-		if v.TypeObject.Type != nil {
+		if prop[key].TypeObject.Type != nil {
 			switch value := simple["type"].(string); value {
 			case "string":
 				structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, value, strings.Join(tagList, " ")))
@@ -255,7 +267,7 @@ func buildStructData(prop map[string]jsonschema.SchemaOrBool, obj map[string]jso
 				structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, value, strings.Join(tagList, " ")))
 			case "array":
 				// If type array and ref is populated
-				if ref := v.TypeObject.Items.SchemaOrBool.TypeObject.Ref; ref != nil {
+				if ref := prop[key].TypeObject.Items.SchemaOrBool.TypeObject.Ref; ref != nil {
 					var objectType string
 					if strings.Contains(*ref, "Datatype") {
 						objectType, err = generateModelTypes(obj, *ref, strings.Split(*ref, "/")[2], tags, modelMap)
@@ -274,9 +286,9 @@ func buildStructData(prop map[string]jsonschema.SchemaOrBool, obj map[string]jso
 					// TODO: would anyof/allof ever be evaluated here?
 
 					// if array and no ref populated - check for items
-					if items := v.TypeObject.Items.SchemaOrBool; items != nil {
-						singular := *v.TypeObject.Items.SchemaOrBool.TypeObject.Title
-						obj[valueName] = *v.TypeObject.Items.SchemaOrBool
+					if items := prop[key].TypeObject.Items.SchemaOrBool; items != nil {
+						singular := *prop[key].TypeObject.Items.SchemaOrBool.TypeObject.Title
+						obj[valueName] = *prop[key].TypeObject.Items.SchemaOrBool
 						objectType, err := generateModelTypes(obj, valueName, singular, tags, modelMap)
 						if err != nil {
 							return nil, err
@@ -289,7 +301,7 @@ func buildStructData(prop map[string]jsonschema.SchemaOrBool, obj map[string]jso
 
 				}
 			case "object":
-				obj[valueName] = v
+				obj[valueName] = prop[key]
 				objectType, err := generateModelTypes(obj, valueName, valueName, tags, modelMap)
 				if err != nil {
 					return nil, err
@@ -299,7 +311,7 @@ func buildStructData(prop map[string]jsonschema.SchemaOrBool, obj map[string]jso
 				// TODO: Error handling
 				fmt.Printf("type not defined: %v", value)
 			}
-		} else if ref := v.TypeObject.Ref; ref != nil {
+		} else if ref := prop[key].TypeObject.Ref; ref != nil {
 			var objectType string
 			if strings.Contains(*ref, "Datatype") {
 				objectType, err = generateModelTypes(obj, *ref, strings.Split(*ref, "/")[2], tags, modelMap)
@@ -313,9 +325,9 @@ func buildStructData(prop map[string]jsonschema.SchemaOrBool, obj map[string]jso
 				}
 			}
 			structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, objectType, strings.Join(tagList, " ")))
-		} else if anyof := v.TypeObject.AnyOf; anyof != nil {
+		} else if anyof := prop[key].TypeObject.AnyOf; anyof != nil {
 			// TODO: support OR operation and enums - for now we will locate the ref
-			for _, schema := range v.TypeObject.AnyOf {
+			for _, schema := range prop[key].TypeObject.AnyOf {
 				if ref := schema.TypeObject.Ref; ref != nil {
 					var objectType string
 					if strings.Contains(*ref, "Datatype") {
@@ -333,9 +345,9 @@ func buildStructData(prop map[string]jsonschema.SchemaOrBool, obj map[string]jso
 				}
 			}
 
-		} else if allof := v.TypeObject.AllOf; allof != nil {
+		} else if allof := prop[key].TypeObject.AllOf; allof != nil {
 
-			for _, schema := range v.TypeObject.AllOf {
+			for _, schema := range prop[key].TypeObject.AllOf {
 				// TODO: support AND operation and enums - for now we will locate the ref
 				if ref := schema.TypeObject.Ref; ref != nil {
 					var objectType string
@@ -355,7 +367,7 @@ func buildStructData(prop map[string]jsonschema.SchemaOrBool, obj map[string]jso
 			}
 		} else {
 			// TODO: Error Handling
-			fmt.Printf("no type or ref for: %s\n", k)
+			fmt.Printf("no type or ref for: %s\n", key)
 
 		}
 	}
