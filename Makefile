@@ -63,11 +63,11 @@ $(BINDIR)/$(BINNAME): $(SRC)
 
 .PHONY: generate-compdef-stdout
 generate-compdef-stdout: clean build ## Generate Go structs from OSCAL component-definition JSON schema and outputs to stdout.
-	$(BINDIR)/$(BINNAME) -f $(OSCAL_COMPONENT_SCHEMA_FILE) --pkg componentDefinition --tags json,yaml
+	$(BINDIR)/$(BINNAME) generate -f $(OSCAL_COMPONENT_SCHEMA_FILE) --pkg componentDefinition --tags json,yaml
 
 .PHONY: generate-ssp-stdout
 generate-ssp-stdout: clean build ## Generate Go structs from OSCAL system-security-plan JSON schema and outputs to stdout.
-	$(BINDIR)/$(BINNAME) -f $(OSCAL_SSP_SCHEMA_FILE) --pkg ssp --tags json,yaml
+	$(BINDIR)/$(BINNAME) generate -f $(OSCAL_SSP_SCHEMA_FILE) --pkg ssp --tags json,yaml
 
 .PHONY: test
 test: build ## Run automated tests.
@@ -87,8 +87,8 @@ install: ## Install binary to $INSTALL_PATH.
 
 .PHONY: generate-latest-compdef
 generate-latest-compdef: clean build
-	$(BINDIR)/$(BINNAME) -f $(OSCAL_COMPONENT_SCHEMA_FILE) --pkg compdeftypes --tags json,yaml -o src/types/oscal-1-1-1/component-definition/types.go
+	$(BINDIR)/$(BINNAME) generate -f $(OSCAL_COMPONENT_SCHEMA_FILE) --pkg compdeftypes --tags json,yaml -o src/types/oscal-1-1-1/component-definition/types.go
 
 .PHONY: generate-latest-ssp
 generate-latest-ssp: clean build
-	$(BINDIR)/$(BINNAME) -f $(OSCAL_SSP_SCHEMA_FILE) --pkg ssptypes --tags json,yaml -o src/types/oscal-1-1-1/system-security-plan/types.go
+	$(BINDIR)/$(BINNAME) generate -f $(OSCAL_SSP_SCHEMA_FILE) --pkg ssptypes --tags json,yaml -o src/types/oscal-1-1-1/system-security-plan/types.go
