@@ -149,7 +149,7 @@ func setOscalModelRef(oscalModel string) (string, error) {
 
 	// Infinite loop problem - Investigate
 	if oscalModel == "assessment-plan" {
-		return "", fmt.Errorf("Unsupported OSCAL model. Currently supported OSCAL models are Component Definition and System Security Plan.")
+		return "#assembly_oscal-ap_assessment-plan", nil
 	}
 
 	// Infinite loop problem - Investigate
