@@ -154,7 +154,7 @@ func setOscalModelRef(oscalModel string) (string, error) {
 
 	// Infinite loop problem - Investigate
 	if oscalModel == "assessment-results" {
-		return "", fmt.Errorf("Unsupported OSCAL model. Currently supported OSCAL models are Component Definition and System Security Plan.")
+		return "#assembly_oscal-ar_assessment-results", nil
 	}
 
 	// Infinite loop problem - Investigate
@@ -382,6 +382,7 @@ func generateModelTypes(obj map[string]jsonschema.SchemaOrBool, structId string,
 	if obj[structId].TypeObject.Properties != nil {
 		properties := obj[structId].TypeObject.Properties
 		formattedStructName := []string{FmtFieldName(structName)}
+		modelMap[structId] = formattedStructName
 		structData, err := buildStructData(properties, obj, structId, tags, formattedStructName, modelMap)
 		if err != nil {
 			return "", err
@@ -399,13 +400,16 @@ func generateModelTypes(obj map[string]jsonschema.SchemaOrBool, structId string,
 			return "bool", nil
 		case "array":
 			return "array", nil
+		case "object":
+			// Edge case here for empty objects (ie `include-all`)
+			formattedStructName := []string{FmtFieldName(structName)}
+			modelMap[structId] = formattedStructName
+			return formattedStructName[0], nil
 		default:
 			//TODO: Error Handling
 			fmt.Printf("type not defined: %v", value)
 		}
 	} else if ref := obj[structId].TypeObject.Ref; ref != nil {
-		// TODO: Convert this this stub to placeholders for struct functions that will perform validation
-
 		switch *ref {
 		case "#/definitions/Base64Datatype":
 			return "string", nil
@@ -447,6 +451,34 @@ func generateModelTypes(obj map[string]jsonschema.SchemaOrBool, structId string,
 
 	} else if allof := obj[structId].TypeObject.AllOf; allof != nil {
 		for _, schema := range allof {
+			// TODO: support AND operation and enums - for now we will locate the ref
+			if ref := schema.TypeObject.Ref; ref != nil {
+				switch *ref {
+				case "#/definitions/Base64Datatype":
+					return "string", nil
+				case "#/definitions/DateTimeWithTimezoneDatatype":
+					return "string", nil
+				case "#/definitions/EmailAddressDatatype":
+					return "string", nil
+				case "#/definitions/IntegerDatatype":
+					return "int", nil
+				case "#/definitions/NonNegativeIntegerDatatype":
+					return "int", nil
+				case "#/definitions/StringDatatype":
+					return "string", nil
+				case "#/definitions/TokenDatatype":
+					return "string", nil
+				case "#/definitions/URIDatatype":
+					return "string", nil
+				case "#/definitions/URIReferenceDatatype":
+					return "string", nil
+				case "#/definitions/UUIDDatatype":
+					return "string", nil
+				}
+			}
+		}
+	} else if anyof := obj[structId].TypeObject.AnyOf; anyof != nil {
+		for _, schema := range anyof {
 			// TODO: support AND operation and enums - for now we will locate the ref
 			if ref := schema.TypeObject.Ref; ref != nil {
 				switch *ref {

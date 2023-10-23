@@ -1,6 +1,6 @@
 module github.com/defenseunicorns/go-oscal
 
-go 1.21.1
+go 1.21.3
 
 require (
 	github.com/spf13/cobra v1.7.0
