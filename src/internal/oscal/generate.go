@@ -274,11 +274,10 @@ func buildStructData(prop map[string]jsonschema.SchemaOrBool, obj map[string]jso
 			switch value := simple["type"].(string); value {
 			case "string":
 				structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, value, strings.Join(tagList, " ")))
-			case "bool":
-				structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, value, strings.Join(tagList, " ")))
+			case "boolean":
+				structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, "bool", strings.Join(tagList, " ")))
 			case "integer":
-				value = "int"
-				structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, value, strings.Join(tagList, " ")))
+				structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, "int", strings.Join(tagList, " ")))
 			case "array":
 				// If type array and ref is populated
 				if ref := prop[key].TypeObject.Items.SchemaOrBool.TypeObject.Ref; ref != nil {
@@ -458,7 +457,7 @@ func generateModelTypes(obj map[string]jsonschema.SchemaOrBool, structId string,
 		switch value := reference["type"].(string); value {
 		case "string":
 			return "string", nil
-		case "bool":
+		case "boolean":
 			return "bool", nil
 		case "array":
 			return "array", nil
