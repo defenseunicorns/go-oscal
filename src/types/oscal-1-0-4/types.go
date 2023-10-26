@@ -17,13 +17,13 @@
 package oscalTypes
 
 type OscalModels struct {
-	Catalog                   Catalog                   `json:"catalog" yaml:"catalog"`
-	Profile                   Profile                   `json:"profile" yaml:"profile"`
-	ComponentDefinition       ComponentDefinition       `json:"component-definition" yaml:"component-definition"`
-	SystemSecurityPlan        SystemSecurityPlan        `json:"system-security-plan" yaml:"system-security-plan"`
-	AssessmentPlan            AssessmentPlan            `json:"assessment-plan" yaml:"assessment-plan"`
-	AssessmentResults         AssessmentResults         `json:"assessment-results" yaml:"assessment-results"`
-	PlanOfActionAndMilestones PlanOfActionAndMilestones `json:"plan-of-action-and-milestones" yaml:"plan-of-action-and-milestones"`
+	Catalog                   Catalog                   `json:"catalog,omitempty" yaml:"catalog,omitempty"`
+	Profile                   Profile                   `json:"profile,omitempty" yaml:"profile,omitempty"`
+	ComponentDefinition       ComponentDefinition       `json:"component-definition,omitempty" yaml:"component-definition,omitempty"`
+	SystemSecurityPlan        SystemSecurityPlan        `json:"system-security-plan,omitempty" yaml:"system-security-plan,omitempty"`
+	AssessmentPlan            AssessmentPlan            `json:"assessment-plan,omitempty" yaml:"assessment-plan,omitempty"`
+	AssessmentResults         AssessmentResults         `json:"assessment-results,omitempty" yaml:"assessment-results,omitempty"`
+	PlanOfActionAndMilestones PlanOfActionAndMilestones `json:"plan-of-action-and-milestones,omitempty" yaml:"plan-of-action-and-milestones,omitempty"`
 }
 
 type AssessmentPlan struct {

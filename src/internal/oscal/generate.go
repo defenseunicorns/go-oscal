@@ -24,7 +24,7 @@ const headerComment string = `/*
 
 	To regenerate:
 	
-	go-oscal \
+	go-oscal generate \
 		--input-file <path_to_oscal_json_schema_file> \
 		--output-file <name_of_go_types_file> // the path to this file must already exist \
 		--tags json,yaml // the tags to add to the Go structs \
@@ -544,7 +544,7 @@ func generateOscalModelStruct(oscalModels []string, pkgName string, tags []strin
 		// Format struct tags.
 		tagList := []string{}
 		for _, tag := range tags {
-			tagList = append(tagList, fmt.Sprintf("%s:\"%s\"", tag, oscalModel))
+			tagList = append(tagList, fmt.Sprintf("%s:\"%s,omitempty\"", tag, oscalModel))
 		}
 
 		structString += fmt.Sprintf("\t%s %s `%s`\n", formattedOscalModelName, formattedOscalModelName, strings.Join(tagList, " "))
