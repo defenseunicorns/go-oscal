@@ -95,13 +95,7 @@ func Generate(oscalSchema []byte, pkgName string, tags []string) ([]byte, error)
 	schema.UnmarshalJSON(oscalSchema)
 
 	// Identify the OSCAL model under generation
-	model, err := getOscalModel(schema.Required)
-	if err != nil {
-		return nil, err
-	}
-
-	// Get the $id for the OSCAL model under generation
-	modelId, err := setOscalModelRef(model)
+	models, err := getOscalModel(schema)
 	if err != nil {
 		return nil, err
 	}
@@ -115,13 +109,21 @@ func Generate(oscalSchema []byte, pkgName string, tags []string) ([]byte, error)
 	// Instantiate variable for storing the data
 	modelTypeMap := make(map[string][]string)
 
-	generateModelTypes(idMap, modelId, strings.Split(modelId, "_")[2], tags, modelTypeMap)
+	for _, model := range models {
+		// Get the $id for the OSCAL model under generation
+		// we'll just set this to the first one for now
+		modelId, err := setOscalModelRef(model)
+		if err != nil {
+			return nil, err
+		}
+		generateModelTypes(idMap, modelId, strings.Split(modelId, "_")[2], tags, modelTypeMap)
+	}
 
 	// Construct header comment and package name.
 	structString := fmt.Sprintf("%s\n\npackage %s\n", headerComment, pkgName)
 
 	// Construct top-level OscalModel struct.
-	toplevel, err := generateOscalModelStruct(model, pkgName, tags)
+	toplevel, err := generateOscalModelStruct(models, pkgName, tags)
 	if err != nil {
 		return nil, err
 	}
@@ -166,20 +168,35 @@ func setOscalModelRef(oscalModel string) (string, error) {
 		return "#assembly_oscal-component-definition_component-definition", nil
 	}
 
+	if oscalModel == "catalog" {
+		return "#assembly_oscal-catalog_catalog", nil
+	}
+
+	if oscalModel == "profile" {
+		return "#assembly_oscal-profile_profile", nil
+	}
+
 	return "", fmt.Errorf("Unsupported OSCAL model. Currently supported OSCAL models are Component Definition and System Security Plan.")
 }
 
 // getOscalModel determines which OSCAL model we're working with.
-func getOscalModel(required []string) (string, error) {
-	// error if more than one required field - not supported
-	if len(required) > 1 {
-		return "", fmt.Errorf("Processing more than one model is unsupported")
-	}
-	if len(required) == 1 {
-		return required[0], nil
+func getOscalModel(schema jsonschema.Schema) ([]string, error) {
+
+	// We could evaluate if oneOf exists first - otherwise revert to required
+	if len(schema.OneOf) > 0 {
+		// Attempt total generation
+		models := make([]string, 0)
+		for _, item := range schema.OneOf {
+			models = append(models, item.TypeObject.Required...)
+		}
+		return models, nil
 	}
 
-	return "", fmt.Errorf("Top-level 'required' field not found or is not populated. Please verify the OSCAL JSON schema file is valid.")
+	if len(schema.Required) > 0 {
+		return schema.Required, nil
+	}
+
+	return []string{}, fmt.Errorf("Top-level 'required' field not found or is not populated. Please verify the OSCAL JSON schema file is valid.")
 }
 
 // TODO: Look into full definition naming when processing multiple schemas - unsupported at this time
@@ -257,11 +274,10 @@ func buildStructData(prop map[string]jsonschema.SchemaOrBool, obj map[string]jso
 			switch value := simple["type"].(string); value {
 			case "string":
 				structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, value, strings.Join(tagList, " ")))
-			case "bool":
-				structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, value, strings.Join(tagList, " ")))
+			case "boolean":
+				structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, "bool", strings.Join(tagList, " ")))
 			case "integer":
-				value = "int"
-				structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, value, strings.Join(tagList, " ")))
+				structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, "int", strings.Join(tagList, " ")))
 			case "array":
 				// If type array and ref is populated
 				if ref := prop[key].TypeObject.Items.SchemaOrBool.TypeObject.Ref; ref != nil {
@@ -396,7 +412,7 @@ func generateModelTypes(obj map[string]jsonschema.SchemaOrBool, structId string,
 		switch value := simple["type"].(string); value {
 		case "string":
 			return "string", nil
-		case "bool":
+		case "boolean":
 			return "bool", nil
 		case "array":
 			return "array", nil
@@ -441,7 +457,7 @@ func generateModelTypes(obj map[string]jsonschema.SchemaOrBool, structId string,
 		switch value := reference["type"].(string); value {
 		case "string":
 			return "string", nil
-		case "bool":
+		case "boolean":
 			return "bool", nil
 		case "array":
 			return "array", nil
@@ -517,19 +533,24 @@ func generateModelTypes(obj map[string]jsonschema.SchemaOrBool, structId string,
 }
 
 // generateOscalModelStruct generates the top-level struct for OSCAL data models.
-func generateOscalModelStruct(oscalModel string, pkgName string, tags []string) (string, error) {
+func generateOscalModelStruct(oscalModels []string, pkgName string, tags []string) (string, error) {
 
-	// Example: Format the string from 'oscal-model' to 'OscalModel'.
-	formattedOscalModelName := FmtFieldName(oscalModel)
+	structString := fmt.Sprintf("type OscalModels struct {\n")
 
-	// Format struct tags.
-	tagList := []string{}
-	for _, tag := range tags {
-		tagList = append(tagList, fmt.Sprintf("%s:\"%s\"", tag, oscalModel))
+	for _, oscalModel := range oscalModels {
+		// Example: Format the string from 'oscal-model' to 'OscalModel'.
+		formattedOscalModelName := FmtFieldName(oscalModel)
+
+		// Format struct tags.
+		tagList := []string{}
+		for _, tag := range tags {
+			tagList = append(tagList, fmt.Sprintf("%s:\"%s\"", tag, oscalModel))
+		}
+
+		structString += fmt.Sprintf("\t%s %s `%s`\n", formattedOscalModelName, formattedOscalModelName, strings.Join(tagList, " "))
 	}
 
-	// Construct the struct string.
-	structString := fmt.Sprintf("type Oscal%sModel struct {\n\t%s %s `%s`\n}\n", formattedOscalModelName, formattedOscalModelName, formattedOscalModelName, strings.Join(tagList, " "))
+	structString += fmt.Sprintf("}\n")
 
 	// Format the Go struct.
 	formattedStruct, err := format.Source([]byte(structString))

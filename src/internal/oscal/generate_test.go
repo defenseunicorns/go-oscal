@@ -3,6 +3,7 @@ package oscal
 import (
 	"fmt"
 	"os"
+	"reflect"
 	"sort"
 	"strings"
 	"testing"
@@ -29,13 +30,13 @@ func TestGetOscalModel(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expected := "test-data"
-	actual, err := getOscalModel(schema.Required)
+	expected := []string{"test-data"}
+	actual, err := getOscalModel(schema)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if expected != actual {
+	if !reflect.DeepEqual(actual, expected) {
 		t.Fatalf("error getOscalModel(): expected: %s | got: %s", expected, actual)
 	}
 }
@@ -80,11 +81,11 @@ func TestGenerateUniqueIdMapComponent(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	oscalModel, err := getOscalModel(schema.Required)
+	oscalModel, err := getOscalModel(schema)
 	if err != nil {
 		t.Fatal(err)
 	}
-	modelId, err := setOscalModelRef(oscalModel)
+	modelId, err := setOscalModelRef(oscalModel[0])
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -120,11 +121,11 @@ func TestGenerateUniqueIdMapSSP(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	oscalModel, err := getOscalModel(schema.Required)
+	oscalModel, err := getOscalModel(schema)
 	if err != nil {
 		t.Fatal(err)
 	}
-	modelId, err := setOscalModelRef(oscalModel)
+	modelId, err := setOscalModelRef(oscalModel[0])
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -157,11 +158,11 @@ func TestFormatStructTagsComponent(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	oscalModel, err := getOscalModel(schema.Required)
+	oscalModel, err := getOscalModel(schema)
 	if err != nil {
 		t.Fatal(err)
 	}
-	modelId, err := setOscalModelRef(oscalModel)
+	modelId, err := setOscalModelRef(oscalModel[0])
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -191,11 +192,11 @@ func TestFormatStructTagsSSP(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	oscalModel, err := getOscalModel(schema.Required)
+	oscalModel, err := getOscalModel(schema)
 	if err != nil {
 		t.Fatal(err)
 	}
-	modelId, err := setOscalModelRef(oscalModel)
+	modelId, err := setOscalModelRef(oscalModel[0])
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -253,11 +254,11 @@ func TestBuildStructDataComponent(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	oscalModel, err := getOscalModel(schema.Required)
+	oscalModel, err := getOscalModel(schema)
 	if err != nil {
 		t.Fatal(err)
 	}
-	modelId, err := setOscalModelRef(oscalModel)
+	modelId, err := setOscalModelRef(oscalModel[0])
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -298,11 +299,11 @@ func TestBuildStructDataSSP(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	oscalModel, err := getOscalModel(schema.Required)
+	oscalModel, err := getOscalModel(schema)
 	if err != nil {
 		t.Fatal(err)
 	}
-	modelId, err := setOscalModelRef(oscalModel)
+	modelId, err := setOscalModelRef(oscalModel[0])
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -341,11 +342,11 @@ func TestGenerateModelTypesComponent(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	oscalModel, err := getOscalModel(schema.Required)
+	oscalModel, err := getOscalModel(schema)
 	if err != nil {
 		t.Fatal(err)
 	}
-	modelId, err := setOscalModelRef(oscalModel)
+	modelId, err := setOscalModelRef(oscalModel[0])
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -378,11 +379,11 @@ func TestGenerateModelTypesSSP(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	oscalModel, err := getOscalModel(schema.Required)
+	oscalModel, err := getOscalModel(schema)
 	if err != nil {
 		t.Fatal(err)
 	}
-	modelId, err := setOscalModelRef(oscalModel)
+	modelId, err := setOscalModelRef(oscalModel[0])
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -417,7 +418,7 @@ func TestGenerateOscalComponentModelStruct(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	oscalModel, err := getOscalModel(schema.Required)
+	oscalModel, err := getOscalModel(schema)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -451,7 +452,7 @@ func TestGenerateOscalSSPModelStruct(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	oscalModel, err := getOscalModel(schema.Required)
+	oscalModel, err := getOscalModel(schema)
 	if err != nil {
 		t.Fatal(err)
 	}
