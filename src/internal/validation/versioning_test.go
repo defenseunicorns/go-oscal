@@ -1,7 +1,6 @@
 package validation
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
@@ -83,20 +82,17 @@ func TestOscalVersioning(t *testing.T) {
 // TODO: Add tests for supported versions other than V1.0.4
 func TestIsValidSchemaVersion(t *testing.T) {
 	var (
-		invalidComponentPath = "../../../testdata/validation/test-data.yaml"
-		validComponentPath   = "../../../testdata/validation/valid-test-data.yaml"
+		invalidComponentPath = "../../../testdata/validation/invalid-component-definition.yaml"
+		validComponentPath   = "../../../testdata/validation/valid-component-definition.yaml"
+		assessmentResultPath = "../../../testdata/validation/assessment-result.yaml"
 	)
-	invalidComponentDefinition, err := readTestComponentDefinitionFile(t, invalidComponentPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	validComponentDefinition, err := readTestComponentDefinitionFile(t, validComponentPath)
-	if err != nil {
-		t.Fatal(err)
-	}
+	invalidComponentDefinitionYamlBytes := readFile(t, invalidComponentPath)
+	validComponentDefinitionYamlBytes := readFile(t, validComponentPath)
+	assessmentResultYamlBytes := readFile(t, assessmentResultPath)
+	catalogJsonBytes := readFile(t, "../../../testdata/validation/catalog.json")
 
 	t.Run("returns true when a valid component definition of the correct version is passed", func(t *testing.T) {
-		valid := IsValidSchemaVersion("1.0.4", validComponentDefinition)
+		valid := IsValidSchemaVersion("1.0.4", validComponentDefinitionYamlBytes)
 		if !valid {
 			t.Errorf("expected true, got %v", valid)
 		}
@@ -104,24 +100,62 @@ func TestIsValidSchemaVersion(t *testing.T) {
 	})
 
 	t.Run("returns false when an invalid component definition of the correct version is passed", func(t *testing.T) {
-		valid := IsValidSchemaVersion("1.0.4", invalidComponentDefinition)
+		valid := IsValidSchemaVersion("1.0.4", invalidComponentDefinitionYamlBytes)
 		if valid {
 			t.Errorf("expected false, got %v", valid)
 		}
 	})
+
+	t.Run("returns true when a valid assessment result of the correct version is passed", func(t *testing.T) {
+		valid := IsValidSchemaVersion("1.0.4", assessmentResultYamlBytes)
+		if !valid {
+			t.Errorf("expected true, got %v", valid)
+		}
+	})
+
+	t.Run("Handles json as well as yaml", func(t *testing.T) {
+
+		t.Run("returns true when a valid catalog of the correct version is passed", func(t *testing.T) {
+			valid := IsValidSchemaVersion("1.1.0", catalogJsonBytes)
+			if !valid {
+				t.Errorf("expected true, got %v", valid)
+			}
+		})
+
+	})
+	t.Run("Handles interface{} as well as []byte", func(t *testing.T) {
+		t.Run("returns true when a valid assessment result interface of the correct version is passed", func(t *testing.T) {
+			assessmentResultInterface := unmarshalToYaml(t, assessmentResultYamlBytes)
+			valid := IsValidSchemaVersion("1.0.4", assessmentResultInterface)
+			if !valid {
+				t.Errorf("expected true, got %v", valid)
+			}
+		})
+		t.Run("returns true when a valid catalog interface of the correct version is passed", func(t *testing.T) {
+			catalogResultInterface := unmarshalToYaml(t, catalogJsonBytes)
+			valid := IsValidSchemaVersion("1.1.0", catalogResultInterface)
+			if !valid {
+				t.Errorf("expected true, got %v", valid)
+			}
+		})
+	})
 }
 
-func readTestComponentDefinitionFile(t *testing.T, path string) (componentDefinition interface{}, err error) {
+func unmarshalToYaml(t *testing.T, bytes []byte) (result interface{}) {
+	t.Helper()
+	err := yaml.Unmarshal(bytes, &result)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return result
+}
+
+func readFile(t *testing.T, path string) []byte {
 	t.Helper()
 
-	componentDefinitionBytes, err := os.ReadFile(path)
+	docBytes, err := os.ReadFile(path)
 	if err != nil {
-		return componentDefinition, fmt.Errorf("failed to read in test component definition file: %v", err)
+		t.Fatal(err)
 	}
-
-	if err := yaml.Unmarshal(componentDefinitionBytes, &componentDefinition); err != nil {
-		return componentDefinition, fmt.Errorf("failed to unmarshal test component definition file: %v", err)
-	}
-
-	return componentDefinition, err
+	return docBytes
 }

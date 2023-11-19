@@ -5,16 +5,18 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"reflect"
 	"regexp"
 	"strings"
 
 	"github.com/santhosh-tekuri/jsonschema/v5"
+	"gopkg.in/yaml.v3"
 )
 
 //go:embed schema/*.json
 var schemas embed.FS
 
-const SCHEMA_PREFIX = "oscal_component_schema-"
+const SCHEMA_PREFIX = "oscal_complete_schema-"
 const DEFAULT_OSCAL_VERSION = "1.0.4"
 
 var versionRegexp = regexp.MustCompile(`^\d+([-\.]\d+){2}$`)
@@ -27,7 +29,37 @@ var supportedVersion = map[string]bool{
 	"1.1.1": true,
 }
 
-func IsValidSchemaVersion(version string, component interface{}) bool {
+// CoerceToJSONForTypeSafety takes a yaml byte array and coerces it to a json interface{}
+// This is necessary because the jsonschema library does not support yaml date types that are not declared as strings ie "2021-01-01" vs 2021-01-01
+func CoerceToJSONForTypeSafety[T interface{} | []byte](version string, ymlData T) (model interface{}, err error) {
+	ymlBytes, ok := reflect.ValueOf(ymlData).Interface().([]byte)
+	if ok {
+		err = yaml.Unmarshal(ymlBytes, &model)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		model = ymlData
+	}
+	jsonBytes, err := json.Marshal(model)
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(jsonBytes, &model)
+	if err != nil {
+		return nil, err
+	}
+
+	return model, nil
+}
+
+func IsValidSchemaVersion[T interface{} | []byte](version string, docBytes T) bool {
+	component, err := CoerceToJSONForTypeSafety(version, docBytes)
+	if err != nil {
+		log.Printf("%#v\n", err)
+		return false
+	}
+
 	compiler := jsonschema.NewCompiler()
 	schemaPath := SCHEMA_PREFIX + strings.ReplaceAll(version, ".", "-") + ".json"
 	schemaBytes, err := schemas.ReadFile("schema/" + schemaPath)
@@ -48,9 +80,11 @@ func IsValidSchemaVersion(version string, component interface{}) bool {
 	}
 	err = sch.Validate(component)
 	if err != nil {
-		b, _ := json.MarshalIndent(err.(*jsonschema.ValidationError).DetailedOutput(), "", "  ")
-		fmt.Println(string(b))
+		log.Printf("%#v\n", err)
 		return false
+		// b, _ := json.MarshalIndent(err.(*jsonschema.ValidationError).DetailedOutput(), "", "  ")
+		// fmt.Println(string(b))
+		// return false
 	}
 	return true
 }
