@@ -1,9 +1,9 @@
 package validation
 
 import (
+	"os"
 	"testing"
 
-	"github.com/defenseunicorns/go-oscal/src/internal/utils"
 	V104 "github.com/defenseunicorns/go-oscal/src/types/oscal-1-0-4"
 	"gopkg.in/yaml.v3"
 )
@@ -267,7 +267,7 @@ func TestIsValidSchemaVersion(t *testing.T) {
 func getByteMap(t *testing.T) map[string][]byte {
 	var byteMap = make(map[string][]byte)
 	for _, path := range pathSlice {
-		bytes, err := utils.ReadFile(path)
+		bytes, err := os.ReadFile(path)
 		if err != nil {
 			panic(err)
 		}
@@ -275,13 +275,4 @@ func getByteMap(t *testing.T) map[string][]byte {
 	}
 
 	return byteMap
-}
-
-func unmarshalToYaml(t *testing.T, bytes []byte) (result interface{}) {
-	t.Helper()
-	err := yaml.Unmarshal(bytes, &result)
-	if err != nil {
-		t.Fatal(err)
-	}
-	return result
 }
