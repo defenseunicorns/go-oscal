@@ -182,8 +182,8 @@ func formatUserVersion(v string) string {
 	return builtVersion
 }
 
-func findOscalVersion(data map[string]interface{}) (string, error) {
-	// Check if the "oscal-version" field exists in the top-level map and return if not an empty string as the oscal-version is required for all versions in metadata.
+// Recursively search for the oscal-version field
+func deepFindOscalVersion(data map[string]interface{}) (string, error) {
 	if version, ok := data["oscal-version"].(string); ok && version != "" {
 		return version, nil
 	}
@@ -196,7 +196,42 @@ func findOscalVersion(data map[string]interface{}) (string, error) {
 			}
 		}
 	}
+	return "", fmt.Errorf("required field: oscal-version not found")
+}
+
+// Assumes that the data follows the OscalModel structure of any version.
+// If that assumption is false, this function will do a deep recursive search for the oscal-version field
+// Note: Not sure that deep search is necessary, as the oscal-version field is required at the top level of the model
+func findOscalVersion(data map[string]interface{}) (version string, err error) {
+	// Check for a top level field that has the Metadata substructure
+	for _, value := range data {
+		// Ensure the value is a map[string]interface{}
+		modelType, ok := value.(map[string]interface{})
+		if ok {
+			// Check if the map has a metadata field
+			if modelType["metadata"] != nil {
+				// Ensure the metadata field is a map[string]interface{}
+				metadata, ok := modelType["metadata"].(map[string]interface{})
+				if ok {
+					// Check if the metadata field has an oscal-version field
+					if metadata["oscal-version"] != nil {
+						version, ok := metadata["oscal-version"].(string)
+						// Return the version if it is a string and not empty
+						if ok && version != "" {
+							return version, nil
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// Failed to find the oscal-version in the assumed OscalModel structure, so do a deep search
+	// TODO: Remove this deep search if it is not necessary
+	if version == "" {
+		return deepFindOscalVersion(data)
+	}
 
 	// Return an error if the field is not found
-	return "", fmt.Errorf("required field: oscal-version not found")
+	return "", fmt.Errorf("required field: \"oscal-version\" not found")
 }
