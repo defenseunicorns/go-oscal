@@ -21,18 +21,21 @@ import (
 //go:embed schema/*.json
 var schemas embed.FS
 
-const SCHEMA_PREFIX = "oscal_complete_schema-"
-const DEFAULT_OSCAL_VERSION = "1.0.4"
+const (
+	SCHEMA_PREFIX         = "oscal_complete_schema-"
+	DEFAULT_OSCAL_VERSION = "1.0.4"
+)
 
-var versionRegexp = regexp.MustCompile(`^\d+([-\.]\d+){2}$`)
-
-var supportedVersion = map[string]bool{
-	"1.0.4": true,
-	"1.0.5": true,
-	"1.0.6": true,
-	"1.1.0": true,
-	"1.1.1": true,
-}
+var (
+	versionRegexp    = regexp.MustCompile(`^\d+([-\.]\d+){2}$`)
+	supportedVersion = map[string]bool{
+		"1.0.4": true,
+		"1.0.5": true,
+		"1.0.6": true,
+		"1.1.0": true,
+		"1.1.1": true,
+	}
+)
 
 // InterfaceOrBytes is an interface{} or []byte for generic functions that can support either type
 type InterfaceOrBytes interface {
@@ -60,17 +63,19 @@ func GetVersionedModel(version string) interface{} {
 
 // IsValidSchemaVersion takes a version string and a []byte or interface{} and returns true if the yaml/json is valid for the specified oscal-version
 func IsValidSchemaVersion[T InterfaceOrBytes](oscalVersion string, docBytes T) (err error) {
+	modelJson, err := CoerceToJSONForTypeSafety(oscalVersion, docBytes)
+	if err != nil {
+		return err
+	}
+
+	// Ensure the oscal-version is valid and
 	formattedVersion, err := FormatOscalVersion(oscalVersion)
 	if err != nil {
 		return err
 	}
 
+	// Build the schema file-path
 	schemaPath := SCHEMA_PREFIX + strings.ReplaceAll(formattedVersion, ".", "-") + ".json"
-
-	modelJson, err := CoerceToJSONForTypeSafety(oscalVersion, docBytes)
-	if err != nil {
-		return err
-	}
 
 	schemaBytes, err := schemas.ReadFile("schema/" + schemaPath)
 	if err != nil {
@@ -96,7 +101,7 @@ func IsValidSchemaVersion[T InterfaceOrBytes](oscalVersion string, docBytes T) (
 		return errors.New(string(formattedError))
 	}
 
-	// Successfull validation
+	// Successful validation
 	return nil
 }
 
