@@ -10,7 +10,6 @@ component-definition:
       - rel: website
         href: https://myorganization.com
     last-modified: "2023-06-28T17:19:35-05:00"
-    oscal-version: 1.0.4
     title: my-oscal-document
   components:
   - control-implementations:

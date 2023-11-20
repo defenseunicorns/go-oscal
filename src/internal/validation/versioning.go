@@ -9,6 +9,11 @@ import (
 	"regexp"
 	"strings"
 
+	V104 "github.com/defenseunicorns/go-oscal/src/types/oscal-1-0-4"
+	V105 "github.com/defenseunicorns/go-oscal/src/types/oscal-1-0-5"
+	V106 "github.com/defenseunicorns/go-oscal/src/types/oscal-1-0-6"
+	V110 "github.com/defenseunicorns/go-oscal/src/types/oscal-1-1-0"
+	V111 "github.com/defenseunicorns/go-oscal/src/types/oscal-1-1-1"
 	"github.com/santhosh-tekuri/jsonschema/v5"
 	"gopkg.in/yaml.v3"
 )
@@ -27,6 +32,76 @@ var supportedVersion = map[string]bool{
 	"1.0.6": true,
 	"1.1.0": true,
 	"1.1.1": true,
+}
+
+// GetModels returns an instance of the OSCAL model for the specified version.
+// Returns an empty map[string]interface{} if the version is not supported.
+func GetVersionedModel(version string) interface{} {
+	switch version {
+	case "1.0.4":
+		return V104.OscalModels{}
+	case "1.0.5":
+		return V105.OscalModels{}
+	case "1.0.6":
+		return V106.OscalModels{}
+	case "1.1.0":
+		return V110.OscalModels{}
+	case "1.1.1":
+		return V111.OscalModels{}
+	default:
+		return map[string]interface{}{}
+	}
+}
+
+func findOscalVersion(data map[string]interface{}) (string, error) {
+	// Check if the "oscal-version" field exists in the top-level map
+	if version, ok := data["oscal-version"].(string); ok && version != "" {
+		return version, nil
+	}
+
+	// If not found at the top level, recursively search nested structures
+	for _, value := range data {
+		if nestedMap, isMap := value.(map[string]interface{}); isMap {
+			if version, err := findOscalVersion(nestedMap); err == nil {
+				return version, nil
+			}
+		}
+	}
+
+	// Return an error if the field is not found
+	return "", fmt.Errorf("required field: oscal-version not found")
+}
+
+// GetOscalModelVersion takes an interface{} or []byte and returns the metadata.oscal_version as a string
+func GetOscalModelVersion[T interface{} | []byte](incomingModel T) (version string, err error) {
+	// Check if interface{} and can be coerced to map[string]interface{}
+	model, ok := reflect.ValueOf(incomingModel).Interface().(map[string]interface{})
+	if !ok {
+		// Check if []byte
+		ymlBytes, ok := reflect.ValueOf(incomingModel).Interface().([]byte)
+		// If not []byte, marshal to []byte
+		if !ok {
+			ymlBytes, err = yaml.Marshal(incomingModel)
+			if err != nil {
+				return "", err
+			}
+		}
+		// Unmarshal to map[string]interface{}
+		err = yaml.Unmarshal(ymlBytes, &model)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	// find the oscal-version field
+	version, err = findOscalVersion(model)
+	if err != nil {
+		return "", err
+	}
+	// if version == "" {
+	// 	return "", fmt.Errorf("required field: oscal-version not found")
+	// }
+	return version, nil
 }
 
 // CoerceToJSONForTypeSafety takes a yaml byte array and coerces it to a json interface{}
@@ -53,15 +128,16 @@ func CoerceToJSONForTypeSafety[T interface{} | []byte](version string, ymlData T
 	return model, nil
 }
 
-func IsValidSchemaVersion[T interface{} | []byte](version string, docBytes T) bool {
-	component, err := CoerceToJSONForTypeSafety(version, docBytes)
+// IsValidSchemaVersion takes a version string and a []byte or interface{} and returns true if the yaml/json is valid for the specified oscal-version
+func IsValidSchemaVersion[T interface{} | []byte](oscalVersion string, docBytes T) bool {
+	component, err := CoerceToJSONForTypeSafety(oscalVersion, docBytes)
 	if err != nil {
 		log.Printf("%#v\n", err)
 		return false
 	}
 
 	compiler := jsonschema.NewCompiler()
-	schemaPath := SCHEMA_PREFIX + strings.ReplaceAll(version, ".", "-") + ".json"
+	schemaPath := SCHEMA_PREFIX + strings.ReplaceAll(oscalVersion, ".", "-") + ".json"
 	schemaBytes, err := schemas.ReadFile("schema/" + schemaPath)
 
 	if err != nil {
