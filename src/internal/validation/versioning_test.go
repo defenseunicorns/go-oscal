@@ -18,12 +18,12 @@ const (
 )
 
 var (
-	invalidComponentPath = "../../../testdata/validation/invalid-component-definition.yaml"
-	validComponentPath   = "../../../testdata/validation/valid-component-definition.yaml"
-	assessmentResultPath = "../../../testdata/validation/assessment-result.yaml"
-	validCatalogPath     = "../../../testdata/validation/catalog.yaml"
-	catalogJsonPath      = "../../../testdata/validation/catalog.json"
-	pathSlice            = []string{invalidComponentPath, validComponentPath, assessmentResultPath, validCatalogPath, catalogJsonPath}
+	invalidComponentPath      = "../../../testdata/validation/invalid-component-definition.yaml"
+	validComponentPath        = "../../../testdata/validation/valid-component-definition.yaml"
+	validAssessmentResultPath = "../../../testdata/validation/assessment-result.yaml"
+	validCatalogPath          = "../../../testdata/validation/catalog.yaml"
+	validCatalogJsonPath      = "../../../testdata/validation/catalog.json"
+	pathSlice                 = []string{invalidComponentPath, validComponentPath, validAssessmentResultPath, validCatalogPath, validCatalogJsonPath}
 )
 
 func TestOscalVersioning(t *testing.T) {
@@ -114,7 +114,7 @@ func TestGettingVersionFromModel(t *testing.T) {
 
 	t.Run("returns valid version when a valid assessment result is passed", func(t *testing.T) {
 		t.Parallel()
-		version, err := GetOscalVersionFromModel(byteMap[assessmentResultPath])
+		version, err := GetOscalVersionFromModel(byteMap[validAssessmentResultPath])
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
 		}
@@ -241,7 +241,7 @@ func TestIsValidSchemaVersion(t *testing.T) {
 
 	t.Run("returns nil when a valid assessment result of the correct version is passed", func(t *testing.T) {
 		t.Parallel()
-		err := IsValidSchemaVersion("1.0.4", byteMap[assessmentResultPath])
+		err := IsValidSchemaVersion("1.0.4", byteMap[validAssessmentResultPath])
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
 		}
@@ -257,7 +257,7 @@ func TestIsValidSchemaVersion(t *testing.T) {
 
 	t.Run("Handles json as well as yaml", func(t *testing.T) {
 		t.Parallel()
-		err := IsValidSchemaVersion("1.1.0", byteMap[catalogJsonPath])
+		err := IsValidSchemaVersion("1.1.0", byteMap[validCatalogJsonPath])
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
 		}
