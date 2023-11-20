@@ -2,6 +2,7 @@ package validation
 
 import (
 	"os"
+	"sync"
 	"testing"
 
 	V104 "github.com/defenseunicorns/go-oscal/src/types/oscal-1-0-4"
@@ -24,6 +25,8 @@ var (
 	validCatalogPath          = "../../../testdata/validation/catalog.yaml"
 	validCatalogJsonPath      = "../../../testdata/validation/catalog.json"
 	pathSlice                 = []string{invalidComponentPath, validComponentPath, validAssessmentResultPath, validCatalogPath, validCatalogJsonPath}
+	byteMap                   = map[string][]byte{}
+	mutex                     = sync.Mutex{}
 )
 
 func TestOscalVersioning(t *testing.T) {
@@ -99,7 +102,7 @@ func TestOscalVersioning(t *testing.T) {
 
 func TestGettingVersionFromModel(t *testing.T) {
 	t.Parallel()
-	byteMap := getByteMap(t)
+	getByteMap(t)
 
 	t.Run("returns valid version when a valid component definition is passed", func(t *testing.T) {
 		t.Parallel()
@@ -212,7 +215,7 @@ func TestGettingVersionFromModel(t *testing.T) {
 
 func TestIsValidSchemaVersion(t *testing.T) {
 	t.Parallel()
-	byteMap := getByteMap(t)
+	getByteMap(t)
 
 	t.Run("returns nil when a valid component definition of the correct version is passed", func(t *testing.T) {
 		t.Parallel()
@@ -264,15 +267,16 @@ func TestIsValidSchemaVersion(t *testing.T) {
 	})
 }
 
-func getByteMap(t *testing.T) map[string][]byte {
-	var byteMap = make(map[string][]byte)
-	for _, path := range pathSlice {
-		bytes, err := os.ReadFile(path)
-		if err != nil {
-			panic(err)
+func getByteMap(t *testing.T) {
+	mutex.Lock()
+	if len(byteMap) == 0 {
+		for _, path := range pathSlice {
+			bytes, err := os.ReadFile(path)
+			if err != nil {
+				panic(err)
+			}
+			byteMap[path] = bytes
 		}
-		byteMap[path] = bytes
 	}
-
-	return byteMap
+	mutex.Unlock()
 }
