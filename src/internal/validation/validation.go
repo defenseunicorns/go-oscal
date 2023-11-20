@@ -60,36 +60,43 @@ func GetVersionedModel(version string) interface{} {
 
 // IsValidSchemaVersion takes a version string and a []byte or interface{} and returns true if the yaml/json is valid for the specified oscal-version
 func IsValidSchemaVersion[T InterfaceOrBytes](oscalVersion string, docBytes T) (err error) {
+	formattedVersion, err := FormatOscalVersion(oscalVersion)
+	if err != nil {
+		return err
+	}
+
+	schemaPath := SCHEMA_PREFIX + strings.ReplaceAll(formattedVersion, ".", "-") + ".json"
+
 	modelJson, err := CoerceToJSONForTypeSafety(oscalVersion, docBytes)
 	if err != nil {
 		return err
 	}
 
-	compiler := jsonschema.NewCompiler()
-	schemaPath := SCHEMA_PREFIX + strings.ReplaceAll(oscalVersion, ".", "-") + ".json"
 	schemaBytes, err := schemas.ReadFile("schema/" + schemaPath)
 	if err != nil {
 		return err
 	}
-	compiler.AddResource(schemaPath, strings.NewReader(string(schemaBytes)))
+
+	sch, err := jsonschema.CompileString(formattedVersion, string(schemaBytes))
 	if err != nil {
 		return err
 	}
-	sch, err := compiler.Compile(schemaPath)
-	if err != nil {
-		return err
-	}
+
 	err = sch.Validate(modelJson)
 	if err != nil {
-
+		// If the error is not a validation error, return the error
 		validationErr, ok := err.(*jsonschema.ValidationError)
 		if !ok {
 			return err
 		}
+
 		// TODO: More succinct error message.
+		// Return the detailed output of the validation error
 		formattedError, _ := json.MarshalIndent(validationErr.DetailedOutput(), "", "  ")
 		return errors.New(string(formattedError))
 	}
+
+	// Successfull validation
 	return nil
 }
 
@@ -132,29 +139,25 @@ func GetOscalVersionFromModel[T InterfaceOrBytes](incomingModel T) (version stri
 	return version, nil
 }
 
-// FormatCmdLineOscalVersion returns formatted OSCAL version if valid version is passed, returns error if not.
-func FormatCmdLineOscalVersion(cmdLineVersion string) (formattedVersion string, err error) {
-	if cmdLineVersion == "" {
+// FormatOscalVersion returns formatted OSCAL version if valid version is passed, returns error if not.
+func FormatOscalVersion(unformattedVersion string) (formattedVersion string, err error) {
+	if unformattedVersion == "" {
 		return DEFAULT_OSCAL_VERSION, nil
 	}
 
-	formattedVersion = strings.ToLower(cmdLineVersion)
+	formattedVersion = strings.ToLower(unformattedVersion)
 	formattedVersion = strings.TrimPrefix(formattedVersion, "v")
 	formattedVersion = strings.ReplaceAll(formattedVersion, "-", ".")
 
-	if !isVersionRegexp(formattedVersion) {
-		return formattedVersion, fmt.Errorf("version %s is not a valid version", cmdLineVersion)
+	if !versionRegexp.MatchString(formattedVersion) {
+		return formattedVersion, fmt.Errorf("version %s is not a valid version", unformattedVersion)
 	}
 
 	if !supportedVersion[formattedVersion] {
-		return formattedVersion, fmt.Errorf("version %s is not supported", cmdLineVersion)
+		return formattedVersion, fmt.Errorf("version %s is not supported", unformattedVersion)
 	}
 
 	return formattedVersion, nil
-}
-
-func isVersionRegexp(v string) bool {
-	return versionRegexp.MatchString(v)
 }
 
 // ConvertInterfaceOrBytesToJson takes an InterfaceOrByte and returns a map[string]interface{}

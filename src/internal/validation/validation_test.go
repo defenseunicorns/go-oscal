@@ -33,7 +33,7 @@ func TestOscalVersioning(t *testing.T) {
 	t.Parallel()
 	t.Run("returns valid version when user version is in proper format", func(t *testing.T) {
 		t.Parallel()
-		version, err := FormatCmdLineOscalVersion(validVersion)
+		version, err := FormatOscalVersion(validVersion)
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
 		}
@@ -44,7 +44,7 @@ func TestOscalVersioning(t *testing.T) {
 
 	t.Run("replaces dashes with periods when version given with dashes", func(t *testing.T) {
 		t.Parallel()
-		version, err := FormatCmdLineOscalVersion(validVersionWithDashes)
+		version, err := FormatOscalVersion(validVersionWithDashes)
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
 		}
@@ -55,7 +55,7 @@ func TestOscalVersioning(t *testing.T) {
 
 	t.Run("returns valid version when prefixed with v", func(t *testing.T) {
 		t.Parallel()
-		version, err := FormatCmdLineOscalVersion(validVersionWithPrefix)
+		version, err := FormatOscalVersion(validVersionWithPrefix)
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
 		}
@@ -66,7 +66,7 @@ func TestOscalVersioning(t *testing.T) {
 
 	t.Run("uses the default oscal version when version is empty", func(t *testing.T) {
 		t.Parallel()
-		version, err := FormatCmdLineOscalVersion("")
+		version, err := FormatOscalVersion("")
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
 		}
@@ -77,7 +77,7 @@ func TestOscalVersioning(t *testing.T) {
 
 	t.Run("throws error with invalid version structure", func(t *testing.T) {
 		t.Parallel()
-		_, err := FormatCmdLineOscalVersion(tooManyVersionNumbers)
+		_, err := FormatOscalVersion(tooManyVersionNumbers)
 		if err == nil {
 			t.Errorf("expected error, got %v", err)
 		}
@@ -85,7 +85,7 @@ func TestOscalVersioning(t *testing.T) {
 
 	t.Run("throws error with too few version numbers", func(t *testing.T) {
 		t.Parallel()
-		_, err := FormatCmdLineOscalVersion(tooFewVersionNumbers)
+		_, err := FormatOscalVersion(tooFewVersionNumbers)
 		if err == nil {
 			t.Errorf("expected error, got %v", err)
 		}
@@ -93,7 +93,7 @@ func TestOscalVersioning(t *testing.T) {
 
 	t.Run("throws error when version is not supported", func(t *testing.T) {
 		t.Parallel()
-		_, err := FormatCmdLineOscalVersion(nonExistentVersion)
+		_, err := FormatOscalVersion(nonExistentVersion)
 		if err == nil {
 			t.Errorf("expected error, got %v", err)
 		}
