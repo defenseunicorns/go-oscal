@@ -83,9 +83,6 @@ func GetOscalVersionFromModel[T Model](incomingModel T) (version string, err err
 	if err != nil {
 		return "", err
 	}
-	// if version == "" {
-	// 	return "", fmt.Errorf("required field: oscal-version not found")
-	// }
 	return version, nil
 }
 
