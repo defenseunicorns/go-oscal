@@ -116,7 +116,6 @@ func CoerceToJSONForTypeSafety[T Model](version string, ymlData T) (model interf
 	return model, nil
 }
 
-// TODO: Proper error handling.
 // IsValidSchemaVersion takes a version string and a []byte or interface{} and returns true if the yaml/json is valid for the specified oscal-version
 func IsValidSchemaVersion[T Model](oscalVersion string, docBytes T) (err error) {
 	component, err := CoerceToJSONForTypeSafety(oscalVersion, docBytes)
