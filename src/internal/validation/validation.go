@@ -58,65 +58,9 @@ func GetVersionedModel(version string) interface{} {
 	}
 }
 
-// GetOscalVersionFromModel takes an interface{} or []byte and returns the metadata.oscal_version as a string
-func GetOscalVersionFromModel[T InterfaceOrBytes](incomingModel T) (version string, err error) {
-	// Check if interface{} and can be coerced to map[string]interface{}
-	model, ok := reflect.ValueOf(incomingModel).Interface().(map[string]interface{})
-	if !ok {
-		// Check if []byte
-		ymlBytes, ok := reflect.ValueOf(incomingModel).Interface().([]byte)
-		// If not []byte, marshal to []byte
-		if !ok {
-			ymlBytes, err = yaml.Marshal(incomingModel)
-			if err != nil {
-				return "", err
-			}
-		}
-		// Unmarshal to map[string]interface{}
-		err = yaml.Unmarshal(ymlBytes, &model)
-		if err != nil {
-			return "", err
-		}
-	}
-
-	// find the oscal-version field
-	version, err = findOscalVersion(model)
-	if err != nil {
-		return "", err
-	}
-	return version, nil
-}
-
-// CoerceToJSONForTypeSafety takes a yaml byte array and coerces it to a json interface{}
-// This is necessary because the jsonschema library does not support yaml date types that are not declared as strings ie "2021-01-01" vs 2021-01-01
-func CoerceToJSONForTypeSafety[T InterfaceOrBytes](version string, ymlData T) (model interface{}, err error) {
-	// Check if []byte
-	ymlBytes, ok := reflect.ValueOf(ymlData).Interface().([]byte)
-	if ok {
-		// Unmarshal to map[string]interface{}
-		err = yaml.Unmarshal(ymlBytes, &model)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		// set model to ymlData if not []byte
-		model = ymlData
-	}
-	jsonBytes, err := json.Marshal(model)
-	if err != nil {
-		return nil, err
-	}
-	err = json.Unmarshal(jsonBytes, &model)
-	if err != nil {
-		return nil, err
-	}
-
-	return model, nil
-}
-
 // IsValidSchemaVersion takes a version string and a []byte or interface{} and returns true if the yaml/json is valid for the specified oscal-version
 func IsValidSchemaVersion[T InterfaceOrBytes](oscalVersion string, docBytes T) (err error) {
-	component, err := CoerceToJSONForTypeSafety(oscalVersion, docBytes)
+	modelJson, err := CoerceToJSONForTypeSafety(oscalVersion, docBytes)
 	if err != nil {
 		return err
 	}
@@ -135,7 +79,7 @@ func IsValidSchemaVersion[T InterfaceOrBytes](oscalVersion string, docBytes T) (
 	if err != nil {
 		return err
 	}
-	err = sch.Validate(component)
+	err = sch.Validate(modelJson)
 	if err != nil {
 
 		validationErr, ok := err.(*jsonschema.ValidationError)
@@ -149,35 +93,91 @@ func IsValidSchemaVersion[T InterfaceOrBytes](oscalVersion string, docBytes T) (
 	return nil
 }
 
-// FormatUserOscalVersion returns formatted OSCAL version if valid version is passed, returns error if not.
-func FormatUserOscalVersion(userVersion string) (string, error) {
-	if userVersion == "" {
+// CoerceToJSONForTypeSafety takes a yaml byte array and coerces it to a json interface{}
+// This is necessary because the jsonschema library only accepts valid json data types that may not match yaml.
+// Example: yaml allows for DateTimes to be time.Time, but json requires them to be strings
+// This also allows for structs to be passed in, and they will be converted to map[string]interface{}
+func CoerceToJSONForTypeSafety[T InterfaceOrBytes](version string, ymlData T) (model map[string]interface{}, err error) {
+	model, err = ConvertInterfaceOrBytesToJson(ymlData)
+	if err != nil {
+		return nil, err
+	}
+
+	jsonBytes, err := json.Marshal(model)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(jsonBytes, &model)
+	if err != nil {
+		return nil, err
+	}
+
+	return model, nil
+}
+
+// GetOscalVersionFromModel takes an interface{} or []byte and returns the metadata.oscal_version as a string
+func GetOscalVersionFromModel[T InterfaceOrBytes](incomingModel T) (version string, err error) {
+	// Check if interface{} and can be coerced to map[string]interface{}
+	model, err := ConvertInterfaceOrBytesToJson(incomingModel)
+	if err != nil {
+		return "", err
+	}
+
+	// find the oscal-version field
+	version, err = findOscalVersion(model)
+	if err != nil {
+		return "", err
+	}
+	return version, nil
+}
+
+// FormatCmdLineOscalVersion returns formatted OSCAL version if valid version is passed, returns error if not.
+func FormatCmdLineOscalVersion(cmdLineVersion string) (formattedVersion string, err error) {
+	if cmdLineVersion == "" {
 		return DEFAULT_OSCAL_VERSION, nil
 	}
-	builtVersion := formatUserVersion(userVersion)
 
-	if !isVersionRegexp(builtVersion) {
-		return builtVersion, fmt.Errorf("version %s is not a valid version", userVersion)
+	formattedVersion = strings.ToLower(cmdLineVersion)
+	formattedVersion = strings.TrimPrefix(formattedVersion, "v")
+	formattedVersion = strings.ReplaceAll(formattedVersion, "-", ".")
+
+	if !isVersionRegexp(formattedVersion) {
+		return formattedVersion, fmt.Errorf("version %s is not a valid version", cmdLineVersion)
 	}
 
-	if !supportedVersion[builtVersion] {
-		return builtVersion, fmt.Errorf("version %s is not supported", userVersion)
+	if !supportedVersion[formattedVersion] {
+		return formattedVersion, fmt.Errorf("version %s is not supported", cmdLineVersion)
 	}
 
-	return builtVersion, nil
+	return formattedVersion, nil
 }
 
 func isVersionRegexp(v string) bool {
 	return versionRegexp.MatchString(v)
 }
 
-func formatUserVersion(v string) string {
-	builtVersion := v
-	if builtVersion[0] == 'v' {
-		builtVersion = builtVersion[1:]
+// ConvertInterfaceOrBytesToJson takes an InterfaceOrByte and returns a map[string]interface{}
+func ConvertInterfaceOrBytesToJson[T InterfaceOrBytes](incomingModel T) (model map[string]interface{}, err error) {
+	// Check if interface{} and can be coerced to map[string]interface{}
+	model, ok := reflect.ValueOf(incomingModel).Interface().(map[string]interface{})
+	if !ok {
+		// Check if []byte
+		ymlBytes, ok := reflect.ValueOf(incomingModel).Interface().([]byte)
+		// If not []byte or map[string]interface{}, marshal to []byte
+		if !ok {
+			ymlBytes, err = yaml.Marshal(incomingModel)
+			if err != nil {
+				return nil, err
+			}
+		}
+		// Unmarshal to map[string]interface{}
+		err = yaml.Unmarshal(ymlBytes, &model)
+		if err != nil {
+			return nil, err
+		}
 	}
-	builtVersion = strings.ReplaceAll(builtVersion, "-", ".")
-	return builtVersion
+	return model, nil
 }
 
 // Recursively search for the oscal-version field

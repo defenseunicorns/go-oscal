@@ -33,7 +33,7 @@ func TestOscalVersioning(t *testing.T) {
 	t.Parallel()
 	t.Run("returns valid version when user version is in proper format", func(t *testing.T) {
 		t.Parallel()
-		version, err := FormatUserOscalVersion(validVersion)
+		version, err := FormatCmdLineOscalVersion(validVersion)
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
 		}
@@ -44,7 +44,7 @@ func TestOscalVersioning(t *testing.T) {
 
 	t.Run("replaces dashes with periods when version given with dashes", func(t *testing.T) {
 		t.Parallel()
-		version, err := FormatUserOscalVersion(validVersionWithDashes)
+		version, err := FormatCmdLineOscalVersion(validVersionWithDashes)
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
 		}
@@ -55,7 +55,7 @@ func TestOscalVersioning(t *testing.T) {
 
 	t.Run("returns valid version when prefixed with v", func(t *testing.T) {
 		t.Parallel()
-		version, err := FormatUserOscalVersion(validVersionWithPrefix)
+		version, err := FormatCmdLineOscalVersion(validVersionWithPrefix)
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
 		}
@@ -66,7 +66,7 @@ func TestOscalVersioning(t *testing.T) {
 
 	t.Run("uses the default oscal version when version is empty", func(t *testing.T) {
 		t.Parallel()
-		version, err := FormatUserOscalVersion("")
+		version, err := FormatCmdLineOscalVersion("")
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
 		}
@@ -77,7 +77,7 @@ func TestOscalVersioning(t *testing.T) {
 
 	t.Run("throws error with invalid version structure", func(t *testing.T) {
 		t.Parallel()
-		_, err := FormatUserOscalVersion(tooManyVersionNumbers)
+		_, err := FormatCmdLineOscalVersion(tooManyVersionNumbers)
 		if err == nil {
 			t.Errorf("expected error, got %v", err)
 		}
@@ -85,7 +85,7 @@ func TestOscalVersioning(t *testing.T) {
 
 	t.Run("throws error with too few version numbers", func(t *testing.T) {
 		t.Parallel()
-		_, err := FormatUserOscalVersion(tooFewVersionNumbers)
+		_, err := FormatCmdLineOscalVersion(tooFewVersionNumbers)
 		if err == nil {
 			t.Errorf("expected error, got %v", err)
 		}
@@ -93,7 +93,7 @@ func TestOscalVersioning(t *testing.T) {
 
 	t.Run("throws error when version is not supported", func(t *testing.T) {
 		t.Parallel()
-		_, err := FormatUserOscalVersion(nonExistentVersion)
+		_, err := FormatCmdLineOscalVersion(nonExistentVersion)
 		if err == nil {
 			t.Errorf("expected error, got %v", err)
 		}
@@ -261,6 +261,32 @@ func TestIsValidSchemaVersion(t *testing.T) {
 	t.Run("Handles json as well as yaml", func(t *testing.T) {
 		t.Parallel()
 		err := IsValidSchemaVersion("1.1.0", byteMap[validCatalogJsonPath])
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+	})
+
+	t.Run("Handles interface{} as well as []byte", func(t *testing.T) {
+		t.Parallel()
+		var modelInterface interface{}
+		err := yaml.Unmarshal(byteMap[validComponentPath], &modelInterface)
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+		err = IsValidSchemaVersion("1.0.4", modelInterface)
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+	})
+
+	t.Run("Handles OscalModels struct as well as interface{} and []byte", func(t *testing.T) {
+		t.Parallel()
+		var oscalModels V104.OscalModels
+		err := yaml.Unmarshal(byteMap[validComponentPath], &oscalModels)
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+		err = IsValidSchemaVersion("1.0.4", oscalModels)
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
 		}
