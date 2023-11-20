@@ -34,7 +34,8 @@ var supportedVersion = map[string]bool{
 	"1.1.1": true,
 }
 
-type Model interface {
+// InterfaceOrBytes is an interface{} or []byte for generic functions that can support either type
+type InterfaceOrBytes interface {
 	interface{} | []byte
 }
 
@@ -58,7 +59,7 @@ func GetVersionedModel(version string) interface{} {
 }
 
 // GetOscalVersionFromModel takes an interface{} or []byte and returns the metadata.oscal_version as a string
-func GetOscalVersionFromModel[T Model](incomingModel T) (version string, err error) {
+func GetOscalVersionFromModel[T InterfaceOrBytes](incomingModel T) (version string, err error) {
 	// Check if interface{} and can be coerced to map[string]interface{}
 	model, ok := reflect.ValueOf(incomingModel).Interface().(map[string]interface{})
 	if !ok {
@@ -88,7 +89,7 @@ func GetOscalVersionFromModel[T Model](incomingModel T) (version string, err err
 
 // CoerceToJSONForTypeSafety takes a yaml byte array and coerces it to a json interface{}
 // This is necessary because the jsonschema library does not support yaml date types that are not declared as strings ie "2021-01-01" vs 2021-01-01
-func CoerceToJSONForTypeSafety[T Model](version string, ymlData T) (model interface{}, err error) {
+func CoerceToJSONForTypeSafety[T InterfaceOrBytes](version string, ymlData T) (model interface{}, err error) {
 	// Check if []byte
 	ymlBytes, ok := reflect.ValueOf(ymlData).Interface().([]byte)
 	if ok {
@@ -114,7 +115,7 @@ func CoerceToJSONForTypeSafety[T Model](version string, ymlData T) (model interf
 }
 
 // IsValidSchemaVersion takes a version string and a []byte or interface{} and returns true if the yaml/json is valid for the specified oscal-version
-func IsValidSchemaVersion[T Model](oscalVersion string, docBytes T) (err error) {
+func IsValidSchemaVersion[T InterfaceOrBytes](oscalVersion string, docBytes T) (err error) {
 	component, err := CoerceToJSONForTypeSafety(oscalVersion, docBytes)
 	if err != nil {
 		return err
