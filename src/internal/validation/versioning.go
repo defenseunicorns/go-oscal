@@ -3,8 +3,8 @@ package validation
 import (
 	"embed"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"log"
 	"reflect"
 	"regexp"
 	"strings"
@@ -34,6 +34,10 @@ var supportedVersion = map[string]bool{
 	"1.1.1": true,
 }
 
+type Model interface {
+	interface{} | []byte
+}
+
 // GetModels returns an instance of the OSCAL model for the specified version.
 // Returns an empty map[string]interface{} if the version is not supported.
 func GetVersionedModel(version string) interface{} {
@@ -53,27 +57,8 @@ func GetVersionedModel(version string) interface{} {
 	}
 }
 
-func findOscalVersion(data map[string]interface{}) (string, error) {
-	// Check if the "oscal-version" field exists in the top-level map
-	if version, ok := data["oscal-version"].(string); ok && version != "" {
-		return version, nil
-	}
-
-	// If not found at the top level, recursively search nested structures
-	for _, value := range data {
-		if nestedMap, isMap := value.(map[string]interface{}); isMap {
-			if version, err := findOscalVersion(nestedMap); err == nil {
-				return version, nil
-			}
-		}
-	}
-
-	// Return an error if the field is not found
-	return "", fmt.Errorf("required field: oscal-version not found")
-}
-
-// GetOscalModelVersion takes an interface{} or []byte and returns the metadata.oscal_version as a string
-func GetOscalModelVersion[T interface{} | []byte](incomingModel T) (version string, err error) {
+// GetOscalVersionFromModel takes an interface{} or []byte and returns the metadata.oscal_version as a string
+func GetOscalVersionFromModel[T Model](incomingModel T) (version string, err error) {
 	// Check if interface{} and can be coerced to map[string]interface{}
 	model, ok := reflect.ValueOf(incomingModel).Interface().(map[string]interface{})
 	if !ok {
@@ -106,14 +91,17 @@ func GetOscalModelVersion[T interface{} | []byte](incomingModel T) (version stri
 
 // CoerceToJSONForTypeSafety takes a yaml byte array and coerces it to a json interface{}
 // This is necessary because the jsonschema library does not support yaml date types that are not declared as strings ie "2021-01-01" vs 2021-01-01
-func CoerceToJSONForTypeSafety[T interface{} | []byte](version string, ymlData T) (model interface{}, err error) {
+func CoerceToJSONForTypeSafety[T Model](version string, ymlData T) (model interface{}, err error) {
+	// Check if []byte
 	ymlBytes, ok := reflect.ValueOf(ymlData).Interface().([]byte)
 	if ok {
+		// Unmarshal to map[string]interface{}
 		err = yaml.Unmarshal(ymlBytes, &model)
 		if err != nil {
 			return nil, err
 		}
 	} else {
+		// set model to ymlData if not []byte
 		model = ymlData
 	}
 	jsonBytes, err := json.Marshal(model)
@@ -128,45 +116,44 @@ func CoerceToJSONForTypeSafety[T interface{} | []byte](version string, ymlData T
 	return model, nil
 }
 
+// TODO: Proper error handling.
 // IsValidSchemaVersion takes a version string and a []byte or interface{} and returns true if the yaml/json is valid for the specified oscal-version
-func IsValidSchemaVersion[T interface{} | []byte](oscalVersion string, docBytes T) bool {
+func IsValidSchemaVersion[T Model](oscalVersion string, docBytes T) (err error) {
 	component, err := CoerceToJSONForTypeSafety(oscalVersion, docBytes)
 	if err != nil {
-		log.Printf("%#v\n", err)
-		return false
+		return err
 	}
 
 	compiler := jsonschema.NewCompiler()
 	schemaPath := SCHEMA_PREFIX + strings.ReplaceAll(oscalVersion, ".", "-") + ".json"
 	schemaBytes, err := schemas.ReadFile("schema/" + schemaPath)
-
 	if err != nil {
-		log.Printf("%#v\n", err)
-		return false
+		return err
 	}
 	compiler.AddResource(schemaPath, strings.NewReader(string(schemaBytes)))
 	if err != nil {
-		log.Printf("%#v\n", err)
-		return false
+		return err
 	}
 	sch, err := compiler.Compile(schemaPath)
 	if err != nil {
-		log.Printf("%#v\n", err)
-		return false
+		return err
 	}
 	err = sch.Validate(component)
 	if err != nil {
-		log.Printf("%#v\n", err)
-		return false
-		// b, _ := json.MarshalIndent(err.(*jsonschema.ValidationError).DetailedOutput(), "", "  ")
-		// fmt.Println(string(b))
-		// return false
+
+		validationErr, ok := err.(*jsonschema.ValidationError)
+		if !ok {
+			return err
+		}
+		// TODO: More succinct error message.
+		formattedError, _ := json.MarshalIndent(validationErr.DetailedOutput(), "", "  ")
+		return errors.New(string(formattedError))
 	}
-	return true
+	return nil
 }
 
-// GetVersion returns formatted OSCAL version if valid version is passed, returns error if not.
-func GetVersion(userVersion string) (string, error) {
+// FormatUserOscalVersion returns formatted OSCAL version if valid version is passed, returns error if not.
+func FormatUserOscalVersion(userVersion string) (string, error) {
 	if userVersion == "" {
 		return DEFAULT_OSCAL_VERSION, nil
 	}
@@ -194,4 +181,23 @@ func formatUserVersion(v string) string {
 	}
 	builtVersion = strings.ReplaceAll(builtVersion, "-", ".")
 	return builtVersion
+}
+
+func findOscalVersion(data map[string]interface{}) (string, error) {
+	// Check if the "oscal-version" field exists in the top-level map and return if not an empty string as the oscal-version is required for all versions in metadata.
+	if version, ok := data["oscal-version"].(string); ok && version != "" {
+		return version, nil
+	}
+
+	// If not found at the top level, recursively search nested structures
+	for _, value := range data {
+		if nestedMap, isMap := value.(map[string]interface{}); isMap {
+			if version, err := findOscalVersion(nestedMap); err == nil {
+				return version, nil
+			}
+		}
+	}
+
+	// Return an error if the field is not found
+	return "", fmt.Errorf("required field: oscal-version not found")
 }

@@ -1,7 +1,6 @@
 package validation
 
 import (
-	"os"
 	"testing"
 
 	"github.com/defenseunicorns/go-oscal/src/internal/utils"
@@ -25,12 +24,13 @@ var (
 	validCatalogPath     = "../../../testdata/validation/catalog.yaml"
 	catalogJsonPath      = "../../../testdata/validation/catalog.json"
 	pathSlice            = []string{invalidComponentPath, validComponentPath, assessmentResultPath, validCatalogPath, catalogJsonPath}
-	byteMap              = map[string][]byte{}
 )
 
 func TestOscalVersioning(t *testing.T) {
+	t.Parallel()
 	t.Run("returns valid version when user version is in proper format", func(t *testing.T) {
-		version, err := GetVersion(validVersion)
+		t.Parallel()
+		version, err := FormatUserOscalVersion(validVersion)
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
 		}
@@ -40,7 +40,8 @@ func TestOscalVersioning(t *testing.T) {
 	})
 
 	t.Run("replaces dashes with periods when version given with dashes", func(t *testing.T) {
-		version, err := GetVersion(validVersionWithDashes)
+		t.Parallel()
+		version, err := FormatUserOscalVersion(validVersionWithDashes)
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
 		}
@@ -50,7 +51,8 @@ func TestOscalVersioning(t *testing.T) {
 	})
 
 	t.Run("returns valid version when prefixed with v", func(t *testing.T) {
-		version, err := GetVersion(validVersionWithPrefix)
+		t.Parallel()
+		version, err := FormatUserOscalVersion(validVersionWithPrefix)
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
 		}
@@ -60,7 +62,8 @@ func TestOscalVersioning(t *testing.T) {
 	})
 
 	t.Run("uses the default oscal version when version is empty", func(t *testing.T) {
-		version, err := GetVersion("")
+		t.Parallel()
+		version, err := FormatUserOscalVersion("")
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
 		}
@@ -70,21 +73,24 @@ func TestOscalVersioning(t *testing.T) {
 	})
 
 	t.Run("throws error with invalid version structure", func(t *testing.T) {
-		_, err := GetVersion(tooManyVersionNumbers)
+		t.Parallel()
+		_, err := FormatUserOscalVersion(tooManyVersionNumbers)
 		if err == nil {
 			t.Errorf("expected error, got %v", err)
 		}
 	})
 
 	t.Run("throws error with too few version numbers", func(t *testing.T) {
-		_, err := GetVersion(tooFewVersionNumbers)
+		t.Parallel()
+		_, err := FormatUserOscalVersion(tooFewVersionNumbers)
 		if err == nil {
 			t.Errorf("expected error, got %v", err)
 		}
 	})
 
 	t.Run("throws error when version is not supported", func(t *testing.T) {
-		_, err := GetVersion(nonExistentVersion)
+		t.Parallel()
+		_, err := FormatUserOscalVersion(nonExistentVersion)
 		if err == nil {
 			t.Errorf("expected error, got %v", err)
 		}
@@ -92,10 +98,12 @@ func TestOscalVersioning(t *testing.T) {
 }
 
 func TestGettingVersionFromModel(t *testing.T) {
-	initByteMap(t)
+	t.Parallel()
+	byteMap := getByteMap(t)
 
 	t.Run("returns valid version when a valid component definition is passed", func(t *testing.T) {
-		version, err := GetOscalModelVersion(byteMap[validComponentPath])
+		t.Parallel()
+		version, err := GetOscalVersionFromModel(byteMap[validComponentPath])
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
 		}
@@ -105,7 +113,8 @@ func TestGettingVersionFromModel(t *testing.T) {
 	})
 
 	t.Run("returns valid version when a valid assessment result is passed", func(t *testing.T) {
-		version, err := GetOscalModelVersion(byteMap[assessmentResultPath])
+		t.Parallel()
+		version, err := GetOscalVersionFromModel(byteMap[assessmentResultPath])
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
 		}
@@ -115,7 +124,8 @@ func TestGettingVersionFromModel(t *testing.T) {
 	})
 
 	t.Run("returns valid version when a valid catalog is passed", func(t *testing.T) {
-		version, err := GetOscalModelVersion(byteMap[validCatalogPath])
+		t.Parallel()
+		version, err := GetOscalVersionFromModel(byteMap[validCatalogPath])
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
 		}
@@ -125,14 +135,16 @@ func TestGettingVersionFromModel(t *testing.T) {
 	})
 
 	t.Run("returns an error when there is no metadata.oscal-version", func(t *testing.T) {
-		_, err := GetOscalModelVersion(byteMap[invalidComponentPath])
+		t.Parallel()
+		_, err := GetOscalVersionFromModel(byteMap[invalidComponentPath])
 		if err == nil {
 			t.Errorf("expected error, got %v", err)
 		}
 	})
 
 	t.Run("returns an error when the []byte is json or yaml", func(t *testing.T) {
-		_, err := GetOscalModelVersion(interface{}(
+		t.Parallel()
+		_, err := GetOscalVersionFromModel(interface{}(
 			[]byte(`not a map[string]interface{}`)))
 		if err == nil {
 			t.Errorf("expected error, got %v", err)
@@ -140,14 +152,16 @@ func TestGettingVersionFromModel(t *testing.T) {
 	})
 
 	t.Run("oscal struct behaviors", func(t *testing.T) {
+		t.Parallel()
 		t.Run("it retrieves the oscal-version from a valid oscal struct", func(t *testing.T) {
+			t.Parallel()
 			var oscalModel V104.OscalModels
 			validComponentBytes := byteMap[validComponentPath]
 			err := yaml.Unmarshal(validComponentBytes, &oscalModel)
 			if err != nil {
 				t.Errorf("expected no error, got %v when attempting to unmarshal", err)
 			}
-			oscalVersion, err := GetOscalModelVersion(oscalModel)
+			oscalVersion, err := GetOscalVersionFromModel(oscalModel)
 			if err != nil {
 				t.Errorf("expected no error, got %v", err)
 			}
@@ -157,14 +171,30 @@ func TestGettingVersionFromModel(t *testing.T) {
 		})
 
 		t.Run("it returns an error if the oscal struct is un-initialized", func(t *testing.T) {
+			t.Parallel()
 			oscalModels := V104.OscalModels{}
-			_, err := GetOscalModelVersion(oscalModels)
+			_, err := GetOscalVersionFromModel(oscalModels)
 			if err == nil {
 				t.Errorf("expected error, got %v", err)
 			}
 		})
 
+		t.Run("it returns an error if the metadata struct has no OscalVersion", func(t *testing.T) {
+			t.Parallel()
+			oscalModels := V104.OscalModels{
+				ComponentDefinition: V104.ComponentDefinition{
+					Metadata: V104.Metadata{},
+				},
+			}
+			_, err := GetOscalVersionFromModel(oscalModels)
+			if err == nil {
+				t.Errorf("expected error, got %v", err)
+			}
+
+		})
+
 		t.Run("it returns an error if the oscal struct oscal-version is empty", func(t *testing.T) {
+			t.Parallel()
 			oscalModels := V104.OscalModels{
 				ComponentDefinition: V104.ComponentDefinition{
 					Metadata: V104.Metadata{
@@ -172,7 +202,7 @@ func TestGettingVersionFromModel(t *testing.T) {
 					},
 				},
 			}
-			_, err := GetOscalModelVersion(oscalModels)
+			_, err := GetOscalVersionFromModel(oscalModels)
 			if err == nil {
 				t.Errorf("expected error, got %v", err)
 			}
@@ -181,75 +211,70 @@ func TestGettingVersionFromModel(t *testing.T) {
 }
 
 func TestIsValidSchemaVersion(t *testing.T) {
-	initByteMap(t)
+	t.Parallel()
+	byteMap := getByteMap(t)
 
-	t.Run("returns true when a valid component definition of the correct version is passed", func(t *testing.T) {
-		valid := IsValidSchemaVersion("1.0.4", byteMap[validComponentPath])
-		if !valid {
-			t.Errorf("expected true, got %v", valid)
+	t.Run("returns nil when a valid component definition of the correct version is passed", func(t *testing.T) {
+		t.Parallel()
+		err := IsValidSchemaVersion("1.0.4", byteMap[validComponentPath])
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
 		}
 
 	})
 
-	t.Run("returns false when an invalid component definition of the correct version is passed", func(t *testing.T) {
-		valid := IsValidSchemaVersion("1.0.4", byteMap[invalidComponentPath])
-		if valid {
-			t.Errorf("expected false, got %v", valid)
+	t.Run("returns error when an invalid component definition of the correct version is passed", func(t *testing.T) {
+		t.Parallel()
+		err := IsValidSchemaVersion("1.0.4", byteMap[invalidComponentPath])
+		if err == nil {
+			t.Errorf("expected no error, got %v", err)
 		}
 	})
 
-	t.Run("returns true when a valid assessment result of the correct version is passed", func(t *testing.T) {
-		valid := IsValidSchemaVersion("1.0.4", byteMap[assessmentResultPath])
-		if !valid {
-			t.Errorf("expected true, got %v", valid)
+	t.Run("returns error when it fails to validate against another version", func(t *testing.T) {
+		t.Parallel()
+		err := IsValidSchemaVersion("1.0.5", byteMap[validComponentPath])
+		if err == nil {
+			t.Errorf("expected error, got %v", err)
 		}
 	})
 
-	t.Run("returns true when a valid catalog of the correct version is passed", func(t *testing.T) {
-		valid := IsValidSchemaVersion("1.1.0", byteMap[validCatalogPath])
-		if !valid {
-			t.Errorf("expected true, got %v", valid)
+	t.Run("returns nil when a valid assessment result of the correct version is passed", func(t *testing.T) {
+		t.Parallel()
+		err := IsValidSchemaVersion("1.0.4", byteMap[assessmentResultPath])
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+	})
+
+	t.Run("returns nil when a valid catalog of the correct version is passed", func(t *testing.T) {
+		t.Parallel()
+		err := IsValidSchemaVersion("1.1.0", byteMap[validCatalogPath])
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
 		}
 	})
 
 	t.Run("Handles json as well as yaml", func(t *testing.T) {
-
-		t.Run("returns true when a valid catalog of the correct version is passed", func(t *testing.T) {
-			valid := IsValidSchemaVersion("1.1.0", byteMap[catalogJsonPath])
-			if !valid {
-				t.Errorf("expected true, got %v", valid)
-			}
-		})
-
-	})
-	t.Run("Handles interface{} as well as []byte", func(t *testing.T) {
-		t.Run("returns true when a valid assessment result interface of the correct version is passed", func(t *testing.T) {
-			assessmentResultInterface := unmarshalToYaml(t, byteMap[assessmentResultPath])
-			valid := IsValidSchemaVersion("1.0.4", assessmentResultInterface)
-			if !valid {
-				t.Errorf("expected true, got %v", valid)
-			}
-		})
-		t.Run("returns true when a valid catalog interface of the correct version is passed", func(t *testing.T) {
-			catalogResultInterface := unmarshalToYaml(t, byteMap[catalogJsonPath])
-			valid := IsValidSchemaVersion("1.1.0", catalogResultInterface)
-			if !valid {
-				t.Errorf("expected true, got %v", valid)
-			}
-		})
+		t.Parallel()
+		err := IsValidSchemaVersion("1.1.0", byteMap[catalogJsonPath])
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
 	})
 }
 
-func initByteMap(t *testing.T) {
-	if byteMap[invalidComponentPath] == nil {
-		for _, path := range pathSlice {
-			bytes, err := utils.ReadFile(path)
-			if err != nil {
-				panic(err)
-			}
-			byteMap[path] = bytes
+func getByteMap(t *testing.T) map[string][]byte {
+	var byteMap = make(map[string][]byte)
+	for _, path := range pathSlice {
+		bytes, err := utils.ReadFile(path)
+		if err != nil {
+			panic(err)
 		}
+		byteMap[path] = bytes
 	}
+
+	return byteMap
 }
 
 func unmarshalToYaml(t *testing.T, bytes []byte) (result interface{}) {
@@ -259,30 +284,4 @@ func unmarshalToYaml(t *testing.T, bytes []byte) (result interface{}) {
 		t.Fatal(err)
 	}
 	return result
-}
-
-func convertToYaml(t *testing.T, version string, outputPath string, bytes []byte) {
-	t.Helper()
-	model := GetVersionedModel(version)
-	err := yaml.Unmarshal(bytes, &model)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	yamlBytes, err := yaml.Marshal(model)
-	if err != nil {
-		t.Fatal(err)
-	}
-	os.WriteFile(outputPath, yamlBytes, 0644)
-
-}
-
-func readFile(t *testing.T, path string) []byte {
-	t.Helper()
-
-	docBytes, err := os.ReadFile(path)
-	if err != nil {
-		t.Fatal(err)
-	}
-	return docBytes
 }
