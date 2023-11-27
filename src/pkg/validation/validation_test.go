@@ -24,7 +24,9 @@ var (
 	validAssessmentResultPath = "../../../testdata/validation/assessment-result.yaml"
 	validCatalogPath          = "../../../testdata/validation/catalog.yaml"
 	validCatalogJsonPath      = "../../../testdata/validation/catalog.json"
-	pathSlice                 = []string{invalidComponentPath, validComponentPath, validAssessmentResultPath, validCatalogPath, validCatalogJsonPath}
+	validProfilePath          = "../../../testdata/validation/profile.yaml"
+	multipleDocPath           = "../../../testdata/validation/multiple.yaml"
+	pathSlice                 = []string{invalidComponentPath, validComponentPath, validAssessmentResultPath, validCatalogPath, validCatalogJsonPath, validProfilePath, multipleDocPath}
 	byteMap                   = map[string][]byte{}
 	mutex                     = sync.Mutex{}
 )
@@ -219,7 +221,7 @@ func TestIsValidSchemaVersion(t *testing.T) {
 
 	t.Run("returns nil when a valid component definition of the correct version is passed", func(t *testing.T) {
 		t.Parallel()
-		err := IsValidSchemaVersion("1.0.4", byteMap[validComponentPath])
+		err := IsValidOscalWithVersion("1.0.4", byteMap[validComponentPath])
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
 		}
@@ -228,7 +230,7 @@ func TestIsValidSchemaVersion(t *testing.T) {
 
 	t.Run("returns error when an invalid component definition of the correct version is passed", func(t *testing.T) {
 		t.Parallel()
-		err := IsValidSchemaVersion("1.0.4", byteMap[invalidComponentPath])
+		err := IsValidOscalWithVersion("1.0.4", byteMap[invalidComponentPath])
 		if err == nil {
 			t.Errorf("expected no error, got %v", err)
 		}
@@ -236,7 +238,7 @@ func TestIsValidSchemaVersion(t *testing.T) {
 
 	t.Run("returns error when it fails to validate against another version", func(t *testing.T) {
 		t.Parallel()
-		err := IsValidSchemaVersion("1.0.5", byteMap[validComponentPath])
+		err := IsValidOscalWithVersion("1.0.5", byteMap[validComponentPath])
 		if err == nil {
 			t.Errorf("expected error, got %v", err)
 		}
@@ -244,7 +246,7 @@ func TestIsValidSchemaVersion(t *testing.T) {
 
 	t.Run("returns nil when a valid assessment result of the correct version is passed", func(t *testing.T) {
 		t.Parallel()
-		err := IsValidSchemaVersion("1.0.4", byteMap[validAssessmentResultPath])
+		err := IsValidOscalWithVersion("1.0.4", byteMap[validAssessmentResultPath])
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
 		}
@@ -252,7 +254,15 @@ func TestIsValidSchemaVersion(t *testing.T) {
 
 	t.Run("returns nil when a valid catalog of the correct version is passed", func(t *testing.T) {
 		t.Parallel()
-		err := IsValidSchemaVersion("1.1.0", byteMap[validCatalogPath])
+		err := IsValidOscalWithVersion("1.1.0", byteMap[validCatalogPath])
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+	})
+
+	t.Run("returns nil when a valid profile of the correct version is passed", func(t *testing.T) {
+		t.Parallel()
+		err := IsValidOscalWithVersion("1.1.0", byteMap[validProfilePath])
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
 		}
@@ -260,9 +270,17 @@ func TestIsValidSchemaVersion(t *testing.T) {
 
 	t.Run("Handles json as well as yaml", func(t *testing.T) {
 		t.Parallel()
-		err := IsValidSchemaVersion("1.1.0", byteMap[validCatalogJsonPath])
+		err := IsValidOscalWithVersion("1.1.0", byteMap[validCatalogJsonPath])
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
+		}
+	})
+
+	t.Run("returns error if there are multiple top level fields or OSCALModels", func(t *testing.T) {
+		t.Parallel()
+		err := IsValidOscalWithVersion("1.1.0", byteMap[multipleDocPath])
+		if err == nil {
+			t.Errorf("expected error, got %v", err)
 		}
 	})
 
@@ -273,7 +291,7 @@ func TestIsValidSchemaVersion(t *testing.T) {
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
 		}
-		err = IsValidSchemaVersion("1.0.4", modelInterface)
+		err = IsValidOscalWithVersion("1.0.4", modelInterface)
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
 		}
@@ -286,7 +304,7 @@ func TestIsValidSchemaVersion(t *testing.T) {
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
 		}
-		err = IsValidSchemaVersion("1.0.4", oscalModels)
+		err = IsValidOscalWithVersion("1.0.4", oscalModels)
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
 		}

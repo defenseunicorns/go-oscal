@@ -61,8 +61,21 @@ func GetVersionedModel(version string) interface{} {
 	}
 }
 
-// IsValidSchemaVersion takes a version string and a []byte or interface{} and returns true if the yaml/json is valid for the specified oscal-version
-func IsValidSchemaVersion[T InterfaceOrBytes](oscalVersion string, docBytes T) (err error) {
+// IsValidOscal takes an interface{} or []byte and returns error if the yaml/json is not valid.
+func IsValidOscal[T InterfaceOrBytes](docBytes T) (err error) {
+	version, err := GetOscalVersionFromModel(docBytes)
+	if err != nil {
+		return err
+	}
+	err = IsValidOscalWithVersion(version, docBytes)
+	if err != nil {
+		return err
+	}
+	return err
+}
+
+// IsValidOscalWithVersion takes a version string and a []byte or interface{} and returns true if the yaml/json is valid for the specified oscal-version
+func IsValidOscalWithVersion[T InterfaceOrBytes](oscalVersion string, docBytes T) (err error) {
 	modelJson, err := CoerceToJSONForTypeSafety(oscalVersion, docBytes)
 	if err != nil {
 		return err
