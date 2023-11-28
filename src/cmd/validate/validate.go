@@ -28,7 +28,6 @@ var ValidateCmd = &cobra.Command{
 }
 
 func ValidateCommand() {
-	var oscalModel string
 	logger := log.New(os.Stderr, "", 0)
 
 	// Set the logger output to a file if specified
@@ -56,15 +55,17 @@ func ValidateCommand() {
 		log.Fatalf("reading input file: %s\n", err)
 	}
 
-	oscalMap, err := validation.IsValidOscal(bytes)
+	validator, err := validation.NewValidator(bytes)
 	if err != nil {
-		log.Fatalf("validating oscal: %s\n", err)
+		log.Fatalf("Failed to create validator: %s\n", err)
 	}
 
-	// Already validated that the map is valid, so this should not error
-	version, _ := validation.GetOscalVersionFromMap(oscalMap)
+	err = validator.Validate()
+	if err != nil {
+		log.Fatalf("Failed to validate %s version %s: %s\n", validator.GetModelType(), validator.GetVersion(), err)
+	}
 
-	log.Printf("Successfully validated %s is valid OSCAL version %s %s\n", opts.InputFile, version, oscalModel)
+	log.Printf("Successfully validated %s is valid OSCAL version %s %s\n", opts.InputFile, validator.GetVersion(), validator.GetModelType())
 }
 
 func init() {
