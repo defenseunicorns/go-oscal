@@ -2,11 +2,11 @@ package generate
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"strings"
 
 	"github.com/defenseunicorns/go-oscal/src/internal/oscal"
+	"github.com/defenseunicorns/go-oscal/src/internal/utils"
 
 	"github.com/spf13/cobra"
 )
@@ -41,7 +41,7 @@ var GenerateCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		// Write the Go struct output to either stdout or a file.
-		writeOutput(output)
+		utils.WriteOutput(output, opts.OutputFile)
 		return nil
 	},
 }
@@ -68,17 +68,4 @@ func formatTags() (tagList []string) {
 	}
 
 	return
-}
-
-// writeOutput writes the generated Go structs to an output file
-// if provided via -o/--output-file or stdout by default.
-func writeOutput(output []byte) {
-	if opts.OutputFile != "" {
-		err := os.WriteFile(opts.OutputFile, output, 0644)
-		if err != nil {
-			log.Fatalf("writing output: %s", err)
-		}
-	} else {
-		fmt.Print(string(output))
-	}
 }

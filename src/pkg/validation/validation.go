@@ -62,29 +62,29 @@ func GetVersionedModel(version string) interface{} {
 }
 
 // IsValidOscal takes an interface{} or []byte and returns error if the yaml/json is not valid.
-func IsValidOscal[T InterfaceOrBytes](docBytes T) (err error) {
-	version, err := GetOscalVersionFromModel(docBytes)
+func IsValidOscal[T InterfaceOrBytes](docBytes T) (modelJson map[string]interface{}, err error) {
+	model, version, err := GetOscalVersionFromModel(docBytes)
 	if err != nil {
-		return err
+		return modelJson, err
 	}
-	err = IsValidOscalWithVersion(version, docBytes)
+	modelJson, err = IsValidOscalWithVersion(version, model)
 	if err != nil {
-		return err
+		return modelJson, err
 	}
-	return err
+	return modelJson, err
 }
 
 // IsValidOscalWithVersion takes a version string and a []byte or interface{} and returns true if the yaml/json is valid for the specified oscal-version
-func IsValidOscalWithVersion[T InterfaceOrBytes](oscalVersion string, docBytes T) (err error) {
-	modelJson, err := CoerceToJSONForTypeSafety(oscalVersion, docBytes)
+func IsValidOscalWithVersion[T InterfaceOrBytes](oscalVersion string, docBytes T) (modelJson map[string]interface{}, err error) {
+	modelJson, err = CoerceToJSONForTypeSafety(oscalVersion, docBytes)
 	if err != nil {
-		return err
+		return modelJson, err
 	}
 
 	// Ensure the oscal-version is valid and
 	formattedVersion, err := FormatOscalVersion(oscalVersion)
 	if err != nil {
-		return err
+		return modelJson, err
 	}
 
 	// Build the schema file-path
@@ -92,12 +92,12 @@ func IsValidOscalWithVersion[T InterfaceOrBytes](oscalVersion string, docBytes T
 
 	schemaBytes, err := schemas.ReadFile("schema/" + schemaPath)
 	if err != nil {
-		return err
+		return modelJson, err
 	}
 
 	sch, err := jsonschema.CompileString(formattedVersion, string(schemaBytes))
 	if err != nil {
-		return err
+		return modelJson, err
 	}
 
 	err = sch.Validate(modelJson)
@@ -105,17 +105,17 @@ func IsValidOscalWithVersion[T InterfaceOrBytes](oscalVersion string, docBytes T
 		// If the error is not a validation error, return the error
 		validationErr, ok := err.(*jsonschema.ValidationError)
 		if !ok {
-			return err
+			return modelJson, err
 		}
 
 		// TODO: More succinct error message.
 		// Return the detailed output of the validation error
 		formattedError, _ := json.MarshalIndent(validationErr.DetailedOutput(), "", "  ")
-		return errors.New(string(formattedError))
+		return modelJson, errors.New(string(formattedError))
 	}
 
 	// Successful validation
-	return nil
+	return modelJson, nil
 }
 
 // CoerceToJSONForTypeSafety takes a yaml byte array and coerces it to a json interface{}
@@ -142,19 +142,19 @@ func CoerceToJSONForTypeSafety[T InterfaceOrBytes](version string, ymlData T) (m
 }
 
 // GetOscalVersionFromModel takes an interface{} or []byte and returns the metadata.oscal_version as a string
-func GetOscalVersionFromModel[T InterfaceOrBytes](incomingModel T) (version string, err error) {
+func GetOscalVersionFromModel[T InterfaceOrBytes](incomingModel T) (model map[string]interface{}, version string, err error) {
 	// Check if interface{} and can be coerced to map[string]interface{}
-	model, err := ConvertInterfaceOrBytesToJson(incomingModel)
+	model, err = ConvertInterfaceOrBytesToJson(incomingModel)
 	if err != nil {
-		return "", err
+		return model, "", err
 	}
 
 	// find the oscal-version field
 	version, err = findOscalVersion(model)
 	if err != nil {
-		return "", err
+		return model, "", err
 	}
-	return version, nil
+	return model, version, nil
 }
 
 // FormatOscalVersion returns formatted OSCAL version if valid version is passed, returns error if not.
