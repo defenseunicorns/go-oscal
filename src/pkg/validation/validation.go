@@ -9,11 +9,6 @@ import (
 	"regexp"
 	"strings"
 
-	V104 "github.com/defenseunicorns/go-oscal/src/types/oscal-1-0-4"
-	V105 "github.com/defenseunicorns/go-oscal/src/types/oscal-1-0-5"
-	V106 "github.com/defenseunicorns/go-oscal/src/types/oscal-1-0-6"
-	V110 "github.com/defenseunicorns/go-oscal/src/types/oscal-1-1-0"
-	V111 "github.com/defenseunicorns/go-oscal/src/types/oscal-1-1-1"
 	"github.com/santhosh-tekuri/jsonschema/v5"
 	"gopkg.in/yaml.v3"
 )
@@ -42,60 +37,40 @@ type InterfaceOrBytes interface {
 	interface{} | []byte
 }
 
-// GetModels returns an instance of the OSCAL model for the specified version.
-// Returns an empty map[string]interface{} if the version is not supported.
-func GetVersionedModel(version string) interface{} {
-	switch version {
-	case "1.0.4":
-		return V104.OscalModels{}
-	case "1.0.5":
-		return V105.OscalModels{}
-	case "1.0.6":
-		return V106.OscalModels{}
-	case "1.1.0":
-		return V110.OscalModels{}
-	case "1.1.1":
-		return V111.OscalModels{}
-	default:
-		return map[string]interface{}{}
-	}
-}
-
 // IsValidOscal takes an interface{} or []byte and returns error if the yaml/json is not valid.
 func IsValidOscal[T InterfaceOrBytes](docBytes T) (modelJson map[string]interface{}, err error) {
-	model, version, err := GetOscalVersionFromModel(docBytes)
+	modelJson, err = CoerceToJSONForTypeSafety(docBytes)
 	if err != nil {
 		return modelJson, err
 	}
-	modelJson, err = IsValidOscalWithVersion(version, model)
+	version, err := GetOscalVersionFromMap(modelJson)
 	if err != nil {
 		return modelJson, err
 	}
-	return modelJson, err
+
+	return ValidateOscalAgainstVersion(version, modelJson)
 }
 
-// IsValidOscalWithVersion takes a version string and a []byte or interface{} and returns true if the yaml/json is valid for the specified oscal-version
-func IsValidOscalWithVersion[T InterfaceOrBytes](oscalVersion string, docBytes T) (modelJson map[string]interface{}, err error) {
-	modelJson, err = CoerceToJSONForTypeSafety(oscalVersion, docBytes)
+// ValidateOscalAgainstVersion takes a version string and a []byte or interface{} and returns true if the yaml/json is valid for the specified oscal-version
+func ValidateOscalAgainstVersion[T InterfaceOrBytes](oscalVersion string, docBytes T) (modelJson map[string]interface{}, err error) {
+	modelJson, err = CoerceToJSONForTypeSafety(docBytes)
 	if err != nil {
 		return modelJson, err
 	}
 
-	// Ensure the oscal-version is valid and
-	formattedVersion, err := FormatOscalVersion(oscalVersion)
-	if err != nil {
+	if err = IsValidOscalVersion(oscalVersion); err != nil {
 		return modelJson, err
 	}
 
 	// Build the schema file-path
-	schemaPath := SCHEMA_PREFIX + strings.ReplaceAll(formattedVersion, ".", "-") + ".json"
+	schemaPath := SCHEMA_PREFIX + strings.ReplaceAll(oscalVersion, ".", "-") + ".json"
 
 	schemaBytes, err := schemas.ReadFile("schema/" + schemaPath)
 	if err != nil {
 		return modelJson, err
 	}
 
-	sch, err := jsonschema.CompileString(formattedVersion, string(schemaBytes))
+	sch, err := jsonschema.CompileString(oscalVersion, string(schemaBytes))
 	if err != nil {
 		return modelJson, err
 	}
@@ -122,8 +97,8 @@ func IsValidOscalWithVersion[T InterfaceOrBytes](oscalVersion string, docBytes T
 // This is necessary because the jsonschema library only accepts valid json data types that may not match yaml.
 // Example: yaml allows for DateTimes to be time.Time, but json requires them to be strings
 // This also allows for structs to be passed in, and they will be converted to map[string]interface{}
-func CoerceToJSONForTypeSafety[T InterfaceOrBytes](version string, ymlData T) (model map[string]interface{}, err error) {
-	model, err = ConvertInterfaceOrBytesToJson(ymlData)
+func CoerceToJSONForTypeSafety[T InterfaceOrBytes](ymlData T) (model map[string]interface{}, err error) {
+	model, err = convertInterfaceOrBytesToMap(ymlData)
 	if err != nil {
 		return nil, err
 	}
@@ -141,45 +116,55 @@ func CoerceToJSONForTypeSafety[T InterfaceOrBytes](version string, ymlData T) (m
 	return model, nil
 }
 
-// GetOscalVersionFromModel takes an interface{} or []byte and returns the metadata.oscal_version as a string
-func GetOscalVersionFromModel[T InterfaceOrBytes](incomingModel T) (model map[string]interface{}, version string, err error) {
-	// Check if interface{} and can be coerced to map[string]interface{}
-	model, err = ConvertInterfaceOrBytesToJson(incomingModel)
-	if err != nil {
-		return model, "", err
+// GetOscalVersionFromMap returns formatted OSCAL version if valid version is passed, returns error if not.
+func GetOscalVersionFromMap(model map[string]interface{}) (version string, err error) {
+	var submodel map[string]interface{}
+	for _, value := range model {
+		submodel = value.(map[string]interface{})
+		break
 	}
 
-	// find the oscal-version field
-	version, err = findOscalVersion(model)
-	if err != nil {
-		return model, "", err
+	metadata, ok := submodel["metadata"].(map[string]interface{})
+	if !ok {
+		return "", fmt.Errorf("required field: metadata not found")
 	}
-	return model, version, nil
+
+	if _, ok := metadata["oscal-version"]; !ok {
+		return "", fmt.Errorf("required field: oscal-version not found")
+	}
+
+	version, ok = reflect.ValueOf(metadata["oscal-version"]).Interface().(string)
+	if !ok {
+		return "", fmt.Errorf("required field: oscal-version not found")
+	}
+
+	return version, nil
 }
 
-// FormatOscalVersion returns formatted OSCAL version if valid version is passed, returns error if not.
-func FormatOscalVersion(unformattedVersion string) (formattedVersion string, err error) {
-	if unformattedVersion == "" {
-		return DEFAULT_OSCAL_VERSION, nil
+// IsValidOscalVersion returns true if the version is supported, false if not.
+func IsValidOscalVersion(version string) error {
+	version = FormatOscalVersion(version)
+
+	if !versionRegexp.MatchString(version) {
+		return fmt.Errorf("version %s is not a valid version", version)
 	}
 
-	formattedVersion = strings.ToLower(unformattedVersion)
-	formattedVersion = strings.TrimPrefix(formattedVersion, "v")
+	if !supportedVersion[version] {
+		return fmt.Errorf("version %s is not supported", version)
+	}
+	return nil
+}
+
+// FormatOscalVersion takes a version string and returns a formatted version string
+func FormatOscalVersion(version string) (formattedVersion string) {
+	formattedVersion = strings.ToLower(version)
 	formattedVersion = strings.ReplaceAll(formattedVersion, "-", ".")
-
-	if !versionRegexp.MatchString(formattedVersion) {
-		return formattedVersion, fmt.Errorf("version %s is not a valid version", unformattedVersion)
-	}
-
-	if !supportedVersion[formattedVersion] {
-		return formattedVersion, fmt.Errorf("version %s is not supported", unformattedVersion)
-	}
-
-	return formattedVersion, nil
+	formattedVersion = strings.Trim(formattedVersion, "v")
+	return formattedVersion
 }
 
-// ConvertInterfaceOrBytesToJson takes an InterfaceOrByte and returns a map[string]interface{}
-func ConvertInterfaceOrBytesToJson[T InterfaceOrBytes](incomingModel T) (model map[string]interface{}, err error) {
+// convertInterfaceOrBytesToMap takes an InterfaceOrByte and returns a map[string]interface{}
+func convertInterfaceOrBytesToMap[T InterfaceOrBytes](incomingModel T) (model map[string]interface{}, err error) {
 	// Check if interface{} and can be coerced to map[string]interface{}
 	model, ok := reflect.ValueOf(incomingModel).Interface().(map[string]interface{})
 	if !ok {
@@ -199,58 +184,4 @@ func ConvertInterfaceOrBytesToJson[T InterfaceOrBytes](incomingModel T) (model m
 		}
 	}
 	return model, nil
-}
-
-// Recursively search for the oscal-version field
-func deepFindOscalVersion(data map[string]interface{}) (string, error) {
-	if version, ok := data["oscal-version"].(string); ok && version != "" {
-		return version, nil
-	}
-
-	// If not found at the top level, recursively search nested structures
-	for _, value := range data {
-		if nestedMap, isMap := value.(map[string]interface{}); isMap {
-			if version, err := findOscalVersion(nestedMap); err == nil {
-				return version, nil
-			}
-		}
-	}
-	return "", fmt.Errorf("required field: oscal-version not found")
-}
-
-// Assumes that the data follows the OscalModel structure of any version.
-// If that assumption is false, this function will do a deep recursive search for the oscal-version field
-// Note: Not sure that deep search is necessary, as the oscal-version field is required at the top level of the model
-func findOscalVersion(data map[string]interface{}) (version string, err error) {
-	// Check for a top level field that has the Metadata substructure
-	for _, value := range data {
-		// Ensure the value is a map[string]interface{}
-		modelType, ok := value.(map[string]interface{})
-		if ok {
-			// Check if the map has a metadata field
-			if modelType["metadata"] != nil {
-				// Ensure the metadata field is a map[string]interface{}
-				metadata, ok := modelType["metadata"].(map[string]interface{})
-				if ok {
-					// Check if the metadata field has an oscal-version field
-					if metadata["oscal-version"] != nil {
-						version, ok := metadata["oscal-version"].(string)
-						// Return the version if it is a string and not empty
-						if ok && version != "" {
-							return version, nil
-						}
-					}
-				}
-			}
-		}
-	}
-
-	// Failed to find the oscal-version in the assumed OscalModel structure, so do a deep search
-	// TODO: Remove this deep search if it is not necessary
-	if version == "" {
-		return deepFindOscalVersion(data)
-	}
-
-	// Return an error if the field is not found
-	return "", fmt.Errorf("required field: \"oscal-version\" not found")
 }

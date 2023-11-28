@@ -57,16 +57,12 @@ func ValidateCommand() {
 	}
 
 	oscalMap, err := validation.IsValidOscal(bytes)
-
 	if err != nil {
 		log.Fatalf("validating oscal: %s\n", err)
 	}
 
-	for key := range oscalMap {
-		oscalModel = key
-	}
-
-	version := oscalMap[oscalModel].(map[string]interface{})["metadata"].(map[string]interface{})["oscal-version"].(string)
+	// Already validated that the map is valid, so this should not error
+	version, _ := validation.GetOscalVersionFromMap(oscalMap)
 
 	log.Printf("Successfully validated %s is valid OSCAL version %s %s\n", opts.InputFile, version, oscalModel)
 }
