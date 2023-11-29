@@ -3,6 +3,7 @@ module github.com/defenseunicorns/go-oscal
 go 1.21.3
 
 require (
+	github.com/google/uuid v1.4.0
 	github.com/spf13/cobra v1.7.0
 	github.com/swaggest/jsonschema-go v0.3.62
 )
