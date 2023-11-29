@@ -2,6 +2,8 @@ package uuid
 
 import (
 	"testing"
+
+	"github.com/google/uuid"
 )
 
 func TestDeterministicUUIDGeneration(t *testing.T) {
@@ -15,5 +17,16 @@ func TestDeterministicUUIDGeneration(t *testing.T) {
 
 	if uuid2 == uuid3 {
 		t.Fatal("UUIDs are not deterministic")
+	}
+}
+
+func TestNewUUID(t *testing.T) {
+	testuuid := NewUUID()
+	if testuuid == "" {
+		t.Fatal("UUID is empty")
+	}
+	_, err := uuid.Parse(testuuid)
+	if err != nil {
+		t.Fatal("Error parsing UUID")
 	}
 }

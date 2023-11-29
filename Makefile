@@ -71,7 +71,7 @@ generate-ssp-stdout: clean build ## Generate Go structs from OSCAL system-securi
 
 .PHONY: test
 test: build ## Run automated tests.
-	go test $(GOFLAGS) -run $(TESTS) $(PKG) $(TESTFLAGS)
+	go clean -testcache && go test $(GOFLAGS) -run $(TESTS) $(PKG) $(TESTFLAGS)
 
 .PHONY: run-main-compdef
 run-main-compdef: ## useful for running the main.go file without having to compile
