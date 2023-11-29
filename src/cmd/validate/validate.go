@@ -11,7 +11,7 @@ import (
 
 type flags struct {
 	InputFile string // -f --input-file
-	LogFile   string // -l --log-file
+	LogFile   string // -l --logger-file
 
 }
 
@@ -28,20 +28,20 @@ var ValidateCmd = &cobra.Command{
 }
 
 func ValidateCommand() {
-	logger := log.New(os.Stderr, "", 0)
+	logger := log.New(os.Stderr, "", log.LstdFlags)
 
 	// Set the logger output to a file if specified
 	if opts.LogFile != "" {
-		file, err := os.Create(opts.LogFile)
+		file, err := os.OpenFile(opts.LogFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 		if err != nil {
-			log.Fatalln(err)
+			logger.Fatalln(err)
 		}
 		logger.SetOutput(file)
 	}
 
 	// Validate the input file
 	if opts.InputFile == "" {
-		log.Fatalln("Please specify an input file with the -f flag")
+		logger.Fatalln("Please specify an input file with the -f flag")
 	}
 
 	// Validate the input file is a json or yaml file
@@ -52,23 +52,23 @@ func ValidateCommand() {
 	// Read the input file
 	bytes, err := os.ReadFile(opts.InputFile)
 	if err != nil {
-		log.Fatalf("reading input file: %s\n", err)
+		logger.Fatalf("reading input file: %s\n", err)
 	}
 
 	validator, err := validation.NewValidator(bytes)
 	if err != nil {
-		log.Fatalf("Failed to create validator: %s\n", err)
+		logger.Fatalf("Failed to create validator: %s\n", err)
 	}
 
 	err = validator.Validate()
 	if err != nil {
-		log.Fatalf("Failed to validate %s version %s: %s\n", validator.GetModelType(), validator.GetVersion(), err)
+		logger.Fatalf("Failed to validate %s version %s: %s\n", validator.GetModelType(), validator.GetVersion(), err)
 	}
 
-	log.Printf("Successfully validated %s is valid OSCAL version %s %s\n", opts.InputFile, validator.GetVersion(), validator.GetModelType())
+	logger.Printf("Successfully validated %s is valid OSCAL version %s %s\n", opts.InputFile, validator.GetVersion(), validator.GetModelType())
 }
 
 func init() {
 	ValidateCmd.Flags().StringVarP(&opts.InputFile, "input-file", "f", "", "the path to a oscal json schema file")
-	ValidateCmd.Flags().StringVarP(&opts.LogFile, "log-file", "l", "", "the name of the file to write logs to (outputs to STDERR by default)")
+	ValidateCmd.Flags().StringVarP(&opts.LogFile, "logger-file", "l", "", "the name of the file to write logs to (outputs to STDERR by default)")
 }
