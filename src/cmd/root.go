@@ -5,6 +5,7 @@ import (
 
 	"github.com/defenseunicorns/go-oscal/src/cmd/convert"
 	"github.com/defenseunicorns/go-oscal/src/cmd/generate"
+	"github.com/defenseunicorns/go-oscal/src/cmd/validate"
 	"github.com/spf13/cobra"
 )
 
@@ -22,6 +23,7 @@ func Execute() {
 	commands := []*cobra.Command{
 		generate.GenerateCommand(),
 		convert.ConvertCommand(),
+		validate.ValidateCmd,
 	}
 
 	rootCmd.AddCommand(commands...)
