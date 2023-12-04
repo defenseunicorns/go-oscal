@@ -22,17 +22,17 @@ var ValidateCmd = &cobra.Command{
 	Short: "validate an oscal document",
 	Long:  "Validate an OSCAL document against the OSCAL schema version specified in the document.",
 	Run: func(cmd *cobra.Command, args []string) {
-		ValidateCommand()
+		ValidateCommand(opts.InputFile, opts.LogFile)
 
 	},
 }
 
-func ValidateCommand() {
+func ValidateCommand(inputFile string, logFile string) {
 	logger := log.New(os.Stderr, "", log.LstdFlags)
 
 	// Set the logger output to a file if specified
-	if opts.LogFile != "" {
-		file, err := os.OpenFile(opts.LogFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	if logFile != "" {
+		file, err := os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 		if err != nil {
 			logger.Fatalln(err)
 		}
@@ -40,17 +40,17 @@ func ValidateCommand() {
 	}
 
 	// Validate the input file
-	if opts.InputFile == "" {
+	if inputFile == "" {
 		logger.Fatalln("Please specify an input file with the -f flag")
 	}
 
 	// Validate the input file is a json or yaml file
-	if !strings.HasSuffix(opts.InputFile, "json") && !strings.HasSuffix(opts.InputFile, "yaml") {
+	if !strings.HasSuffix(inputFile, "json") && !strings.HasSuffix(inputFile, "yaml") {
 		logger.Fatalln("Please specify a json or yaml file")
 	}
 
 	// Read the input file
-	bytes, err := os.ReadFile(opts.InputFile)
+	bytes, err := os.ReadFile(inputFile)
 	if err != nil {
 		logger.Fatalf("reading input file: %s\n", err)
 	}
@@ -65,7 +65,7 @@ func ValidateCommand() {
 		logger.Fatalf("Failed to validate %s version %s: %s\n", validator.GetModelType(), validator.GetVersion(), err)
 	}
 
-	logger.Printf("Successfully validated %s is valid OSCAL version %s %s\n", opts.InputFile, validator.GetVersion(), validator.GetModelType())
+	logger.Printf("Successfully validated %s is valid OSCAL version %s %s\n", inputFile, validator.GetVersion(), validator.GetModelType())
 }
 
 func init() {
