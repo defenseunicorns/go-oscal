@@ -108,10 +108,11 @@ func (v *validator) Validate() error {
 			return err
 		}
 
-		// TODO: More succinct error message.
-		// Return the detailed output of the validation error
-		formattedError, _ := json.MarshalIndent(validationErr.DetailedOutput(), "", "  ")
-		return errors.New(string(formattedError))
+		// Extract the specific errors from the schema error
+		// Return the errors as a string
+		basicErrors := extractErrors(v.jsonMap, validationErr.BasicOutput())
+		formattedErrors, _ := json.MarshalIndent(basicErrors, "", "  ")
+		return errors.New(string(formattedErrors))
 	}
 
 	return nil
