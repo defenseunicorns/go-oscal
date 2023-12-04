@@ -5,10 +5,19 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
+	"strconv"
 	"strings"
 
+	"github.com/santhosh-tekuri/jsonschema/v5"
 	"gopkg.in/yaml.v3"
 )
+
+// Extension of the jsonschema.BasicError struct to include the failed value
+// if the failed value is a map or slice, it will be omitted
+type ValidatorError struct {
+	jsonschema.BasicError
+	FailedValue interface{} `json:"failedValue,omitempty"`
+}
 
 var (
 	versionRegexp    = regexp.MustCompile(`^\d+([-\.]\d+){2}$`)
@@ -21,6 +30,71 @@ var (
 	}
 )
 
+// Creates a []ValidatorError from a jsonschema.Basic
+// The jsonschema.Basic contains the errors from the validation
+func extractErrors(originalObject map[string]interface{}, validationError jsonschema.Basic) (validationErrors []ValidatorError) {
+	for _, error := range validationError.Errors {
+		if error.InstanceLocation == "" || error.Error == "" || strings.HasPrefix(error.Error, "doesn't validate with") {
+			continue
+		}
+		if len(validationErrors) > 0 && validationErrors[len(validationErrors)-1].InstanceLocation == error.InstanceLocation {
+			validationErrors[len(validationErrors)-1].Error += ", " + error.Error
+		} else {
+			failedValue := findValue(originalObject, strings.Split(error.InstanceLocation, "/")[1:])
+			_, mapOk := failedValue.(map[string]interface{})
+			_, sliceOk := failedValue.([]interface{})
+			if mapOk || sliceOk {
+				failedValue = nil
+			}
+			validationErrors = append(validationErrors, ValidatorError{BasicError: error, FailedValue: failedValue})
+		}
+	}
+	return validationErrors
+
+}
+
+// Finds the value of a key in a model in a map[string]interface{} given a slice of keys
+// Returns nil if the key is not found or the model type is not supported
+// Internal Recursive function so that the model can keep type safety
+func findValue(model map[string]interface{}, keys []string) interface{} {
+
+	// Define recursive function
+	var find func(model interface{}, keys []string) interface{}
+	find = func(root interface{}, keys []string) interface{} {
+		// If there are no more keys to find, return the parent
+		if len(keys) == 0 {
+			return root
+		}
+
+		childKey := keys[0]
+		descendentKeys := keys[1:]
+
+		// If the model is a map find the next value
+		if rootAsMap, ok := root.(map[string]interface{}); ok {
+			if child, found := rootAsMap[childKey]; found {
+				return find(child, descendentKeys)
+			}
+		}
+
+		// If the model is a rootAsSlice find the next value
+		if rootAsSlice, ok := root.([]interface{}); ok {
+			// Convert the key to an int (should always be an int/index)
+			index, err := strconv.Atoi(childKey)
+			if err != nil {
+				return nil
+			}
+			child := rootAsSlice[index]
+			return find(child, descendentKeys)
+		}
+
+		// If the key is not found or model type is not supported, return nil
+		return nil
+	}
+	return find(model, keys)
+}
+
+// getModelType returns the type of the model if the model is valid
+// returns error if more than one model is found or no models are found (consistent with OSCAL spec)
 func getModelType(model map[string]interface{}) (modelType string, err error) {
 	if len(model) != 1 {
 		return "", fmt.Errorf("expected model to have 1 key, got %d", len(model))
