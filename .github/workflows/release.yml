@@ -23,6 +23,9 @@ jobs:
       - name: Setup golang
         uses: ./.github/actions/golang
 
+      - name: Install tools
+        uses: ./.github/actions/install-tools
+
       - name: Build CLI
         run: |
           make build
