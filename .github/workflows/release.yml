@@ -23,9 +23,6 @@ jobs:
       - name: Setup golang
         uses: ./.github/actions/golang
 
-      - name: Install tools
-        uses: ./.github/actions/install-tools
-
       - name: Build CLI
         run: |
           make build
@@ -84,6 +81,9 @@ jobs:
 
       - name: Setup golang
         uses: ./.github/actions/golang
+
+      - name: Install tools
+        uses: ./.github/actions/install-tools
 
       - name: Download build artifacts
         uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
