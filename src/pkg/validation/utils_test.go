@@ -5,6 +5,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/defenseunicorns/go-oscal/src/gooscaltest"
 	V104 "github.com/defenseunicorns/go-oscal/src/types/oscal-1-0-4"
 	"github.com/santhosh-tekuri/jsonschema/v5"
 	"gopkg.in/yaml.v3"
@@ -16,7 +17,11 @@ var yamlString = `component-definition:
 
 var jsonString = `{"component-definition": {"metadata": {"oscal-version": "1.0.4"}}}`
 
-var basicErrorPath = "../../../testdata/validation/basic-error.json"
+var (
+	unsupportedVersion    = "-2.0.7"
+	validVersion          = "1.0.4"
+	tooManyVersionNumbers = "1.0.4.1"
+)
 
 func TestValidationUtils(t *testing.T) {
 	t.Parallel()
@@ -255,11 +260,11 @@ func TestValidationUtils(t *testing.T) {
 		var catalog map[string]interface{}
 		var basic jsonschema.Basic
 		// Read Catalog and basic errors.
-		originalDocBytes, err := os.ReadFile(invalidCatalogPath)
+		originalDocBytes, err := os.ReadFile(gooscaltest.InvalidCatalogPath)
 		if err != nil {
 			t.Fatal(err)
 		}
-		errorsBytes, err := os.ReadFile(basicErrorPath)
+		errorsBytes, err := os.ReadFile(gooscaltest.BasicErrorPathJson)
 		if err != nil {
 			t.Fatal(err)
 		}
