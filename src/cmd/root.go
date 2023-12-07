@@ -23,7 +23,7 @@ var RootCmd = &cobra.Command{
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		log.SetOutput(os.Stderr)
 		log.SetPrefix("go-oscal: ")
-		file, err := utils.ReadLogFile(logFile)
+		file, err := utils.OpenLogFile(logFile)
 		if err != nil {
 			log.Fatalf("failed to create log file: %s\n", err)
 		}

@@ -40,7 +40,14 @@ var GenerateCmd = &cobra.Command{
 			log.Fatalf("failed to generate Go structs: %s\n", err)
 		}
 		// Write the Go struct output to either stdout or a file.
-		utils.WriteOutput(output, opts.OutputFile)
+		if opts.OutputFile == "" {
+			log.Println(string(output))
+		} else {
+			err = utils.WriteOutput(output, opts.OutputFile)
+			if err != nil {
+				log.Fatalf("failed to write output to file: %s\n", err)
+			}
+		}
 		return nil
 	},
 }
