@@ -25,5 +25,5 @@ jobs:
               repo: 'go-oscal',
               title: title,
               body: body,
-              labels: 'enhancement',
+              labels: 'enhancement'
             });
