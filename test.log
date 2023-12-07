@@ -1,0 +1,5 @@
+go-oscal: 2023/12/07 14:10:05 Successfully validated testdata/validation/valid-component-definition.yaml is valid OSCAL version 1.0.4 component-definition
+go-oscal: 2023/12/07 14:10:26 Please specify an input file with the -f flag
+go-oscal: 2023/12/07 14:12:22 Please specify an input file with the -f flag
+go-oscal: 2023/12/07 14:12:37 Successfully validated testdata/validation/valid-component-definition.yaml is valid OSCAL version 1.0.4 component-definition
+go-oscal: 2023/12/07 14:13:10 Failed to create validator: version V1-1-1 is not a valid version

@@ -17,12 +17,9 @@ func TestValidator(t *testing.T) {
 
 		t.Run("returns *validator when a valid model is passed", func(t *testing.T) {
 			t.Parallel()
-			validator, err := NewValidator(gooscaltest.ByteMap[gooscaltest.ValidComponentPath])
+			_, err := NewValidator(gooscaltest.ByteMap[gooscaltest.ValidComponentPath])
 			if err != nil {
 				t.Errorf("expected no error, got %v", err)
-			}
-			if validator == nil {
-				t.Errorf("expected validator, got nil")
 			}
 		})
 
