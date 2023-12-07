@@ -3,7 +3,7 @@
 
 	To regenerate:
 
-	go-oscal \
+	go-oscal generate \
 		--input-file <path_to_oscal_json_schema_file> \
 		--output-file <name_of_go_types_file> // the path to this file must already exist \
 		--tags json,yaml // the tags to add to the Go structs \
