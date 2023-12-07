@@ -20,12 +20,6 @@ var ConvertCmd = &cobra.Command{
 	},
 }
 
-func ConvertCommand() *cobra.Command {
-
-	// insert flag options here
-	return ConvertCmd
-}
-
 // func init() {
 // 	GenerateCmd.Flags().StringVarP(&opts.InputFile, "input-file", "f", "", "the path to a oscal json schema file")
 // 	GenerateCmd.Flags().StringVarP(&opts.OutputFile, "output-file", "o", "", "the name of the file to write the output to (outputs to STDOUT by default)")

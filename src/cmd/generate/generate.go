@@ -1,7 +1,7 @@
 package generate
 
 import (
-	"fmt"
+	"log"
 	"os"
 	"strings"
 
@@ -37,19 +37,12 @@ var GenerateCmd = &cobra.Command{
 		// Generate the Go structs.
 		output, err := oscal.Generate(bytes, opts.Pkg, tagList)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "error parsing", err)
-			os.Exit(1)
+			log.Fatalf("failed to generate Go structs: %s\n", err)
 		}
 		// Write the Go struct output to either stdout or a file.
 		utils.WriteOutput(output, opts.OutputFile)
 		return nil
 	},
-}
-
-func GenerateCommand() *cobra.Command {
-
-	// insert flag options here
-	return GenerateCmd
 }
 
 func init() {

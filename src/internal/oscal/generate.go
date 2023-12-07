@@ -3,6 +3,7 @@ package oscal
 import (
 	"fmt"
 	"go/format"
+	"log"
 	"sort"
 	"strconv"
 	"strings"
@@ -309,7 +310,7 @@ func buildStructData(prop map[string]jsonschema.SchemaOrBool, obj map[string]jso
 						structData = append(structData, fmt.Sprintf("%s []%s `%s`", valueName, objectType, strings.Join(tagList, " ")))
 					} else {
 						// TODO: Error Handling
-						fmt.Println("Did not find ref/items/allof/anyof")
+						log.Println("Did not find ref/items/allof/anyof")
 					}
 
 				}
@@ -322,7 +323,7 @@ func buildStructData(prop map[string]jsonschema.SchemaOrBool, obj map[string]jso
 				structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, objectType, strings.Join(tagList, " ")))
 			default:
 				// TODO: Error handling
-				fmt.Printf("type not defined: %v", value)
+				log.Printf("type not defined: %v", value)
 			}
 		} else if ref := prop[key].TypeObject.Ref; ref != nil {
 			var objectType string
@@ -380,7 +381,7 @@ func buildStructData(prop map[string]jsonschema.SchemaOrBool, obj map[string]jso
 			}
 		} else {
 			// TODO: Error Handling
-			fmt.Printf("no type or ref for: %s\n", key)
+			log.Printf("no type or ref for: %s\n", key)
 
 		}
 	}
@@ -423,7 +424,7 @@ func generateModelTypes(obj map[string]jsonschema.SchemaOrBool, structId string,
 			return formattedStructName[0], nil
 		default:
 			//TODO: Error Handling
-			fmt.Printf("type not defined: %v", value)
+			log.Printf("type not defined: %v", value)
 		}
 	} else if ref := obj[structId].TypeObject.Ref; ref != nil {
 		switch *ref {
@@ -462,7 +463,7 @@ func generateModelTypes(obj map[string]jsonschema.SchemaOrBool, structId string,
 		case "array":
 			return "array", nil
 		default:
-			fmt.Printf("type not defined: %v", value)
+			log.Printf("type not defined: %v", value)
 		}
 
 	} else if allof := obj[structId].TypeObject.AllOf; allof != nil {
@@ -523,8 +524,8 @@ func generateModelTypes(obj map[string]jsonschema.SchemaOrBool, structId string,
 		}
 	} else {
 		// TODO: Error Handling
-		fmt.Println("did not find properties or type")
-		fmt.Printf("structId: %s\n", structId)
+		log.Println("did not find properties or type")
+		log.Printf("structId: %s\n", structId)
 	}
 
 	formattedStructName := FmtFieldName(structName)

@@ -6,4 +6,5 @@ import (
 
 func TestValidateCmd(t *testing.T) {
 	t.Parallel()
+
 }
