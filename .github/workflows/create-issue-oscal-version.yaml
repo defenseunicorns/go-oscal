@@ -1,0 +1,29 @@
+name: Create Issue on PR for OSCAL Version Updates
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    paths:
+      - 'update/oscal-version.yaml'
+
+jobs:
+  createIssue:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Issue
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const title = `PR #${context.payload.pull_request.number} OSCAL Version Update`;
+            const body = `A new OSCAL version has been released. Please review the changes https://github.com/usnistgov/OSCAL/releases`;
+            const projectID = '12';
+            github.rest.issues.create({
+              owner: 'defenseunicorns',
+              repo: 'go-oscal',
+              title: title,
+              body: body,
+              labels: 'enhancement',
+            });

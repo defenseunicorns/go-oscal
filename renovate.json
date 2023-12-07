@@ -20,5 +20,15 @@
   "platformCommit": true,
   "postUpdateOptions": ["gomodTidy"],
   "commitBodyTable": true,
-  "commitMessagePrefix": "deps"
+  "commitMessagePrefix": "deps",
+  "regexManagers": [
+    {
+      "fileMatch": ["^update/oscal-version\\.yaml$"],
+      "matchStrings": ["oscal: v(?<currentValue>\\d+\\.\\d+\\.\\d+)"],
+      "datasource": "github-tags",
+      "depName": "usnistgov/OSCAL",
+      "versioning": "semver"
+    }
+  ]
+
 }
