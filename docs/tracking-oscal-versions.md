@@ -1,9 +1,9 @@
 # How We Track OSCAL Version Changes
-We use a combonation of Renovate and GitHub Actions to track OSCAL changes.
+We use a combination of Renovate and GitHub Actions to track OSCAL changes.
 
 ## Renovate 
 A YAML file is used to track the changes to OSCAL version. located in update/oscal-version.yaml as
-```yamll
+```yaml
 ---
 oscal: X.X.X
 ```
