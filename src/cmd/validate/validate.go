@@ -17,18 +17,17 @@ var ValidateCmd = &cobra.Command{
 	Use:   "validate",
 	Short: "validate an oscal document",
 	Long:  "Validate an OSCAL document against the OSCAL schema version specified in the document.",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		validator, err := ValidateCommand(inputfile)
 		if err != nil {
-			log.Println(err)
-		} else {
-			log.Printf("Successfully validated %s is valid OSCAL version %s %s\n", inputfile, validator.GetVersion(), validator.GetModelType())
+			return err
 		}
+		log.Printf("Successfully validated %s is valid OSCAL version %s %s\n", inputfile, validator.GetVersion(), validator.GetModelType())
+		return nil
 	},
 }
 
 func ValidateCommand(inputFile string) (validator validation.Validator, err error) {
-
 	// Validate the input file
 	if inputFile == "" {
 		return validator, errors.New("Please specify an input file with the -f flag")

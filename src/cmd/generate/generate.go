@@ -1,6 +1,7 @@
 package generate
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -19,25 +20,9 @@ var GenerateCmd = &cobra.Command{
 	Long:  "Generate Golang data types from OSCAL schema",
 	// Example: generateHelp,
 	RunE: func(cmd *cobra.Command, componentDefinitionPaths []string) error {
-		// Remove the transfer of objects across packages
-		// aggregate file IO to root
-
-		bytes, err := os.ReadFile(opts.InputFile)
+		output, err := GenerateCommand(*opts)
 		if err != nil {
 			return err
-		}
-
-		// oscalMap, err := oscal.ParseJson(opts)
-		// if err != nil {
-		// 	return err
-		// }
-
-		tagList := formatTags()
-
-		// Generate the Go structs.
-		output, err := oscal.Generate(bytes, opts.Pkg, tagList)
-		if err != nil {
-			log.Fatalf("failed to generate Go structs: %s\n", err)
 		}
 		// Write the Go struct output to either stdout or a file.
 		if opts.OutputFile == "" {
@@ -45,11 +30,31 @@ var GenerateCmd = &cobra.Command{
 		} else {
 			err = utils.WriteOutput(output, opts.OutputFile)
 			if err != nil {
-				log.Fatalf("failed to write output to file: %s\n", err)
+				return fmt.Errorf("failed to write output to file: %s\n", err)
 			}
 		}
 		return nil
 	},
+}
+
+func GenerateCommand(flags oscal.BaseFlags) (output []byte, err error) {
+	schemaBytes, err := os.ReadFile(flags.InputFile)
+	if err != nil {
+		return
+	}
+
+	tagList, err := utils.FormatTags(flags.Tags)
+	if err != nil {
+		return
+	}
+
+	// Generate the Go structs.
+	output, err = oscal.Generate(schemaBytes, flags.Pkg, tagList)
+	if err != nil {
+		return output, fmt.Errorf("failed to generate Go structs: %s\n", err)
+	}
+
+	return
 }
 
 func init() {

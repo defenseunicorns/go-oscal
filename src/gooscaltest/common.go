@@ -1,13 +1,16 @@
 package gooscaltest
 
 import (
+	"bytes"
+	"log"
 	"os"
 	"sync"
 	"testing"
 )
 
 var (
-	mutex                           = sync.Mutex{}
+	byteMapMtx                      = sync.Mutex{}
+	logMtx                          = sync.Mutex{}
 	ByteMap                         = map[string][]byte{}
 	ValidComponentPath              = "../../../testdata/validation/valid-component-definition.yaml"
 	NoVersionComponentPath          = "../../../testdata/validation/no-version-component-definition.yaml"
@@ -29,7 +32,8 @@ var (
 
 // GetByteMap reads the files in PathSlice and stores them in ByteMap
 func GetByteMap(t *testing.T) {
-	mutex.Lock()
+	byteMapMtx.Lock()
+	defer byteMapMtx.Unlock()
 	if len(ByteMap) == 0 {
 		for _, path := range pathSlice {
 			bytes, err := os.ReadFile(path)
@@ -39,5 +43,20 @@ func GetByteMap(t *testing.T) {
 			ByteMap[path] = bytes
 		}
 	}
-	mutex.Unlock()
+}
+
+func RedirectLog(t *testing.T) *bytes.Buffer {
+	logOutput := new(bytes.Buffer)
+	log.SetOutput(logOutput)
+
+	t.Cleanup(func() {
+		log.SetOutput(os.Stderr)
+	})
+	return logOutput
+}
+
+func ReadLog(t *testing.T, logOutput *bytes.Buffer) []byte {
+	logMtx.Lock()
+	defer logMtx.Unlock()
+	return logOutput.Bytes()
 }

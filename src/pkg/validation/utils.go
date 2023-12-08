@@ -108,9 +108,14 @@ func getModelType(model map[string]interface{}) (modelType string, err error) {
 // getOscalVersionFromMap returns formatted OSCAL version if valid version is passed, returns error if not.
 func getOscalVersionFromMap(model map[string]interface{}) (version string, err error) {
 	var submodel map[string]interface{}
+	var ok bool
 	for _, value := range model {
-		submodel = value.(map[string]interface{})
+		submodel, ok = value.(map[string]interface{})
+		if !ok {
+			continue
+		}
 		break
+
 	}
 
 	metadata, ok := submodel["metadata"].(map[string]interface{})
