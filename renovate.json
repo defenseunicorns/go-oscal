@@ -1,8 +1,8 @@
 {
-  "extends": ["config:base"],
+  "extends": ["config:recommended"],
   "ignorePaths": ["**/adr/**", "**/docs/**", "**/test/**"],
   "timezone": "America/New_York",
-  "schedule": ["after 12pm and before 11am every weekday"],
+  "schedule": ["after 12pm every weekday", "before 11am every weekday"],
   "dependencyDashboardTitle": "Renovate Dashboard 🤖",
   "packageRules": [
     {
@@ -21,14 +21,13 @@
   "postUpdateOptions": ["gomodTidy"],
   "commitBodyTable": true,
   "commitMessagePrefix": "deps",
-  "regexManagers": [
+  "customManagers": [
     {
+      "customType": "regex",
       "fileMatch": ["^update/oscal-version\\.yaml$"],
       "matchStrings": ["oscal: v(?<currentValue>\\d+\\.\\d+\\.\\d+)"],
-      "datasource": "github-tags",
-      "depName": "usnistgov/OSCAL",
-      "versioning": "semver"
+      "datasourceTemplate": "github-tags",
+      "depNameTemplate": "usnistgov/OSCAL"
     }
   ]
-
 }
