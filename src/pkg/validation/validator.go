@@ -16,7 +16,7 @@ const (
 	SCHEMA_PREFIX = "oscal_complete_schema-"
 )
 
-type validator struct {
+type Validator struct {
 	jsonMap   map[string]interface{}
 	version   string
 	modelType string
@@ -27,66 +27,66 @@ type InterfaceOrBytes interface {
 	interface{} | []byte
 }
 
-func NewValidator(oscalDoc InterfaceOrBytes) (*validator, error) {
+func NewValidator(oscalDoc InterfaceOrBytes) (validator Validator, err error) {
 	model, err := coerceToJsonMap(oscalDoc)
 	if err != nil {
-		return nil, err
+		return validator, err
 	}
 
 	modelType, err := getModelType(model)
 	if err != nil {
-		return nil, err
+		return validator, err
 	}
 
 	version, err := getOscalVersionFromMap(model)
 	if err != nil {
-		return nil, err
+		return validator, err
 	}
 
-	return &validator{
+	return Validator{
 		jsonMap:   model,
 		version:   version,
 		modelType: modelType,
 	}, nil
 }
 
-func NewValidatorDesiredVersion(oscalDoc InterfaceOrBytes, desiredVersion string) (*validator, error) {
+func NewValidatorDesiredVersion(oscalDoc InterfaceOrBytes, desiredVersion string) (validator Validator, err error) {
 	model, err := coerceToJsonMap(oscalDoc)
 	if err != nil {
-		return nil, err
+		return validator, err
 	}
 
 	modelType, err := getModelType(model)
 	if err != nil {
-		return nil, err
+		return validator, err
 	}
 
 	formattedVersion := formatOscalVersion(desiredVersion)
 
 	if err = isValidOscalVersion(formattedVersion); err != nil {
-		return nil, err
+		return validator, err
 	}
 
-	return &validator{
+	return Validator{
 		jsonMap:   model,
 		modelType: modelType,
 		version:   formattedVersion,
 	}, nil
 }
 
-func (v *validator) GetVersion() string {
+func (v *Validator) GetVersion() string {
 	return v.version
 }
 
-func (v *validator) GetJsonModel() map[string]interface{} {
+func (v *Validator) GetJsonModel() map[string]interface{} {
 	return v.jsonMap
 }
 
-func (v *validator) GetModelType() string {
+func (v *Validator) GetModelType() string {
 	return v.modelType
 }
 
-func (v *validator) Validate() error {
+func (v *Validator) Validate() error {
 	// Build the schema file-path
 	schemaPath := SCHEMA_PREFIX + strings.ReplaceAll(v.version, ".", "-") + ".json"
 
