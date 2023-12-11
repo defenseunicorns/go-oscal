@@ -22,6 +22,7 @@ func WriteOutput(output []byte, outputFile string) (err error) {
 	return nil
 }
 
+// OpenLogFile opens the provided input file or returns an error if the file does not exist.
 func OpenLogFile(path string) (file *os.File, err error) {
 	file, err = os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
@@ -34,6 +35,7 @@ func OpenLogFile(path string) (file *os.File, err error) {
 	return file, nil
 }
 
+// CreateFileDirs creates the directories for a file path if they do not exist.
 func CreateFileDirs(fullPath string) (err error) {
 	pathSeperator := string(os.PathSeparator)
 	splitPath := strings.Split(fullPath, pathSeperator)
@@ -53,6 +55,14 @@ func CreateFileDirs(fullPath string) (err error) {
 		if os.IsPermission(err) {
 			return err
 		}
+	}
+	return nil
+}
+
+// isJsonOrYaml returns error if the file is not a json or yaml file.
+func IsJsonOrYaml(path string) (err error) {
+	if !strings.HasSuffix(path, ".json") && !strings.HasSuffix(path, ".yaml") {
+		return errors.New("please specify a json or yaml file")
 	}
 	return nil
 }
