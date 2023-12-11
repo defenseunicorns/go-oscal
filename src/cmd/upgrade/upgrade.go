@@ -2,8 +2,11 @@ package upgrade
 
 import (
 	"errors"
+	"fmt"
+	"os"
 
 	"github.com/defenseunicorns/go-oscal/src/internal/utils"
+	"github.com/defenseunicorns/go-oscal/src/pkg/validation"
 	"github.com/spf13/cobra"
 )
 
@@ -34,9 +37,32 @@ func UpgradeCmdCommand(opts *UpgradeCmdOptions) (err error) {
 		return errors.New("Please specify an input file with the -f flag")
 	}
 
+	if opts.Version == "" {
+		return errors.New("Please specify a version with the -v flag")
+	}
+
 	if err := utils.IsJsonOrYaml(opts.InputFile); err != nil {
 		return err
 	}
+
+	// Read the input file
+	bytes, err := os.ReadFile(opts.InputFile)
+	if err != nil {
+		return fmt.Errorf("reading input file: %s\n", err)
+	}
+
+	// Create Validator
+	validator, err := validation.NewValidatorDesiredVersion(bytes, opts.Version)
+	if err != nil {
+		return fmt.Errorf("creating validator: %s\n", err)
+	}
+
+	// Validate the input file
+	if err := validator.Validate(); err != nil {
+		return fmt.Errorf("validating input file: %s\n", err)
+	}
+
+	// TODO: Upgrade the input file
 
 	return nil
 }
