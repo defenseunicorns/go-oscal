@@ -24,8 +24,11 @@ To trigger the goreleaser action you push a signed tag using your GPG key.
 
 ```console
 git tag -s vX.X.X -m "Release Commit Message"
+
 git push origin vX.X.X
 ```
+
+Goreleaser can also be triggered by cutting the release manually through GitHub. Following the GitHub [release](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository) documentation and using a semver version number IE. vX.X.X
 
 ### How do I fix a release issue?
 
@@ -42,6 +45,26 @@ The CHANGELOG is not required to be updated, only the release notes must be upda
 ```md
 >[!WARNING]
 >PLEASE USE A NEWER VERSION (there are known issues with this release)
+```
+
+#### Incorrect Tag or Remove a Tag
+
+In the event a release is tagged incorrectly and it needs to be changed this can be completed by someone with admin privileges in the repo by running the following commands:
+```console
+git tag -d vX.X.X
+
+git tag -s vX.X.X
+
+git push origin vX.X.X --force
+```
+
+These commands will delete the tag locally, create a new signed tag version, lastly force push the new tag to origin. 
+
+In the event a tag needs deleted and NOT replaced this can be completed by someone with admin privileges in the repo by running the following commands:
+```console
+git tag -d vX.X.X
+
+git push origin :refs/tags/vX.X.X
 ```
 
 #### Other issues and helpful tips
