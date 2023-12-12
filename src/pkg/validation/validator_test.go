@@ -8,6 +8,13 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+var (
+	unsupportedVersion    = "-2.0.7"
+	validVersion          = "1.0.4"
+	tooManyVersionNumbers = "1.0.4.1"
+	upgradeVersion        = "1.0.6"
+)
+
 func TestValidator(t *testing.T) {
 	t.Parallel()
 	gooscaltest.GetByteMap(t)

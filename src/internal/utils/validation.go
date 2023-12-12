@@ -1,10 +1,9 @@
-package validation
+package utils
 
 import (
 	"encoding/json"
 	"fmt"
 	"reflect"
-	"regexp"
 	"strconv"
 	"strings"
 
@@ -19,20 +18,14 @@ type ValidatorError struct {
 	FailedValue interface{} `json:"failedValue,omitempty"`
 }
 
-var (
-	versionRegexp    = regexp.MustCompile(`^\d+([-\.]\d+){2}$`)
-	supportedVersion = map[string]bool{
-		"1.0.4": true,
-		"1.0.5": true,
-		"1.0.6": true,
-		"1.1.0": true,
-		"1.1.1": true,
-	}
-)
+// InterfaceOrBytes is an interface{} or []byte for generic functions that can support either type
+type InterfaceOrBytes interface {
+	interface{} | []byte
+}
 
 // Creates a []ValidatorError from a jsonschema.Basic
 // The jsonschema.Basic contains the errors from the validation
-func extractErrors(originalObject map[string]interface{}, validationError jsonschema.Basic) (validationErrors []ValidatorError) {
+func ExtractErrors(originalObject map[string]interface{}, validationError jsonschema.Basic) (validationErrors []ValidatorError) {
 	for _, error := range validationError.Errors {
 		if error.InstanceLocation == "" || error.Error == "" || strings.HasPrefix(error.Error, "doesn't validate with") {
 			continue
@@ -40,7 +33,7 @@ func extractErrors(originalObject map[string]interface{}, validationError jsonsc
 		if len(validationErrors) > 0 && validationErrors[len(validationErrors)-1].InstanceLocation == error.InstanceLocation {
 			validationErrors[len(validationErrors)-1].Error += ", " + error.Error
 		} else {
-			failedValue := findValue(originalObject, strings.Split(error.InstanceLocation, "/")[1:])
+			failedValue := FindValue(originalObject, strings.Split(error.InstanceLocation, "/")[1:])
 			_, mapOk := failedValue.(map[string]interface{})
 			_, sliceOk := failedValue.([]interface{})
 			if mapOk || sliceOk {
@@ -56,7 +49,7 @@ func extractErrors(originalObject map[string]interface{}, validationError jsonsc
 // Finds the value of a key in a model in a map[string]interface{} given a slice of keys
 // Returns nil if the key is not found or the model type is not supported
 // Internal Recursive function so that the model can keep type safety
-func findValue(model map[string]interface{}, keys []string) interface{} {
+func FindValue(model map[string]interface{}, keys []string) interface{} {
 
 	// Define recursive function
 	var find func(model interface{}, keys []string) interface{}
@@ -93,9 +86,9 @@ func findValue(model map[string]interface{}, keys []string) interface{} {
 	return find(model, keys)
 }
 
-// getModelType returns the type of the model if the model is valid
+// GetModelType returns the type of the model if the model is valid
 // returns error if more than one model is found or no models are found (consistent with OSCAL spec)
-func getModelType(model map[string]interface{}) (modelType string, err error) {
+func GetModelType(model map[string]interface{}) (modelType string, err error) {
 	if len(model) != 1 {
 		return "", fmt.Errorf("expected model to have 1 key, got %d", len(model))
 	}
@@ -105,65 +98,11 @@ func getModelType(model map[string]interface{}) (modelType string, err error) {
 	return modelType, nil
 }
 
-// getOscalVersionFromMap returns formatted OSCAL version if valid version is passed, returns error if not.
-func getOscalVersionFromMap(model map[string]interface{}) (version string, err error) {
-	var submodel map[string]interface{}
-	var ok bool
-	for _, value := range model {
-		submodel, ok = value.(map[string]interface{})
-		if !ok {
-			continue
-		}
-		break
-
-	}
-
-	metadata, ok := submodel["metadata"].(map[string]interface{})
-	if !ok {
-		return "", fmt.Errorf("required field: metadata not found")
-	}
-
-	if _, ok := metadata["oscal-version"]; !ok {
-		return "", fmt.Errorf("required field: oscal-version not found")
-	}
-
-	version, ok = reflect.ValueOf(metadata["oscal-version"]).Interface().(string)
-	if !ok {
-		return "", fmt.Errorf("required field: oscal-version not found")
-	}
-
-	if err = isValidOscalVersion(version); err != nil {
-		return "", err
-	}
-
-	return version, nil
-}
-
-// isValidOscalVersion returns true if the version is supported, false if not.
-func isValidOscalVersion(version string) error {
-	if !versionRegexp.MatchString(version) {
-		return fmt.Errorf("version %s is not a valid version", version)
-	}
-
-	if !supportedVersion[version] {
-		return fmt.Errorf("version %s is not supported", version)
-	}
-	return nil
-}
-
-// formatOscalVersion takes a version string and returns a formatted version string
-func formatOscalVersion(version string) (formattedVersion string) {
-	formattedVersion = strings.ToLower(version)
-	formattedVersion = strings.ReplaceAll(formattedVersion, "-", ".")
-	formattedVersion = strings.Trim(formattedVersion, "v")
-	return formattedVersion
-}
-
-// coerceToJsonMap takes a yaml byte array and coerces it to a json interface{}
+// CoerceToJsonMap takes a yaml byte array and coerces it to a json interface{}
 // This is necessary because the jsonschema library only accepts valid json data types that may not match yaml.
 // Example: yaml allows for DateTimes to be time.Time, but json requires them to be strings
 // This also allows for structs to be passed in, and they will be converted to map[string]interface{}
-func coerceToJsonMap(ymlData InterfaceOrBytes) (model map[string]interface{}, err error) {
+func CoerceToJsonMap(ymlData InterfaceOrBytes) (model map[string]interface{}, err error) {
 	model, err = convertInterfaceOrBytesToMap(ymlData)
 	if err != nil {
 		return nil, err

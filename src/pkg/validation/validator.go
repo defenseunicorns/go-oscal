@@ -6,6 +6,7 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/defenseunicorns/go-oscal/src/internal/utils"
 	"github.com/santhosh-tekuri/jsonschema/v5"
 )
 
@@ -22,23 +23,18 @@ type Validator struct {
 	modelType string
 }
 
-// InterfaceOrBytes is an interface{} or []byte for generic functions that can support either type
-type InterfaceOrBytes interface {
-	interface{} | []byte
-}
-
-func NewValidator(oscalDoc InterfaceOrBytes) (validator Validator, err error) {
-	model, err := coerceToJsonMap(oscalDoc)
+func NewValidator(oscalDoc utils.InterfaceOrBytes) (validator Validator, err error) {
+	model, err := utils.CoerceToJsonMap(oscalDoc)
 	if err != nil {
 		return validator, err
 	}
 
-	modelType, err := getModelType(model)
+	modelType, err := utils.GetModelType(model)
 	if err != nil {
 		return validator, err
 	}
 
-	version, err := getOscalVersionFromMap(model)
+	version, err := utils.GetOscalVersionFromMap(model)
 	if err != nil {
 		return validator, err
 	}
@@ -50,20 +46,20 @@ func NewValidator(oscalDoc InterfaceOrBytes) (validator Validator, err error) {
 	}, nil
 }
 
-func NewValidatorDesiredVersion(oscalDoc InterfaceOrBytes, desiredVersion string) (validator Validator, err error) {
-	model, err := coerceToJsonMap(oscalDoc)
+func NewValidatorDesiredVersion(oscalDoc utils.InterfaceOrBytes, desiredVersion string) (validator Validator, err error) {
+	model, err := utils.CoerceToJsonMap(oscalDoc)
 	if err != nil {
 		return validator, err
 	}
 
-	modelType, err := getModelType(model)
+	modelType, err := utils.GetModelType(model)
 	if err != nil {
 		return validator, err
 	}
 
-	formattedVersion := formatOscalVersion(desiredVersion)
+	formattedVersion := utils.FormatOscalVersion(desiredVersion)
 
-	if err = isValidOscalVersion(formattedVersion); err != nil {
+	if err = utils.IsValidOscalVersion(formattedVersion); err != nil {
 		return validator, err
 	}
 
@@ -110,7 +106,7 @@ func (v *Validator) Validate() error {
 
 		// Extract the specific errors from the schema error
 		// Return the errors as a string
-		basicErrors := extractErrors(v.jsonMap, validationErr.BasicOutput())
+		basicErrors := utils.ExtractErrors(v.jsonMap, validationErr.BasicOutput())
 		formattedErrors, _ := json.MarshalIndent(basicErrors, "", "  ")
 		return errors.New(string(formattedErrors))
 	}
