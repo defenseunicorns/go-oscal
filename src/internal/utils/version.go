@@ -5,13 +5,6 @@ import (
 	"reflect"
 	"regexp"
 	"strings"
-
-	V104 "github.com/defenseunicorns/go-oscal/src/types/oscal-1-0-4"
-	V105 "github.com/defenseunicorns/go-oscal/src/types/oscal-1-0-5"
-	V106 "github.com/defenseunicorns/go-oscal/src/types/oscal-1-0-6"
-	V110 "github.com/defenseunicorns/go-oscal/src/types/oscal-1-1-0"
-	V111 "github.com/defenseunicorns/go-oscal/src/types/oscal-1-1-1"
-	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -97,31 +90,5 @@ func ReplaceOscalVersionInMap(model map[string]interface{}, version string) (upg
 		return model, fmt.Errorf("required field: metadata not found")
 	}
 	metadata["oscal-version"] = version
-	return model, nil
-}
-
-// GetVersionedStruct returns the versioned struct based on the version passed
-func GetVersionedStruct(bytes []byte, version string) (model interface{}, err error) {
-	switch version {
-	case "1.0.4":
-		model = V104.OscalModels{}
-		break
-	case "1.0.5":
-		model = V105.OscalModels{}
-		break
-	case "1.0.6":
-		model = V106.OscalModels{}
-		break
-	case "1.1.0":
-		model = V110.OscalModels{}
-		break
-	case "1.1.1":
-		model = V111.OscalModels{}
-		break
-	}
-	err = yaml.Unmarshal(bytes, &model)
-	if err != nil {
-		return nil, err
-	}
 	return model, nil
 }
