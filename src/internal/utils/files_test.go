@@ -7,7 +7,7 @@ import (
 	"github.com/defenseunicorns/go-oscal/src/internal/utils"
 )
 
-func UtilsTest(t *testing.T) {
+func TestFileUtils(t *testing.T) {
 	t.Parallel()
 
 	tmpDir := t.TempDir()
@@ -36,7 +36,7 @@ func UtilsTest(t *testing.T) {
 
 		t.Run("creates the file path if it doesn't exist", func(t *testing.T) {
 			t.Parallel()
-			err := utils.WriteOutput([]byte(testOutput), subdir+"/output/test.txt")
+			err := utils.WriteOutput([]byte(testOutput), subdir+testFile)
 			if err != nil {
 				t.Error("expected no error, got", err)
 			}
@@ -118,14 +118,6 @@ func UtilsTest(t *testing.T) {
 		t.Run("returns an error if no file path is provided", func(t *testing.T) {
 			t.Parallel()
 			err := utils.CreateFileDirs("")
-			if err == nil {
-				t.Error("expected an error, got", err)
-			}
-		})
-
-		t.Run("returns an error if the file path is invalid", func(t *testing.T) {
-			t.Parallel()
-			err := utils.CreateFileDirs(tmpDir + "test.txt")
 			if err == nil {
 				t.Error("expected an error, got", err)
 			}

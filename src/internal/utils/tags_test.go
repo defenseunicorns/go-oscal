@@ -7,7 +7,7 @@ import (
 	"github.com/defenseunicorns/go-oscal/src/internal/utils"
 )
 
-func TestFormatTags(t *testing.T) {
+func TestTagsUtils(t *testing.T) {
 	t.Parallel()
 
 	t.Run("splits comma separated tags", func(t *testing.T) {
