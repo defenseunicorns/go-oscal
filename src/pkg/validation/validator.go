@@ -4,7 +4,6 @@ import (
 	"embed"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"strings"
 
 	"github.com/defenseunicorns/go-oscal/src/internal/utils"
@@ -114,29 +113,4 @@ func (v *Validator) Validate() error {
 	}
 
 	return nil
-}
-
-// Upgrade runs the validation and upgrades the model to the desired version
-// Returns error if the model is already at the desired version or if the model is not valid
-func (v *Validator) Upgrade() (upgradedModel map[string]interface{}, err error) {
-	modelVersion, err := utils.GetOscalVersionFromMap(v.jsonMap)
-	if err != nil {
-		return upgradedModel, err
-	}
-
-	if modelVersion == v.version {
-		return upgradedModel, fmt.Errorf("model is already at version %s", v.version)
-	}
-
-	err = v.Validate()
-	if err != nil {
-		return upgradedModel, err
-	}
-
-	upgradedModel, err = utils.ReplaceOscalVersionInMap(v.jsonMap, v.version)
-	if err != nil {
-		return upgradedModel, err
-	}
-
-	return upgradedModel, nil
 }
