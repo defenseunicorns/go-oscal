@@ -47,14 +47,15 @@ func CreateFileDirs(fullPath string) (err error) {
 	for _, location := range splitPath[:len(splitPath)-1] {
 		builtPath += location + pathSeperator
 		_, err := os.Stat(builtPath)
-		if os.IsNotExist(err) {
-			err = os.Mkdir(builtPath, 0755)
-			if err != nil {
-				return fmt.Errorf("failed to create file path: %s\n", err)
+		if err != nil {
+			if os.IsNotExist(err) {
+				err = os.Mkdir(builtPath, 0755)
+				if err != nil {
+					return fmt.Errorf("failed to create file path: %s\n", err)
+				}
+			} else {
+				return err
 			}
-		}
-		if os.IsPermission(err) {
-			return err
 		}
 	}
 	return nil

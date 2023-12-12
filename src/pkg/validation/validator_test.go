@@ -48,8 +48,8 @@ func TestValidator(t *testing.T) {
 			if err != nil {
 				t.Errorf("expected no error, got %v", err)
 			}
-			if validator.GetVersion() != validVersion {
-				t.Errorf("expected version %s, got %s", validVersion, validator.GetVersion())
+			if validator.GetSchemaVersion() != validVersion {
+				t.Errorf("expected version %s, got %s", validVersion, validator.GetSchemaVersion())
 			}
 		})
 
@@ -121,8 +121,8 @@ func TestValidator(t *testing.T) {
 			if err != nil {
 				t.Errorf("expected no error, got %v", err)
 			}
-			if validator.GetVersion() != inputVersion {
-				t.Errorf("expected version %s, got %s", validVersion, validator.GetVersion())
+			if validator.GetSchemaVersion() != inputVersion {
+				t.Errorf("expected version %s, got %s", validVersion, validator.GetSchemaVersion())
 			}
 		})
 
@@ -133,8 +133,8 @@ func TestValidator(t *testing.T) {
 			if err != nil {
 				t.Errorf("expected no error, got %v", err)
 			}
-			if validator.GetVersion() != "1.1.0" {
-				t.Errorf("expected version %s, got %s", validVersion, validator.GetVersion())
+			if validator.GetSchemaVersion() != "1.1.0" {
+				t.Errorf("expected version %s, got %s", validVersion, validator.GetSchemaVersion())
 			}
 		})
 

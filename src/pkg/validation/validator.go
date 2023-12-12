@@ -19,11 +19,12 @@ const (
 )
 
 type Validator struct {
-	jsonMap   map[string]interface{}
-	version   string
-	modelType string
+	jsonMap       map[string]interface{}
+	schemaVersion string
+	modelType     string
 }
 
+// NewValidator returns a validator with the models version of the schema.
 func NewValidator(oscalDoc utils.InterfaceOrBytes) (validator Validator, err error) {
 	model, err := utils.CoerceToJsonMap(oscalDoc)
 	if err != nil {
@@ -41,12 +42,13 @@ func NewValidator(oscalDoc utils.InterfaceOrBytes) (validator Validator, err err
 	}
 
 	return Validator{
-		jsonMap:   model,
-		version:   version,
-		modelType: modelType,
+		jsonMap:       model,
+		schemaVersion: version,
+		modelType:     modelType,
 	}, nil
 }
 
+// NewValidatorDesiredVersion returns a validator with the desired version of the schema.
 func NewValidatorDesiredVersion(oscalDoc utils.InterfaceOrBytes, desiredVersion string) (validator Validator, err error) {
 	model, err := utils.CoerceToJsonMap(oscalDoc)
 	if err != nil {
@@ -65,34 +67,38 @@ func NewValidatorDesiredVersion(oscalDoc utils.InterfaceOrBytes, desiredVersion 
 	}
 
 	return Validator{
-		jsonMap:   model,
-		modelType: modelType,
-		version:   formattedVersion,
+		jsonMap:       model,
+		modelType:     modelType,
+		schemaVersion: formattedVersion,
 	}, nil
 }
 
-func (v *Validator) GetVersion() string {
-	return v.version
+// GetSchemaVersion returns the version of the schema used to validate the model.
+func (v *Validator) GetSchemaVersion() string {
+	return v.schemaVersion
 }
 
+// GetJsonModel returns the model being validated.
 func (v *Validator) GetJsonModel() map[string]interface{} {
 	return v.jsonMap
 }
 
+// GetModelType returns the type of the model being validated.
 func (v *Validator) GetModelType() string {
 	return v.modelType
 }
 
+// Validate validates the model against the schema.
 func (v *Validator) Validate() error {
 	// Build the schema file-path
-	schemaPath := SCHEMA_PREFIX + strings.ReplaceAll(v.version, ".", "-") + ".json"
+	schemaPath := SCHEMA_PREFIX + strings.ReplaceAll(v.schemaVersion, ".", "-") + ".json"
 
 	schemaBytes, err := schemas.ReadFile("schema/" + schemaPath)
 	if err != nil {
 		return err
 	}
 
-	sch, err := jsonschema.CompileString(v.version, string(schemaBytes))
+	sch, err := jsonschema.CompileString(v.schemaVersion, string(schemaBytes))
 	if err != nil {
 		return err
 	}
