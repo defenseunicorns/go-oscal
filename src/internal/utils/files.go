@@ -41,8 +41,12 @@ func CreateFileDirs(fullPath string) (err error) {
 	pathSeperator := string(os.PathSeparator)
 	splitPath := strings.Split(fullPath, pathSeperator)
 	builtPath := ""
+	// If the path is just a file name, return nil
 	if len(splitPath) == 1 {
-		return fmt.Errorf("invalid path: %s\n", fullPath)
+		if splitPath[0] == "" {
+			return errors.New("no output file provided")
+		}
+		return nil
 	}
 	for _, location := range splitPath[:len(splitPath)-1] {
 		builtPath += location + pathSeperator

@@ -2,6 +2,7 @@ package gooscaltest
 
 import (
 	"bytes"
+	"io"
 	"log"
 	"os"
 	"sync"
@@ -26,6 +27,7 @@ var (
 	ValidAsessmentPlan              = "../../../testdata/validation/assessment-plan.json"
 	MultipleDocPath                 = "../../../testdata/validation/multiple.yaml"
 	BasicErrorPathJson              = "../../../testdata/validation/basic-error.json"
+	writers                         = []io.Writer{}
 
 	pathSlice = []string{ValidComponentPath, NoVersionComponentPath, InvalidVersionComponentPath, UnsupportedVersionComponentPath, ValidAssessmentResultPath, ValidCatalogPath, ValidCatalogJsonPath, InvalidCatalogPath, ValidProfilePath, ValidSSP, MultipleDocPath, ValidPlanOfActionAndMilestones, ValidAsessmentPlan}
 )
@@ -46,12 +48,13 @@ func GetByteMap(t *testing.T) {
 }
 
 func RedirectLog(t *testing.T) *bytes.Buffer {
+	logMtx.Lock()
+	defer logMtx.Unlock()
 	logOutput := new(bytes.Buffer)
-	log.SetOutput(logOutput)
+	writers = append(writers, logOutput)
+	multiWriter := io.MultiWriter(writers...)
+	log.SetOutput(multiWriter)
 
-	t.Cleanup(func() {
-		log.SetOutput(os.Stderr)
-	})
 	return logOutput
 }
 

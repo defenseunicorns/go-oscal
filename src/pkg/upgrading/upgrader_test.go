@@ -1,11 +1,12 @@
-package upgrader_test
+package upgrading_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/defenseunicorns/go-oscal/src/gooscaltest"
 	"github.com/defenseunicorns/go-oscal/src/internal/utils"
-	"github.com/defenseunicorns/go-oscal/src/pkg/upgrader"
+	"github.com/defenseunicorns/go-oscal/src/pkg/upgrading"
 )
 
 func TestUpgrader(t *testing.T) {
@@ -16,7 +17,7 @@ func TestUpgrader(t *testing.T) {
 		t.Parallel()
 		t.Run("returns a new Upgrader", func(t *testing.T) {
 			t.Parallel()
-			upgrader, err := upgrader.NewUpgrader(gooscaltest.ByteMap[gooscaltest.ValidComponentPath], "1.0.6")
+			upgrader, err := upgrading.NewUpgrader(gooscaltest.ByteMap[gooscaltest.ValidComponentPath], "1.0.6")
 			if err != nil {
 				t.Errorf("expected no error, got %v", err)
 			}
@@ -33,7 +34,7 @@ func TestUpgrader(t *testing.T) {
 
 		t.Run("returns an error when it is unable to upgrade the current model", func(t *testing.T) {
 			t.Parallel()
-			upgrader, err := upgrader.NewUpgrader(gooscaltest.ByteMap[gooscaltest.ValidComponentPath], "1.0.5")
+			upgrader, err := upgrading.NewUpgrader(gooscaltest.ByteMap[gooscaltest.ValidComponentPath], "1.0.5")
 			if err != nil {
 				t.Errorf("expected no error, got %v", err)
 			}
@@ -46,7 +47,7 @@ func TestUpgrader(t *testing.T) {
 
 		t.Run("success", func(t *testing.T) {
 			t.Parallel()
-			upgrader, err := upgrader.NewUpgrader(gooscaltest.ByteMap[gooscaltest.ValidComponentPath], "1.0.6")
+			upgrader, err := upgrading.NewUpgrader(gooscaltest.ByteMap[gooscaltest.ValidComponentPath], "1.0.6")
 			err = upgrader.Upgrade()
 			if err != nil {
 				t.Errorf("expected no error, got %v", err)
@@ -81,6 +82,47 @@ func TestUpgrader(t *testing.T) {
 					t.Errorf("expected %s, got %s", expected, actual)
 				}
 			})
+		})
+	})
+
+	t.Run("GetUpgradedBytes", func(t *testing.T) {
+		t.Parallel()
+		upgrader, err := upgrading.NewUpgrader(gooscaltest.ByteMap[gooscaltest.ValidComponentPath], "1.0.6")
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+		err = upgrader.Upgrade()
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+		t.Run("returns an error if the extension is not json or yaml", func(t *testing.T) {
+			t.Parallel()
+			_, err := upgrader.GetUpgradedBytes("txt")
+			if err == nil {
+				t.Errorf("expected error, got nil")
+			}
+		})
+
+		t.Run("returns the upgraded model as json", func(t *testing.T) {
+			t.Parallel()
+			bytes, err := upgrader.GetUpgradedBytes("json")
+			if err != nil {
+				t.Errorf("expected no error, got %v", err)
+			}
+			if !strings.Contains(string(bytes), "\"oscal-version\":\"1.0.6\"") {
+				t.Errorf("expected version 1.0.6, got %s", string(bytes))
+			}
+		})
+
+		t.Run("returns the upgraded model as yaml", func(t *testing.T) {
+			t.Parallel()
+			bytes, err := upgrader.GetUpgradedBytes("yaml")
+			if err != nil {
+				t.Errorf("expected no error, got %v", err)
+			}
+			if !strings.Contains(string(bytes), "oscal-version: 1.0.6") {
+				t.Errorf("expected version 1.0.6, got %s", string(bytes))
+			}
 		})
 	})
 

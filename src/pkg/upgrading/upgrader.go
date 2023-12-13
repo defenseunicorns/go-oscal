@@ -1,10 +1,12 @@
-package upgrader
+package upgrading
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/defenseunicorns/go-oscal/src/internal/utils"
 	"github.com/defenseunicorns/go-oscal/src/pkg/validation"
+	"gopkg.in/yaml.v3"
 )
 
 type Upgrader struct {
@@ -67,4 +69,24 @@ func (u *Upgrader) Upgrade() (err error) {
 	u.upgradedJsonMap = upgradedJsonMap
 
 	return nil
+}
+
+// GetUpgradedBytes returns the upgraded model as bytes, marshalled to the desired extension.
+func (u *Upgrader) GetUpgradedBytes(ext string) (bytes []byte, err error) {
+	switch ext {
+	case "json":
+		bytes, err = json.Marshal(u.GetUpgradedJsonMap())
+		if err != nil {
+			return nil, err
+		}
+	case "yaml":
+		bytes, err = yaml.Marshal(u.GetUpgradedJsonMap())
+		if err != nil {
+			return nil, err
+		}
+	default:
+		return nil, fmt.Errorf("invalid file extension must be yaml or json: %s", ext)
+	}
+
+	return bytes, nil
 }
