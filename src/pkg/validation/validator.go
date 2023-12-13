@@ -40,6 +40,7 @@ func NewValidator(oscalDoc utils.InterfaceOrBytes) (validator Validator, err err
 	if err != nil {
 		return validator, err
 	}
+	utils.VersionWarning(version)
 
 	return Validator{
 		jsonMap:       model,
@@ -61,6 +62,7 @@ func NewValidatorDesiredVersion(oscalDoc utils.InterfaceOrBytes, desiredVersion 
 	}
 
 	formattedVersion := utils.FormatOscalVersion(desiredVersion)
+	utils.VersionWarning(formattedVersion)
 
 	if err = utils.IsValidOscalVersion(formattedVersion); err != nil {
 		return validator, err

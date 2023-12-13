@@ -1,8 +1,10 @@
 package utils_test
 
 import (
+	"strings"
 	"testing"
 
+	"github.com/defenseunicorns/go-oscal/src/gooscaltest"
 	"github.com/defenseunicorns/go-oscal/src/internal/utils"
 )
 
@@ -168,5 +170,25 @@ func TestVersionUtils(t *testing.T) {
 			}
 		})
 
+	})
+	t.Run("VersionWarning", func(t *testing.T) {
+		t.Parallel()
+		logBytes := gooscaltest.RedirectLog(t)
+
+		t.Run("prints a warning if the version is has known issues", func(t *testing.T) {
+			t.Parallel()
+			utils.VersionWarning("1.0.5")
+			if !strings.Contains(string(gooscaltest.ReadLog(t, logBytes)), "WARNING: 1.0.5 has known issues.") {
+				t.Errorf("expected warning to be printed")
+			}
+		})
+
+		t.Run("does not print a warning if the version is does not have known issues", func(t *testing.T) {
+			t.Parallel()
+			utils.VersionWarning("1.0.6")
+			if strings.Contains(string(gooscaltest.ReadLog(t, logBytes)), "WARNING: 1.0.6 has known issues.") {
+				t.Errorf("expected warning not to be printed")
+			}
+		})
 	})
 }
