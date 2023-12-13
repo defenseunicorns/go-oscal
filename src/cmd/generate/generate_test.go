@@ -13,8 +13,8 @@ func TestGenerateCmd(t *testing.T) {
 	testInput := "../../../schema/complete/oscal_complete_schema-1-0-4.json"
 	packageName := "oscalTypes"
 	tags := "json,yaml"
-	GenerateCmd.SetOut(new(bytes.Buffer))
 	tempDir := t.TempDir()
+	GenerateCmd.SetOut(new(bytes.Buffer))
 
 	logOutput := gooscaltest.RedirectLog(t)
 
@@ -63,8 +63,8 @@ func TestGenerateCmd(t *testing.T) {
 
 	t.Run("output-file", func(t *testing.T) {
 		t.Run("outputs to a file if the -o flag is provided", func(t *testing.T) {
-			outputFile := "test_output.go"
-			GenerateCmd.SetArgs([]string{"-f", testInput, "-o", tempDir + "/" + outputFile})
+			outputFile := tempDir + "/test_output.go"
+			GenerateCmd.SetArgs([]string{"-f", testInput, "-o", outputFile})
 			err := GenerateCmd.Execute()
 			if err != nil {
 				t.Error("expected nil, got", err)
