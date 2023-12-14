@@ -1,4 +1,4 @@
-package convert
+package revise
 
 import (
 	"errors"
@@ -8,26 +8,26 @@ import (
 	"strings"
 
 	"github.com/defenseunicorns/go-oscal/src/internal/utils"
-	"github.com/defenseunicorns/go-oscal/src/pkg/upgrading"
+	"github.com/defenseunicorns/go-oscal/src/pkg/revision"
 	"github.com/spf13/cobra"
 )
 
-type ConvertOptions struct {
+type ReviseOptions struct {
 	InputFile  string // short -f, long --file, required
 	OutputFile string // short -o, long --output, default to stdout
 	Version    string // short -v, long --version, default to latest
 }
 
-var opts = &ConvertOptions{}
+var opts = &ReviseOptions{}
 
-var ConvertCmd = &cobra.Command{
-	Use:   "convert",
-	Short: "convert existing oscal document to a newer version of oscal",
-	Long:  "Convert a given model from an older oscal version to the current (or specified) oscal version ",
+var ReviseCmd = &cobra.Command{
+	Use:   "revise",
+	Short: "revise an existing oscal document to another version of oscal",
+	Long:  "Revise a given model from one oscal version to the specified oscal version. The steps to revise are output to log, successful revision is output to stdout or the specified output file.",
 	// Example: convertHelp,
 	RunE: func(cmd *cobra.Command, componentDefinitionPaths []string) error {
 
-		upgrader, err := ConvertCommand(opts)
+		reviser, err := Revise(opts)
 		if err != nil {
 			return err
 		}
@@ -40,7 +40,7 @@ var ConvertCmd = &cobra.Command{
 			outputExt = split[len(split)-1]
 		}
 
-		upgradeBytes, err := upgrader.GetUpgradedBytes(outputExt)
+		upgradeBytes, err := reviser.GetRevisedBytes(outputExt)
 		if err != nil {
 			return fmt.Errorf("Failed to get upgraded bytes: %s\n", err)
 		}
@@ -55,19 +55,19 @@ var ConvertCmd = &cobra.Command{
 			}
 		}
 
-		log.Printf("Successfully upgraded %s from %s to version %s\n", upgrader.GetModelType(), upgrader.GetModelVersion(), upgrader.GetSchemaVersion())
+		log.Printf("Successfully upgraded %s from %s to version %s\n", reviser.GetModelType(), reviser.GetModelVersion(), reviser.GetSchemaVersion())
 
 		return nil
 	},
 }
 
-func ConvertCommand(opts *ConvertOptions) (upgrader upgrading.Upgrader, err error) {
+func Revise(opts *ReviseOptions) (reviser revision.Reviser, err error) {
 	// Validate inputfile was provided and that is json or yaml
 	if opts.InputFile == "" {
-		return upgrader, errors.New("Please specify an input file with the -f flag")
+		return reviser, errors.New("Please specify an input file with the -f flag")
 	} else {
 		if err := utils.IsJsonOrYaml(opts.InputFile); err != nil {
-			return upgrader, fmt.Errorf("invalid input file: %s\n", err)
+			return reviser, fmt.Errorf("invalid input file: %s\n", err)
 		}
 	}
 
@@ -76,38 +76,38 @@ func ConvertCommand(opts *ConvertOptions) (upgrader upgrading.Upgrader, err erro
 		log.Printf("No output file specified, result will be logged\n")
 	} else {
 		if err := utils.IsJsonOrYaml(opts.OutputFile); err != nil {
-			return upgrader, fmt.Errorf("invalid output file: %s\n", err)
+			return reviser, fmt.Errorf("invalid output file: %s\n", err)
 		}
 	}
 
 	// Validate version was provided
 	if opts.Version == "" {
-		return upgrader, errors.New("Please specify a version to convert to with the -v flag")
+		return reviser, errors.New("Please specify a version to convert to with the -v flag")
 	}
 
 	// Read the input file
 	bytes, err := os.ReadFile(opts.InputFile)
 	if err != nil {
-		return upgrader, fmt.Errorf("reading input file: %s\n", err)
+		return reviser, fmt.Errorf("reading input file: %s\n", err)
 	}
 
 	// Create Upgrader
-	upgrader, err = upgrading.NewUpgrader(bytes, opts.Version)
+	reviser, err = revision.NewReviser(bytes, opts.Version)
 	if err != nil {
-		return upgrader, fmt.Errorf("Failed to create upgrader: %s\n", err)
+		return reviser, fmt.Errorf("Failed to create reviser: %s\n", err)
 	}
 
 	// Run the upgrade
-	err = upgrader.Upgrade()
+	err = reviser.Revise()
 	if err != nil {
-		return upgrader, fmt.Errorf("Failed to upgrade %s version %s: %s\n", upgrader.GetModelType(), upgrader.GetSchemaVersion(), err)
+		return reviser, fmt.Errorf("Failed to upgrade %s version %s: %s\n", reviser.GetModelType(), reviser.GetSchemaVersion(), err)
 	}
 
-	return upgrader, nil
+	return reviser, nil
 }
 
 func init() {
-	ConvertCmd.Flags().StringVarP(&opts.InputFile, "file", "f", "", "input file to convert")
-	ConvertCmd.Flags().StringVarP(&opts.OutputFile, "output", "o", "", "output file to write to")
-	ConvertCmd.Flags().StringVarP(&opts.Version, "version", "v", "", "version to convert to")
+	ReviseCmd.Flags().StringVarP(&opts.InputFile, "file", "f", "", "input file to convert")
+	ReviseCmd.Flags().StringVarP(&opts.OutputFile, "output", "o", "", "output file to write to")
+	ReviseCmd.Flags().StringVarP(&opts.Version, "version", "v", "", "version to convert to")
 }

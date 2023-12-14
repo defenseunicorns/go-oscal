@@ -1,4 +1,4 @@
-package upgrading
+package revision
 
 import (
 	"encoding/json"
@@ -9,15 +9,15 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type Upgrader struct {
+type Reviser struct {
 	bytes []byte
 	validation.Validator
 	modelVersion    string
 	upgradedJsonMap map[string]interface{}
 }
 
-// NewUpgrader returns an upgrader with a validator created from the desired version.
-func NewUpgrader(model utils.InterfaceOrBytes, desiredVersion string) (upgrader Upgrader, err error) {
+// NewReviser returns an upgrader with a validator created from the desired version.
+func NewReviser(model utils.InterfaceOrBytes, desiredVersion string) (upgrader Reviser, err error) {
 	validator, err := validation.NewValidatorDesiredVersion(model, desiredVersion)
 	if err != nil {
 		return upgrader, err
@@ -28,7 +28,7 @@ func NewUpgrader(model utils.InterfaceOrBytes, desiredVersion string) (upgrader 
 		return upgrader, err
 	}
 
-	return Upgrader{
+	return Reviser{
 		Validator:       validator,
 		modelVersion:    version,
 		upgradedJsonMap: nil,
@@ -36,16 +36,16 @@ func NewUpgrader(model utils.InterfaceOrBytes, desiredVersion string) (upgrader 
 }
 
 // GetModelVersion returns the version of the model being upgraded.
-func (u *Upgrader) GetModelVersion() string {
+func (u *Reviser) GetModelVersion() string {
 	return u.modelVersion
 }
 
-// GetUpgradedJsonMap sets the upgraded model.
-func (u *Upgrader) GetUpgradedJsonMap() map[string]interface{} {
+// GetRevisedJsonMap sets the upgraded model.
+func (u *Reviser) GetRevisedJsonMap() map[string]interface{} {
 	return u.upgradedJsonMap
 }
 
-func (u *Upgrader) Upgrade() (err error) {
+func (u *Reviser) Revise() (err error) {
 	err = u.Validate()
 	if err != nil {
 		return err
@@ -71,16 +71,16 @@ func (u *Upgrader) Upgrade() (err error) {
 	return nil
 }
 
-// GetUpgradedBytes returns the upgraded model as bytes, marshalled to the desired extension.
-func (u *Upgrader) GetUpgradedBytes(ext string) (bytes []byte, err error) {
+// GetRevisedBytes returns the upgraded model as bytes, marshalled to the desired extension.
+func (u *Reviser) GetRevisedBytes(ext string) (bytes []byte, err error) {
 	switch ext {
 	case "json":
-		bytes, err = json.Marshal(u.GetUpgradedJsonMap())
+		bytes, err = json.Marshal(u.GetRevisedJsonMap())
 		if err != nil {
 			return nil, err
 		}
 	case "yaml":
-		bytes, err = yaml.Marshal(u.GetUpgradedJsonMap())
+		bytes, err = yaml.Marshal(u.GetRevisedJsonMap())
 		if err != nil {
 			return nil, err
 		}

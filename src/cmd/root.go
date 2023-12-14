@@ -5,8 +5,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/defenseunicorns/go-oscal/src/cmd/convert"
 	"github.com/defenseunicorns/go-oscal/src/cmd/generate"
+	"github.com/defenseunicorns/go-oscal/src/cmd/revise"
 	"github.com/defenseunicorns/go-oscal/src/cmd/validate"
 	"github.com/defenseunicorns/go-oscal/src/internal/utils"
 	"github.com/spf13/cobra"
@@ -42,7 +42,7 @@ func init() {
 func Execute() {
 	commands := []*cobra.Command{
 		generate.GenerateCmd,
-		convert.ConvertCmd,
+		revise.ReviseCmd,
 		validate.ValidateCmd,
 	}
 
