@@ -22,7 +22,7 @@ var ValidateCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		log.Printf("Successfully validated %s is valid OSCAL version %s %s\n", inputfile, validator.GetVersion(), validator.GetModelType())
+		log.Printf("Successfully validated %s is valid OSCAL version %s %s\n", inputfile, validator.GetSchemaVersion(), validator.GetModelType())
 		return nil
 	},
 }
@@ -51,7 +51,7 @@ func ValidateCommand(inputFile string) (validator validation.Validator, err erro
 
 	err = validator.Validate()
 	if err != nil {
-		return validator, fmt.Errorf("Failed to validate %s version %s: %s\n", validator.GetModelType(), validator.GetVersion(), err)
+		return validator, fmt.Errorf("Failed to validate %s version %s: %s\n", validator.GetModelType(), validator.GetSchemaVersion(), err)
 	}
 
 	return validator, nil

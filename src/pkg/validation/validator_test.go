@@ -8,6 +8,13 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+var (
+	unsupportedVersion    = "-2.0.7"
+	validVersion          = "1.0.4"
+	tooManyVersionNumbers = "1.0.4.1"
+	upgradeVersion        = "1.0.6"
+)
+
 func TestValidator(t *testing.T) {
 	t.Parallel()
 	gooscaltest.GetByteMap(t)
@@ -41,8 +48,8 @@ func TestValidator(t *testing.T) {
 			if err != nil {
 				t.Errorf("expected no error, got %v", err)
 			}
-			if validator.GetVersion() != validVersion {
-				t.Errorf("expected version %s, got %s", validVersion, validator.GetVersion())
+			if validator.GetSchemaVersion() != validVersion {
+				t.Errorf("expected version %s, got %s", validVersion, validator.GetSchemaVersion())
 			}
 		})
 
@@ -114,8 +121,8 @@ func TestValidator(t *testing.T) {
 			if err != nil {
 				t.Errorf("expected no error, got %v", err)
 			}
-			if validator.GetVersion() != inputVersion {
-				t.Errorf("expected version %s, got %s", validVersion, validator.GetVersion())
+			if validator.GetSchemaVersion() != inputVersion {
+				t.Errorf("expected version %s, got %s", validVersion, validator.GetSchemaVersion())
 			}
 		})
 
@@ -126,8 +133,8 @@ func TestValidator(t *testing.T) {
 			if err != nil {
 				t.Errorf("expected no error, got %v", err)
 			}
-			if validator.GetVersion() != "1.1.0" {
-				t.Errorf("expected version %s, got %s", validVersion, validator.GetVersion())
+			if validator.GetSchemaVersion() != "1.1.0" {
+				t.Errorf("expected version %s, got %s", validVersion, validator.GetSchemaVersion())
 			}
 		})
 

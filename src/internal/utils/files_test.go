@@ -7,7 +7,7 @@ import (
 	"github.com/defenseunicorns/go-oscal/src/internal/utils"
 )
 
-func UtilsTest(t *testing.T) {
+func TestFileUtils(t *testing.T) {
 	t.Parallel()
 
 	tmpDir := t.TempDir()
@@ -36,7 +36,7 @@ func UtilsTest(t *testing.T) {
 
 		t.Run("creates the file path if it doesn't exist", func(t *testing.T) {
 			t.Parallel()
-			err := utils.WriteOutput([]byte(testOutput), subdir+"/output/test.txt")
+			err := utils.WriteOutput([]byte(testOutput), subdir+testFile)
 			if err != nil {
 				t.Error("expected no error, got", err)
 			}
@@ -122,10 +122,30 @@ func UtilsTest(t *testing.T) {
 				t.Error("expected an error, got", err)
 			}
 		})
+	})
 
-		t.Run("returns an error if the file path is invalid", func(t *testing.T) {
+	t.Run("isJsonOrYaml", func(t *testing.T) {
+		t.Parallel()
+		t.Run("returns nil if the file path ends with the .json extension", func(t *testing.T) {
 			t.Parallel()
-			err := utils.CreateFileDirs(tmpDir + "test.txt")
+			err := utils.IsJsonOrYaml(tmpDir + "/test.json")
+			if err != nil {
+				t.Error("expected no error, got", err)
+			}
+
+		})
+
+		t.Run("returns nil if the file path ends with the .yaml extension", func(t *testing.T) {
+			t.Parallel()
+			err := utils.IsJsonOrYaml(tmpDir + "/test.yaml")
+			if err != nil {
+				t.Error("expected no error, got", err)
+			}
+		})
+
+		t.Run("returns an error if the file path does not end with the .json or .yaml extension", func(t *testing.T) {
+			t.Parallel()
+			err := utils.IsJsonOrYaml(tmpDir + "/test.txt")
 			if err == nil {
 				t.Error("expected an error, got", err)
 			}
