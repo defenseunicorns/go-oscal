@@ -171,6 +171,22 @@ func TestVersionUtils(t *testing.T) {
 		})
 
 	})
+
+	t.Run("UpdateLastModified", func(t *testing.T) {
+		t.Parallel()
+
+		t.Run("updates the last modified field", func(t *testing.T) {
+			t.Parallel()
+			metadata := map[string]interface{}{
+				"last-modified": "2020-09-09T00:00:00Z",
+			}
+			utils.UpdateLastModified(metadata)
+			if metadata["last-modified"] == "2020-09-09T00:00:00Z" {
+				t.Errorf("expected last-modified to be updated")
+			}
+		})
+	})
+
 	t.Run("VersionWarning", func(t *testing.T) {
 		t.Parallel()
 		logBytes := gooscaltest.RedirectLog(t)
