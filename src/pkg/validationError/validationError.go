@@ -11,7 +11,7 @@ import (
 // if the failed value is a map or slice, it will be omitted
 type ValidatorError struct {
 	jsonschema.BasicError
-	FailedValue interface{} `json:"failedValue,omitempty"`
+	FailedValue interface{} `json:"failedValue,omitempty" yaml:"failedValue,omitempty"`
 }
 
 // Creates a []ValidatorError from a jsonschema.Basic
