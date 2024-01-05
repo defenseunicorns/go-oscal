@@ -1,4 +1,4 @@
-package validationError
+package validation
 
 import (
 	"strings"

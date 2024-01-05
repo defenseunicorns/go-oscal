@@ -30,19 +30,6 @@ func TestValidator(t *testing.T) {
 			}
 		})
 
-		t.Run("validation result is nil when validation has not been run", func(t *testing.T) {
-			t.Parallel()
-			validator, err := NewValidator(gooscaltest.ByteMap[gooscaltest.ValidComponentPath])
-			if err != nil {
-				t.Errorf("expected no error, got %v", err)
-			}
-
-			result := validator.GetValidationResult()
-			if result.Success != false {
-				t.Errorf("expected false, got %v", result.Success)
-			}
-		})
-
 		t.Run("creates a json map from the byte slice", func(t *testing.T) {
 			t.Parallel()
 			validator, err := NewValidator(gooscaltest.ByteMap[gooscaltest.ValidComponentPath])
@@ -184,22 +171,6 @@ func TestValidator(t *testing.T) {
 			}
 		})
 
-		t.Run("sets the validation result success to true when it passes validation", func(t *testing.T) {
-			t.Parallel()
-			validator, err := NewValidator(gooscaltest.ByteMap[gooscaltest.ValidComponentPath])
-			if err != nil {
-				t.Errorf("expected no error, got %v", err)
-			}
-			err = validator.Validate()
-			if err != nil {
-				t.Errorf("expected no error, got %v", err)
-			}
-
-			if validator.GetValidationResult().Success != true {
-				t.Errorf("expected true, got %v", validator.GetValidationResult().Success)
-			}
-		})
-
 		t.Run("returns error when it fails to validate against the supported schema", func(t *testing.T) {
 			t.Parallel()
 			validator, err := NewValidator(gooscaltest.ByteMap[gooscaltest.InvalidCatalogPath])
@@ -209,18 +180,6 @@ func TestValidator(t *testing.T) {
 			err = validator.Validate()
 			if err == nil {
 				t.Errorf("expected error, got %v", err)
-			}
-		})
-
-		t.Run("sets the validation result to failure when it fails to validate against the supported schema", func(t *testing.T) {
-			t.Parallel()
-			validator, err := NewValidator(gooscaltest.ByteMap[gooscaltest.InvalidCatalogPath])
-			if err != nil {
-				t.Errorf("expected no error, got %v", err)
-			}
-			err = validator.Validate()
-			if validator.GetValidationResult().Success {
-				t.Errorf("expected failure, got %v", validator.GetValidationResult().Success)
 			}
 		})
 
@@ -305,6 +264,41 @@ func TestValidator(t *testing.T) {
 			err = validator.Validate()
 			if err != nil {
 				t.Errorf("expected no error, got %v", err)
+			}
+		})
+	})
+
+	t.Run("GetValidationResult", func(t *testing.T) {
+		t.Parallel()
+
+		t.Run("returns a ValidationResult if validation has occured", func(t *testing.T) {
+			t.Parallel()
+			validator, err := NewValidator(gooscaltest.ByteMap[gooscaltest.ValidComponentPath])
+			if err != nil {
+				t.Errorf("expected no error, got %v", err)
+			}
+			err = validator.Validate()
+			if err != nil {
+				t.Errorf("expected no error, got %v", err)
+			}
+			result, err := validator.GetValidationResult()
+			if err != nil {
+				t.Errorf("expected no error, got %v", err)
+			}
+			if !result.Valid {
+				t.Errorf("expected result.Valid to be true, got false")
+			}
+
+		})
+
+		t.Run("throws an error if the validator has not yet been through validation", func(t *testing.T) {
+			validator, err := NewValidator(gooscaltest.ByteMap[gooscaltest.ValidComponentPath])
+			if err != nil {
+				t.Errorf("expected no error, got %v", err)
+			}
+			_, err = validator.GetValidationResult()
+			if err == nil {
+				t.Errorf("expected error, got %v", err)
 			}
 		})
 	})
