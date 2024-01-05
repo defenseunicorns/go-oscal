@@ -1,8 +1,10 @@
 package utils_test
 
 import (
+	"os"
 	"testing"
 
+	"github.com/defenseunicorns/go-oscal/src/gooscaltest"
 	"github.com/defenseunicorns/go-oscal/src/internal/utils"
 	V104 "github.com/defenseunicorns/go-oscal/src/types/oscal-1-0-4"
 	"gopkg.in/yaml.v3"
@@ -36,6 +38,46 @@ func TestModelUtils(t *testing.T) {
 		"component-definition": map[string]interface{}{},
 		"oscal-version":        validVersion,
 	}
+
+	t.Run("findValue", func(t *testing.T) {
+		t.Parallel()
+
+		var catalog map[string]interface{}
+		originalDocBytes, err := os.ReadFile(gooscaltest.InvalidCatalogPath)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		// Unmarshal into associated structs
+		if err := yaml.Unmarshal(originalDocBytes, &catalog); err != nil {
+			t.Fatal(err)
+		}
+
+		t.Run("returns the value given a model and a slice of keys", func(t *testing.T) {
+			t.Parallel()
+			value := utils.FindValue(catalog, []string{"catalog", "metadata", "oscal-version"})
+			if value != "1.0.4" {
+				t.Errorf("expected %s, got %s", "1.0.4", value)
+			}
+		})
+
+		t.Run("converts key to int if the previous key is a slice", func(t *testing.T) {
+			t.Parallel()
+			value := utils.FindValue(catalog, []string{"catalog", "metadata", "parties", "0", "uuid"})
+			if value != "invalid-uuid" {
+				t.Errorf("expected %s, got %s", "invalid-uuid", value)
+			}
+		})
+
+		t.Run("returns nil given a model and a slice of keys that do not exist", func(t *testing.T) {
+			t.Parallel()
+			value := utils.FindValue(catalog, []string{"catalog", "metadata", "oscal-version", "invalid-key"})
+			if value != nil {
+				t.Errorf("expected nil, got %v", value)
+			}
+		})
+
+	})
 
 	t.Run("getModelType", func(t *testing.T) {
 		t.Parallel()

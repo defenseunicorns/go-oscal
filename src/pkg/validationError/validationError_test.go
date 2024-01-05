@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/defenseunicorns/go-oscal/src/gooscaltest"
-	"github.com/defenseunicorns/go-oscal/src/internal/utils"
 	"github.com/defenseunicorns/go-oscal/src/pkg/validationError"
 	"github.com/santhosh-tekuri/jsonschema/v5"
 	"gopkg.in/yaml.v3"
@@ -33,35 +32,6 @@ func TestValidationError(t *testing.T) {
 		if err := json.Unmarshal(errorsBytes, &basic); err != nil {
 			t.Fatal(err)
 		}
-
-		t.Run("findValue", func(t *testing.T) {
-			t.Parallel()
-
-			t.Run("returns the value given a model and a slice of keys", func(t *testing.T) {
-				t.Parallel()
-				value := utils.FindValue(catalog, []string{"catalog", "metadata", "oscal-version"})
-				if value != "1.0.4" {
-					t.Errorf("expected %s, got %s", "1.0.4", value)
-				}
-			})
-
-			t.Run("converts key to int if the previous key is a slice", func(t *testing.T) {
-				t.Parallel()
-				value := utils.FindValue(catalog, []string{"catalog", "metadata", "parties", "0", "uuid"})
-				if value != "invalid-uuid" {
-					t.Errorf("expected %s, got %s", "invalid-uuid", value)
-				}
-			})
-
-			t.Run("returns nil given a model and a slice of keys that do not exist", func(t *testing.T) {
-				t.Parallel()
-				value := utils.FindValue(catalog, []string{"catalog", "metadata", "oscal-version", "invalid-key"})
-				if value != nil {
-					t.Errorf("expected nil, got %v", value)
-				}
-			})
-
-		})
 
 		t.Run("extractErrors", func(t *testing.T) {
 
