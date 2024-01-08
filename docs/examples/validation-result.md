@@ -9,7 +9,7 @@
 
 ```yaml
 valid: false
-timeStamp: 2024-01-08T09:16:06.164456554-08:00
+timeStamp: 2024-01-08T09:25:14.654243932-08:00
 errors:
     - basicerror:
         keywordlocation: /oneOf/0/properties/catalog/$ref/properties/metadata/$ref/required
@@ -17,21 +17,21 @@ errors:
         instancelocation: /catalog/metadata
         error: 'missing properties: ''title'''
     - basicerror:
-        keywordlocation: /oneOf/0/properties/catalog/$ref/properties/metadata/$ref/properties/links/items/$ref/properties/rel/pattern
-        absolutekeywordlocation: http://csrc.nist.gov/ns/oscal/1.0/1.0.4/oscal-complete-schema.json#/definitions/oscal-complete-oscal-metadata:link/properties/rel/pattern
-        instancelocation: /catalog/metadata/links/0/rel
-        error: does not match pattern '^(\\p{L}|_)(\\p{L}|\\p{N}|[.\\-_])*$'
-      failedValue: https://something.com
-    - basicerror:
         keywordlocation: /oneOf/0/properties/catalog/$ref/properties/metadata/$ref/properties/parties/items/$ref/properties/uuid/pattern
         absolutekeywordlocation: http://csrc.nist.gov/ns/oscal/1.0/1.0.4/oscal-complete-schema.json#/definitions/oscal-complete-oscal-metadata:party/properties/uuid/pattern
         instancelocation: /catalog/metadata/parties/0/uuid
         error: does not match pattern '^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[45][0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$'
       failedValue: invalid-uuid
+    - basicerror:
+        keywordlocation: /oneOf/0/properties/catalog/$ref/properties/metadata/$ref/properties/links/items/$ref/properties/rel/pattern
+        absolutekeywordlocation: http://csrc.nist.gov/ns/oscal/1.0/1.0.4/oscal-complete-schema.json#/definitions/oscal-complete-oscal-metadata:link/properties/rel/pattern
+        instancelocation: /catalog/metadata/links/0/rel
+        error: does not match pattern '^(\\p{L}|_)(\\p{L}|\\p{N}|[.\\-_])*$'
+      failedValue: https://something.com
 metadata:
     documentType: catalog
     documentVersion: 1.0.4
-    schemaVersion: 2.0.4
+    schemaVersion: 1.0.4
 ```
 
 ## JSON
