@@ -36,3 +36,12 @@ func NewValidationResult(validator *Validator, errors []ValidatorError) Validati
 		},
 	}
 }
+
+// WriteValidationResult writes a ValidationResult to a file
+func WriteValidationResult(validationResult ValidationResult, outputFile string) (err error) {
+	validationResultBytes, err := utils.MarshalByExtension(validationResult, outputFile)
+	if err != nil {
+		return err
+	}
+	return utils.WriteOutput(validationResultBytes, outputFile)
+}

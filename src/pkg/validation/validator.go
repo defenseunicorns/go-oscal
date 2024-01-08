@@ -90,7 +90,8 @@ func (v *Validator) GetModelType() string {
 	return v.modelType
 }
 
-// GetValidationResult returns the result of the
+// GetValidationResult returns a ValidationResult.
+// If the validation has not been run, an error is returned.
 func (v *Validator) GetValidationResult() (ValidationResult, error) {
 	if v.validationResult.TimeStamp == (ValidationResult{}).TimeStamp {
 		return v.validationResult, errors.New("validation has not been run")

@@ -12,16 +12,30 @@ import (
 )
 
 var inputfile string
+var validationResultFile string
 
 var ValidateCmd = &cobra.Command{
 	Use:   "validate",
 	Short: "validate an oscal document",
 	Long:  "Validate an OSCAL document against the OSCAL schema version specified in the document.",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		validator, err := ValidateCommand(inputfile)
-		if err != nil {
-			return err
+		validator, validationErr := ValidateCommand(inputfile)
+
+		// Write validation result if it was specified and exists before returning ValidateCommand error
+		validationResult, err := validator.GetValidationResult()
+		if err == nil && validationResultFile != "" {
+			err = validation.WriteValidationResult(validationResult, validationResultFile)
+			if err != nil {
+				log.Printf("Failed to write validation result to %s: %s\n", validationResultFile, err)
+			}
 		}
+
+		// Return the error from the validation if there was one
+		if validationErr != nil {
+			return validationErr
+		}
+
+		// No errors, log success
 		log.Printf("Successfully validated %s is valid OSCAL version %s %s\n", inputfile, validator.GetSchemaVersion(), validator.GetModelType())
 		return nil
 	},
@@ -59,4 +73,5 @@ func ValidateCommand(inputFile string) (validator validation.Validator, err erro
 
 func init() {
 	ValidateCmd.Flags().StringVarP(&inputfile, "input-file", "f", "", "the path to a oscal json schema file")
+	ValidateCmd.Flags().StringVarP(&validationResultFile, "validation-result", "r", "", "the path to a validation result file")
 }
