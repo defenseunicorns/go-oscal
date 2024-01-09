@@ -14,9 +14,10 @@ type ValidationResult struct {
 }
 
 type ValidationResultMetadata struct {
-	DocumentType    string `json:"documentType" yaml:"documentType"`
-	DocumentVersion string `json:"documentVersion" yaml:"documentVersion"`
-	SchemaVersion   string `json:"schemaVersion" yaml:"schemaVersion"`
+	DocumentPath    string `json:"documentPath,omitempty" yaml:"documentPath,omitempty"`
+	DocumentType    string `json:"documentType,omitempty" yaml:"documentType,omitempty"`
+	DocumentVersion string `json:"documentVersion,omitempty" yaml:"documentVersion,omitempty"`
+	SchemaVersion   string `json:"schemaVersion,omitempty" yaml:"schemaVersion,omitempty"`
 }
 
 // NewValidationResult creates a new ValidationResult from a Validator and a slice of ValidatorErrors
@@ -30,6 +31,7 @@ func NewValidationResult(validator *Validator, errors []ValidatorError) Validati
 		TimeStamp: time.Now(),
 		Errors:    errors,
 		Metadata: ValidationResultMetadata{
+			DocumentPath:    validator.GetDocumentPath(),
 			DocumentType:    validator.GetModelType(),
 			DocumentVersion: documentVersion,
 			SchemaVersion:   validator.GetSchemaVersion(),

@@ -110,6 +110,8 @@ func Revise(opts *ReviseOptions) (reviser revision.Reviser, err error) {
 		return reviser, fmt.Errorf("Failed to create reviser: %s\n", err)
 	}
 
+	reviser.SetDocumentPath(opts.InputFile)
+
 	// Run the upgrade
 	err = reviser.Revise()
 	if err != nil {

@@ -63,6 +63,8 @@ func ValidateCommand(inputFile string) (validator validation.Validator, err erro
 		return validator, fmt.Errorf("Failed to create validator: %s\n", err)
 	}
 
+	validator.SetDocumentPath(inputFile)
+
 	err = validator.Validate()
 	if err != nil {
 		return validator, fmt.Errorf("Failed to validate %s version %s: %s\n", validator.GetModelType(), validator.GetSchemaVersion(), err)

@@ -18,6 +18,7 @@ const (
 )
 
 type Validator struct {
+	documentPath     string
 	jsonMap          map[string]interface{}
 	schemaVersion    string
 	modelType        string
@@ -73,6 +74,16 @@ func NewValidatorDesiredVersion(oscalDoc utils.InterfaceOrBytes, desiredVersion 
 		modelType:     modelType,
 		schemaVersion: formattedVersion,
 	}, nil
+}
+
+// SetDocumentPath sets the path of the document being validated.
+func (v *Validator) SetDocumentPath(documentPath string) {
+	v.documentPath = documentPath
+}
+
+// GetDocumentPath returns the path of the document being validated.
+func (v *Validator) GetDocumentPath() string {
+	return v.documentPath
 }
 
 // GetSchemaVersion returns the version of the schema used to validate the model.
