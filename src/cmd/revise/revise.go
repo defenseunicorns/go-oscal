@@ -42,7 +42,7 @@ var ReviseCmd = &cobra.Command{
 
 		// Return the error from the revision if there was one
 		if revisionErr != nil {
-			return err
+			return revisionErr
 		}
 
 		var outputExt string
