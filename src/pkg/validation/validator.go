@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/defenseunicorns/go-oscal/src/internal/utils"
-	"github.com/defenseunicorns/go-oscal/src/pkg/validationError"
 	"github.com/santhosh-tekuri/jsonschema/v5"
 )
 
@@ -19,9 +18,11 @@ const (
 )
 
 type Validator struct {
-	jsonMap       map[string]interface{}
-	schemaVersion string
-	modelType     string
+	documentPath     string
+	jsonMap          map[string]interface{}
+	schemaVersion    string
+	modelType        string
+	validationResult ValidationResult
 }
 
 // NewValidator returns a validator with the models version of the schema.
@@ -75,6 +76,16 @@ func NewValidatorDesiredVersion(oscalDoc utils.InterfaceOrBytes, desiredVersion 
 	}, nil
 }
 
+// SetDocumentPath sets the path of the document being validated.
+func (v *Validator) SetDocumentPath(documentPath string) {
+	v.documentPath = documentPath
+}
+
+// GetDocumentPath returns the path of the document being validated.
+func (v *Validator) GetDocumentPath() string {
+	return v.documentPath
+}
+
 // GetSchemaVersion returns the version of the schema used to validate the model.
 func (v *Validator) GetSchemaVersion() string {
 	return v.schemaVersion
@@ -88,6 +99,15 @@ func (v *Validator) GetJsonModel() map[string]interface{} {
 // GetModelType returns the type of the model being validated.
 func (v *Validator) GetModelType() string {
 	return v.modelType
+}
+
+// GetValidationResult returns a ValidationResult.
+// If the validation has not been run, an error is returned.
+func (v *Validator) GetValidationResult() (ValidationResult, error) {
+	if v.validationResult.TimeStamp == (ValidationResult{}).TimeStamp {
+		return v.validationResult, errors.New("validation has not been run")
+	}
+	return v.validationResult, nil
 }
 
 // Validate validates the model against the schema.
@@ -115,10 +135,12 @@ func (v *Validator) Validate() error {
 
 		// Extract the specific errors from the schema error
 		// Return the errors as a string
-		basicErrors := validationError.ExtractErrors(v.jsonMap, validationErr.BasicOutput())
+		basicErrors := ExtractErrors(v.jsonMap, validationErr.BasicOutput())
+		v.validationResult = NewValidationResult(v, basicErrors)
 		formattedErrors, _ := json.MarshalIndent(basicErrors, "", "  ")
 		return errors.New(string(formattedErrors))
 	}
 
+	v.validationResult = NewValidationResult(v, []ValidatorError{})
 	return nil
 }

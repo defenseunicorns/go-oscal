@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -110,4 +111,27 @@ func convertInterfaceOrBytesToMap(incomingModel InterfaceOrBytes) (model map[str
 		}
 	}
 	return model, nil
+}
+
+// MarshalByExtension takes a model and marshals it to json or yaml based on the extension of the output file
+func MarshalByExtension(model interface{}, outputFile string) (bytes []byte, err error) {
+	split := strings.Split(outputFile, ".")
+	ext := split[len(split)-1]
+
+	switch ext {
+	case "json":
+		bytes, err = json.Marshal(model)
+		if err != nil {
+			return nil, err
+		}
+	case "yaml":
+		bytes, err = yaml.Marshal(model)
+		if err != nil {
+			return nil, err
+		}
+	default:
+		return nil, fmt.Errorf("invalid file extension must be yaml or json: %s", ext)
+	}
+
+	return bytes, nil
 }

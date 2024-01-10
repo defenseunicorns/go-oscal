@@ -267,4 +267,39 @@ func TestValidator(t *testing.T) {
 			}
 		})
 	})
+
+	t.Run("GetValidationResult", func(t *testing.T) {
+		t.Parallel()
+
+		t.Run("returns a ValidationResult if validation has occured", func(t *testing.T) {
+			t.Parallel()
+			validator, err := NewValidator(gooscaltest.ByteMap[gooscaltest.ValidComponentPath])
+			if err != nil {
+				t.Errorf("expected no error, got %v", err)
+			}
+			err = validator.Validate()
+			if err != nil {
+				t.Errorf("expected no error, got %v", err)
+			}
+			result, err := validator.GetValidationResult()
+			if err != nil {
+				t.Errorf("expected no error, got %v", err)
+			}
+			if !result.Valid {
+				t.Errorf("expected result.Valid to be true, got false")
+			}
+
+		})
+
+		t.Run("throws an error if the validator has not yet been through validation", func(t *testing.T) {
+			validator, err := NewValidator(gooscaltest.ByteMap[gooscaltest.ValidComponentPath])
+			if err != nil {
+				t.Errorf("expected no error, got %v", err)
+			}
+			_, err = validator.GetValidationResult()
+			if err == nil {
+				t.Errorf("expected error, got %v", err)
+			}
+		})
+	})
 }

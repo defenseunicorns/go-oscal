@@ -6,7 +6,6 @@ import (
 	"reflect"
 	"regexp"
 	"strings"
-	"time"
 )
 
 var (
@@ -98,7 +97,7 @@ func ReplaceOscalVersionInMap(model map[string]interface{}, version string) (upg
 
 // UpdateLastModified updates the last-modified field in the metadata
 func UpdateLastModified(metadata map[string]interface{}) {
-	metadata["last-modified"] = time.Now().Format(time.RFC3339)
+	metadata["last-modified"] = GetTimestamp()
 }
 
 // VersionWarning prints a warning if the version is has known issues.

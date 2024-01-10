@@ -2,11 +2,9 @@ package revision
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/defenseunicorns/go-oscal/src/internal/utils"
 	"github.com/defenseunicorns/go-oscal/src/pkg/validation"
-	"gopkg.in/yaml.v3"
 )
 
 type Reviser struct {
@@ -73,20 +71,5 @@ func (u *Reviser) Revise() (err error) {
 
 // GetRevisedBytes returns the upgraded model as bytes, marshalled to the desired extension.
 func (u *Reviser) GetRevisedBytes(ext string) (bytes []byte, err error) {
-	switch ext {
-	case "json":
-		bytes, err = json.Marshal(u.GetRevisedJsonMap())
-		if err != nil {
-			return nil, err
-		}
-	case "yaml":
-		bytes, err = yaml.Marshal(u.GetRevisedJsonMap())
-		if err != nil {
-			return nil, err
-		}
-	default:
-		return nil, fmt.Errorf("invalid file extension must be yaml or json: %s", ext)
-	}
-
-	return bytes, nil
+	return utils.MarshalByExtension(u.upgradedJsonMap, ext)
 }

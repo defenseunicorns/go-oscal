@@ -9,13 +9,15 @@ import (
 
 	"github.com/defenseunicorns/go-oscal/src/internal/utils"
 	"github.com/defenseunicorns/go-oscal/src/pkg/revision"
+	"github.com/defenseunicorns/go-oscal/src/pkg/validation"
 	"github.com/spf13/cobra"
 )
 
 type ReviseOptions struct {
-	InputFile  string // short -f, long --file, required
-	OutputFile string // short -o, long --output, default to stdout
-	Version    string // short -v, long --version, default to latest
+	InputFile        string // short -f, long --file, required
+	OutputFile       string // short -o, long --output, default to stdout
+	Version          string // short -v, long --version, default to latest
+	ValidationResult string // short -r, long --result, default to stdout
 }
 
 var opts = &ReviseOptions{}
@@ -27,9 +29,20 @@ var ReviseCmd = &cobra.Command{
 	// Example: convertHelp,
 	RunE: func(cmd *cobra.Command, componentDefinitionPaths []string) error {
 
-		reviser, err := Revise(opts)
-		if err != nil {
-			return err
+		reviser, revisionErr := Revise(opts)
+
+		// Write the validation result if it was specified and exists before returning Revise error (if there was one)
+		result, err := reviser.GetValidationResult()
+		if err == nil && opts.ValidationResult != "" {
+			err = validation.WriteValidationResult(result, opts.ValidationResult)
+			if err != nil {
+				log.Printf("Failed to write validation result to %s: %s\n", opts.ValidationResult, err)
+			}
+		}
+
+		// Return the error from the revision if there was one
+		if revisionErr != nil {
+			return revisionErr
 		}
 
 		var outputExt string
@@ -97,6 +110,8 @@ func Revise(opts *ReviseOptions) (reviser revision.Reviser, err error) {
 		return reviser, fmt.Errorf("Failed to create reviser: %s\n", err)
 	}
 
+	reviser.SetDocumentPath(opts.InputFile)
+
 	// Run the upgrade
 	err = reviser.Revise()
 	if err != nil {
@@ -109,5 +124,6 @@ func Revise(opts *ReviseOptions) (reviser revision.Reviser, err error) {
 func init() {
 	ReviseCmd.Flags().StringVarP(&opts.InputFile, "file", "f", "", "input file to convert")
 	ReviseCmd.Flags().StringVarP(&opts.OutputFile, "output", "o", "", "output file to write to")
+	ReviseCmd.Flags().StringVarP(&opts.ValidationResult, "validation-result", "r", "", "validation result file to write to")
 	ReviseCmd.Flags().StringVarP(&opts.Version, "version", "v", "", "version to convert to")
 }
