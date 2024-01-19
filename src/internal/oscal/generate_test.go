@@ -16,7 +16,30 @@ const (
 	oscalSSPSchemaFilePath       string = "../../../schema/ssp/oscal_ssp_schema-1-1-1.json"
 	fieldsPresentFilePath        string = "../../../testdata/fields-present.json"
 	fieldsMissingFilePath        string = "../../../testdata/fields-missing.json"
+	expected104FilePath          string = "../../types/oscal-1-0-4/types.go"
+	oscal104FilePath             string = "../../../schema/complete/oscal_complete_schema-1-0-4.json"
 )
+
+func TestTypesOutput(t *testing.T) {
+	expected, err := os.ReadFile(expected104FilePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	schema, err := os.ReadFile(oscal104FilePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	actual, err := Generate(schema, "oscalTypes", []string{"json", "yaml"})
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	if !reflect.DeepEqual(actual, expected) {
+		t.Fatal("expected output to match")
+	}
+}
 
 // TestGetOscalModel tests that we can get the value of the top-level 'required' field,
 // which is the name of the OSCAL model, and that we can convert it to a string properly.
