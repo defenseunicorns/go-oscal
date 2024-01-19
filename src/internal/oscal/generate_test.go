@@ -11,21 +11,6 @@ import (
 	"github.com/swaggest/jsonschema-go"
 )
 
-const (
-	oscalComponentSchemaFilePath    string = "../../../schema/component/oscal_component_schema-1-1-1.json"
-	oscalSSPSchemaFilePath          string = "../../../schema/ssp/oscal_ssp_schema-1-1-1.json"
-	fieldsPresentFilePath           string = "../../../testdata/fields-present.json"
-	fieldsMissingFilePath           string = "../../../testdata/fields-missing.json"
-	expected104FilePath             string = "../../types/oscal-1-0-4/types.go"
-	oscal104FilePath                string = "../../../schema/complete/oscal_complete_schema-1-0-4.json"
-	componentExpectedPropertiesFile string = "../../../testdata/generation/component/expected-properties.txt"
-	sspExpectedPropertiesFile       string = "../../../testdata/generation/ssp/expected-properties.txt"
-	componentExpectedStructDataFile string = "../../../testdata/generation/component/expected-struct-data.txt"
-	sspExpectedStructDataFile       string = "../../../testdata/generation/ssp/expected-struct-data.txt"
-	expectedComponentOutputFile     string = "../../../testdata/generation/component/expected-oscal-model-struct.txt"
-	sspExpectedOutputFile           string = "../../../testdata/generation/ssp/expected-oscal-model-struct.txt"
-)
-
 func TestTypesOutput(t *testing.T) {
 	expected, err := os.ReadFile(expected104FilePath)
 	if err != nil {

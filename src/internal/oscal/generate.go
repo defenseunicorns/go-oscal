@@ -204,19 +204,16 @@ func getOscalModel(schema jsonschema.Schema) ([]string, error) {
 // create a map with $id primary keys and the object values
 func generateUniqueIdMap(schema jsonschema.Schema) (map[string]jsonschema.SchemaOrBool, error) {
 	result := make(map[string]jsonschema.SchemaOrBool)
-
 	for definition, item := range schema.Definitions {
-		if strings.Contains(definition, "Datatype") {
-			result["#/definitions/"+definition] = item
-		} else if definition == "json-schema-definition" {
-			// Skipping - TODO: determine relevance in the golang structs
-			continue
-		} else {
+		if typeObj := *item.TypeObject; typeObj.ID != nil {
 			result[*item.TypeObject.ID] = item
+		} else {
+			result["#/definitions/"+definition] = item
 		}
-
 	}
-
+	if len(result) == 0 {
+		return nil, fmt.Errorf("No definitions found in the OSCAL JSON schema file. Please verify the OSCAL JSON schema file is valid.")
+	}
 	return result, nil
 }
 
