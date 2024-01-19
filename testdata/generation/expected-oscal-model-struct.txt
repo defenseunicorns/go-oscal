@@ -1,3 +1,0 @@
-type OscalModels struct {
-	SystemSecurityPlan SystemSecurityPlan `json:"system-security-plan,omitempty" yaml:"system-security-plan,omitempty"`
-}

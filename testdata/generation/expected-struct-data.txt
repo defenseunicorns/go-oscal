@@ -1,7 +1,0 @@
-BackMatter BackMatter `json:"back-matter,omitempty" yaml:"back-matter,omitempty"`
-ControlImplementation ControlImplementation `json:"control-implementation" yaml:"control-implementation"`
-ImportProfile ImportProfile `json:"import-profile" yaml:"import-profile"`
-Metadata Metadata `json:"metadata" yaml:"metadata"`
-SystemCharacteristics SystemCharacteristics `json:"system-characteristics" yaml:"system-characteristics"`
-SystemImplementation SystemImplementation `json:"system-implementation" yaml:"system-implementation"`
-UUID string `json:"uuid" yaml:"uuid"`

@@ -12,12 +12,18 @@ import (
 )
 
 const (
-	oscalComponentSchemaFilePath string = "../../../schema/component/oscal_component_schema-1-1-1.json"
-	oscalSSPSchemaFilePath       string = "../../../schema/ssp/oscal_ssp_schema-1-1-1.json"
-	fieldsPresentFilePath        string = "../../../testdata/fields-present.json"
-	fieldsMissingFilePath        string = "../../../testdata/fields-missing.json"
-	expected104FilePath          string = "../../types/oscal-1-0-4/types.go"
-	oscal104FilePath             string = "../../../schema/complete/oscal_complete_schema-1-0-4.json"
+	oscalComponentSchemaFilePath    string = "../../../schema/component/oscal_component_schema-1-1-1.json"
+	oscalSSPSchemaFilePath          string = "../../../schema/ssp/oscal_ssp_schema-1-1-1.json"
+	fieldsPresentFilePath           string = "../../../testdata/fields-present.json"
+	fieldsMissingFilePath           string = "../../../testdata/fields-missing.json"
+	expected104FilePath             string = "../../types/oscal-1-0-4/types.go"
+	oscal104FilePath                string = "../../../schema/complete/oscal_complete_schema-1-0-4.json"
+	componentExpectedPropertiesFile string = "../../../testdata/generation/component/expected-properties.txt"
+	sspExpectedPropertiesFile       string = "../../../testdata/generation/ssp/expected-properties.txt"
+	componentExpectedStructDataFile string = "../../../testdata/generation/component/expected-struct-data.txt"
+	sspExpectedStructDataFile       string = "../../../testdata/generation/ssp/expected-struct-data.txt"
+	expectedComponentOutputFile     string = "../../../testdata/generation/component/expected-oscal-model-struct.txt"
+	sspExpectedOutputFile           string = "../../../testdata/generation/ssp/expected-oscal-model-struct.txt"
 )
 
 func TestTypesOutput(t *testing.T) {
@@ -93,7 +99,6 @@ func TestSetOscalModelRefSSP(t *testing.T) {
 // TestGenerateUniqueIdMapComponent tests that the generateUniqueIdMap function
 // returns the correct 'properties' from the OSCAL Component Definition schema.
 func TestGenerateUniqueIdMapComponent(t *testing.T) {
-	expectedPropertiesFile := "../../../schema/component/expected-properties.txt"
 
 	testdata := &BaseFlags{
 		InputFile: oscalComponentSchemaFilePath,
@@ -119,7 +124,7 @@ func TestGenerateUniqueIdMapComponent(t *testing.T) {
 
 	properties := actualMap[modelId].TypeObject.Properties
 
-	expected, err := readTestFile(expectedPropertiesFile)
+	expected, err := readTestFile(componentExpectedPropertiesFile)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -133,7 +138,6 @@ func TestGenerateUniqueIdMapComponent(t *testing.T) {
 // TestGenerateUniqueIdMapSSP tests that the generateUniqueIdMap function
 // returns the correct 'properties' from the OSCAL SSP schema.
 func TestGenerateUniqueIdMapSSP(t *testing.T) {
-	expectedPropertiesFile := "../../../schema/ssp/expected-properties.txt"
 
 	testdata := &BaseFlags{
 		InputFile: oscalSSPSchemaFilePath,
@@ -159,7 +163,7 @@ func TestGenerateUniqueIdMapSSP(t *testing.T) {
 
 	properties := actualMap[modelId].TypeObject.Properties
 
-	expected, err := readTestFile(expectedPropertiesFile)
+	expected, err := readTestFile(sspExpectedPropertiesFile)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -266,7 +270,6 @@ func TestFmtFieldName(t *testing.T) {
 
 // TestBuildStructDataComponent tests that we can construct Go struct data for the OSCAL Component Definition schema correctly.
 func TestBuildStructDataComponent(t *testing.T) {
-	expectedStructDataFile := "../../../schema/component/expected-struct-data.txt"
 
 	testdata := &BaseFlags{
 		InputFile: oscalComponentSchemaFilePath,
@@ -298,7 +301,7 @@ func TestBuildStructDataComponent(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expected, err := readTestFile(expectedStructDataFile)
+	expected, err := readTestFile(componentExpectedStructDataFile)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -311,7 +314,6 @@ func TestBuildStructDataComponent(t *testing.T) {
 
 // TestBuildStructDataSSP tests that we can construct Go struct data for the OSCAL SSP schema correctly.
 func TestBuildStructDataSSP(t *testing.T) {
-	expectedStructDataFile := "../../../schema/ssp/expected-struct-data.txt"
 
 	testdata := &BaseFlags{
 		InputFile: oscalSSPSchemaFilePath,
@@ -343,7 +345,7 @@ func TestBuildStructDataSSP(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expected, err := readTestFile(expectedStructDataFile)
+	expected, err := readTestFile(sspExpectedStructDataFile)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -430,7 +432,6 @@ func TestGenerateModelTypesSSP(t *testing.T) {
 
 // TestGenerateOscalComponentModelStruct tests that we can generate the 'OscalModel' struct correctly for the OSCAL Component Definition schema.
 func TestGenerateOscalComponentModelStruct(t *testing.T) {
-	expectedOutputFile := "../../../schema/component/expected-oscal-model-struct.txt"
 
 	testdata := &BaseFlags{
 		InputFile: oscalComponentSchemaFilePath,
@@ -446,7 +447,7 @@ func TestGenerateOscalComponentModelStruct(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expected, err := readTestFile(expectedOutputFile)
+	expected, err := readTestFile(expectedComponentOutputFile)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -464,7 +465,6 @@ func TestGenerateOscalComponentModelStruct(t *testing.T) {
 
 // TestGenerateOscalSSPModelStruct tests that we can generate the 'OscalModel' struct correctly for the OSCAL SSP schema.
 func TestGenerateOscalSSPModelStruct(t *testing.T) {
-	expectedOutputFile := "../../../schema/ssp/expected-oscal-model-struct.txt"
 
 	testdata := &BaseFlags{
 		InputFile: oscalSSPSchemaFilePath,
@@ -480,7 +480,7 @@ func TestGenerateOscalSSPModelStruct(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expected, err := readTestFile(expectedOutputFile)
+	expected, err := readTestFile(sspExpectedOutputFile)
 	if err != nil {
 		t.Fatal(err)
 	}
