@@ -658,18 +658,6 @@ type Alter struct {
 	Removes   []Remove `json:"removes,omitempty" yaml:"removes,omitempty"`
 }
 
-type AssemblyOscalProfileGroup struct {
-	Class          string           `json:"class,omitempty" yaml:"class,omitempty"`
-	Groups         []Group          `json:"groups,omitempty" yaml:"groups,omitempty"`
-	ID             string           `json:"id,omitempty" yaml:"id,omitempty"`
-	InsertControls []InsertControls `json:"insert-controls,omitempty" yaml:"insert-controls,omitempty"`
-	Links          []Link           `json:"links,omitempty" yaml:"links,omitempty"`
-	Params         []Parameter      `json:"params,omitempty" yaml:"params,omitempty"`
-	Parts          []Part           `json:"parts,omitempty" yaml:"parts,omitempty"`
-	Props          []Property       `json:"props,omitempty" yaml:"props,omitempty"`
-	Title          string           `json:"title" yaml:"title"`
-}
-
 type Import struct {
 	ExcludeControls []SelectControlById `json:"exclude-controls,omitempty" yaml:"exclude-controls,omitempty"`
 	Href            string              `json:"href" yaml:"href"`
@@ -713,12 +701,6 @@ type Remove struct {
 	ByNs       string `json:"by-ns,omitempty" yaml:"by-ns,omitempty"`
 }
 
-type AssemblyOscalProfileSelectControlById struct {
-	Matching          []MatchControlsByPattern `json:"matching,omitempty" yaml:"matching,omitempty"`
-	WithChildControls string                   `json:"with-child-controls,omitempty" yaml:"with-child-controls,omitempty"`
-	WithIds           []string                 `json:"with-ids,omitempty" yaml:"with-ids,omitempty"`
-}
-
 type AuthorizationBoundary struct {
 	Description string     `json:"description" yaml:"description"`
 	Diagrams    []Diagram  `json:"diagrams,omitempty" yaml:"diagrams,omitempty"`
@@ -742,12 +724,6 @@ type ByComponent struct {
 	UUID                 string                                         `json:"uuid" yaml:"uuid"`
 }
 
-type AssemblyOscalSspControlImplementation struct {
-	Description             string                   `json:"description" yaml:"description"`
-	ImplementedRequirements []ImplementedRequirement `json:"implemented-requirements" yaml:"implemented-requirements"`
-	SetParameters           []SetParameter           `json:"set-parameters,omitempty" yaml:"set-parameters,omitempty"`
-}
-
 type DataFlow struct {
 	Description string     `json:"description" yaml:"description"`
 	Diagrams    []Diagram  `json:"diagrams,omitempty" yaml:"diagrams,omitempty"`
@@ -763,18 +739,6 @@ type Diagram struct {
 	Props       []Property `json:"props,omitempty" yaml:"props,omitempty"`
 	Remarks     string     `json:"remarks,omitempty" yaml:"remarks,omitempty"`
 	UUID        string     `json:"uuid" yaml:"uuid"`
-}
-
-type AssemblyOscalSspImplementedRequirement struct {
-	ByComponents     []ByComponent     `json:"by-components,omitempty" yaml:"by-components,omitempty"`
-	ControlId        string            `json:"control-id" yaml:"control-id"`
-	Links            []Link            `json:"links,omitempty" yaml:"links,omitempty"`
-	Props            []Property        `json:"props,omitempty" yaml:"props,omitempty"`
-	Remarks          string            `json:"remarks,omitempty" yaml:"remarks,omitempty"`
-	ResponsibleRoles []ResponsibleRole `json:"responsible-roles,omitempty" yaml:"responsible-roles,omitempty"`
-	SetParameters    []SetParameter    `json:"set-parameters,omitempty" yaml:"set-parameters,omitempty"`
-	Statements       []Statement       `json:"statements,omitempty" yaml:"statements,omitempty"`
-	UUID             string            `json:"uuid" yaml:"uuid"`
 }
 
 type ImportProfile struct {
@@ -794,16 +758,6 @@ type SecurityImpactLevel struct {
 	SecurityObjectiveAvailability    string `json:"security-objective-availability" yaml:"security-objective-availability"`
 	SecurityObjectiveConfidentiality string `json:"security-objective-confidentiality" yaml:"security-objective-confidentiality"`
 	SecurityObjectiveIntegrity       string `json:"security-objective-integrity" yaml:"security-objective-integrity"`
-}
-
-type AssemblyOscalSspStatement struct {
-	ByComponents     []ByComponent     `json:"by-components,omitempty" yaml:"by-components,omitempty"`
-	Links            []Link            `json:"links,omitempty" yaml:"links,omitempty"`
-	Props            []Property        `json:"props,omitempty" yaml:"props,omitempty"`
-	Remarks          string            `json:"remarks,omitempty" yaml:"remarks,omitempty"`
-	ResponsibleRoles []ResponsibleRole `json:"responsible-roles,omitempty" yaml:"responsible-roles,omitempty"`
-	StatementId      string            `json:"statement-id" yaml:"statement-id"`
-	UUID             string            `json:"uuid" yaml:"uuid"`
 }
 
 type Status struct {
