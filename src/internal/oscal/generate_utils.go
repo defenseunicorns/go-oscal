@@ -177,23 +177,9 @@ func populateSchema(oscalSchema []byte) (jsonschema.Schema, error) {
 
 func getNameFromRef(ref string) string {
 	pattern := regexp.MustCompile("[/_]")
-	result := pattern.Split(ref, -1)
-	return FmtFieldName(result[len(result)-1])
-}
-
-// getRefsToBuild determines which structs to build .
-func getRefsToBuild(schema jsonschema.Schema) (refs []string) {
-	for _, definition := range schema.Definitions {
-		id := *definition.TypeObject.ID
-		// ignore primitives and known refs to ignore.
-		if id == "" || RefsToIgnore[id] {
-			continue
-		}
-
-		refs = append(refs, id)
-	}
-
-	return refs
+	splitPathSeperator := pattern.Split(ref, -1)
+	splitFileExt := strings.Split(splitPathSeperator[len(splitPathSeperator)-1], ".")
+	return FmtFieldName(splitFileExt[0])
 }
 
 // getDefinitionMap generates a map of definitions from the OSCAL JSON schema file.

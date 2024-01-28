@@ -25,19 +25,89 @@ type GeneratorConfig struct {
 	nameMap     map[string]string
 }
 
+func NewGeneratorConfig(tags []string, pkgName string) GeneratorConfig {
+	return GeneratorConfig{
+		tags:        tags,
+		pkgName:     pkgName,
+		refQueue:    NewRefQueue(),
+		definitions: map[string]jsonschema.Schema{},
+		structMap:   map[string]string{},
+		nameMap:     map[string]string{},
+	}
+}
+
 // Generate a struct definition given a JSON string representation of an object.
 func Generate(oscalSchema []byte, pkgName string, tags []string) (typeBytes []byte, err error) {
-	// config := GeneratorConfig{tags: tags, pkgName: pkgName}
-	// schema, err := populateSchema(oscalSchema)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	schema, err := populateSchema(oscalSchema)
+	if err != nil {
+		return typeBytes, err
+	}
 
-	// if err != nil {
-	// 	return nil, err
-	// }
+	config := NewGeneratorConfig(tags, pkgName)
+
+	err = config.initBuild(&schema)
+	if err != nil {
+		return typeBytes, err
+	}
+
+	err = config.buildStructs()
+	if err != nil {
+		return typeBytes, err
+	}
+
+	typeString := fmt.Sprintf("%s\n", headerComment)
+	typeString += fmt.Sprintf("package %s\n\n", pkgName)
+	for _, ref := range config.refQueue.History() {
+		typeString += config.structMap[ref] + "\n\n"
+	}
+
+	typeBytes = []byte(typeString)
+
+	typeBytes, err = format.Source(typeBytes)
+	if err != nil {
+		return typeBytes, err
+	}
 
 	return typeBytes, nil
+}
+
+func (c *GeneratorConfig) initBuild(schema *jsonschema.Schema) (err error) {
+	if schema.ID == nil {
+		return fmt.Errorf("unable to find $id in schema")
+	}
+
+	if schema.Definitions != nil {
+		c.definitions, err = getDefinitionMap(*schema)
+		if err != nil {
+			return err
+		}
+	}
+
+	if schema.Ref != nil {
+		c.refQueue.Add(*schema.Ref)
+		return nil
+	}
+
+	if schema.Properties == nil {
+		schema.Properties = map[string]jsonschema.SchemaOrBool{}
+		if schema.OneOf != nil {
+			for _, oneOf := range schema.OneOf {
+				if oneOf.TypeObject.Properties != nil {
+					for key, prop := range oneOf.TypeObject.Properties {
+						if prop.TypeObject.Ref != nil && !RefsToIgnore[*prop.TypeObject.Ref] {
+							schema.Properties[key] = prop
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// add the schema to the definitions map
+	c.definitions[*schema.ID] = *schema
+	// Add the root schema to the ref queue.
+	c.refQueue.Add(*schema.ID)
+	return err
 }
 
 func (c *GeneratorConfig) buildStructs() (err error) {

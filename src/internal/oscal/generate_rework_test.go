@@ -6,6 +6,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/defenseunicorns/go-oscal/src/internal/utils"
 	"github.com/swaggest/jsonschema-go"
 )
 
@@ -38,6 +39,35 @@ var (
 	schemaByteMap = map[string][]byte{}
 )
 
+func TestGenerate(t *testing.T) {
+	t.Parallel()
+	getSchemaByteMap(t)
+
+	t.Run("It generates the types for a given complete schema", func(t *testing.T) {
+		t.Parallel()
+		bytes, err := Generate(schemaByteMap[oscal111FilePath], "oscalTypes", []string{"json", "yaml"})
+
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+
+		t.Skip("skipping output")
+		utils.WriteOutput(bytes, "../../../test_out/oscal-1-1-1/types.go")
+	})
+
+	t.Run("It generates the types for an individual schema", func(t *testing.T) {
+		t.Parallel()
+		bytes, err := Generate(schemaByteMap[oscalComponentSchemaFilePath], "oscalTypes", []string{"json", "yaml"})
+
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+
+		t.Skip("skipping output")
+		utils.WriteOutput(bytes, "../../../test_out/component/types.go")
+	})
+}
+
 func TestGenerateDifferences(t *testing.T) {
 	t.Parallel()
 	getSchemaByteMap(t)
@@ -59,7 +89,7 @@ func TestGenerateDifferences(t *testing.T) {
 		t.Errorf("expected no error, got %v", err)
 	}
 	t.Run("It builds a struct map given a schema object", func(t *testing.T) {
-		refQueue := *NewRefQueue()
+		refQueue := NewRefQueue()
 		for _, oneOf := range schema.OneOf {
 			for _, pSOB := range oneOf.TypeObject.Properties {
 				prop := pSOB.TypeObject
@@ -69,14 +99,10 @@ func TestGenerateDifferences(t *testing.T) {
 			}
 
 		}
-		config := GeneratorConfig{
-			tags:        []string{"json", "yaml"},
-			definitions: definitions,
-			pkgName:     "oscalTypes",
-			refQueue:    refQueue,
-			structMap:   map[string]string{},
-			nameMap:     map[string]string{},
-		}
+		config := NewGeneratorConfig([]string{"json", "yaml"}, "oscalTypes")
+		config.refQueue = refQueue
+		config.definitions = definitions
+
 		err := config.buildStructs()
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
@@ -114,7 +140,7 @@ func TestBuildStructs(t *testing.T) {
 	}
 
 	t.Run("There should be no duplicate struct names in the struct map", func(t *testing.T) {
-		refQueue := *NewRefQueue()
+		refQueue := NewRefQueue()
 		for _, oneOf := range schema.OneOf {
 			for _, pSOB := range oneOf.TypeObject.Properties {
 				prop := pSOB.TypeObject
@@ -172,7 +198,7 @@ func TestBuildStructString(t *testing.T) {
 			tags:        []string{"json", "yaml"},
 			definitions: definitions,
 			pkgName:     "oscalTypes",
-			refQueue:    *NewRefQueue(),
+			refQueue:    NewRefQueue(),
 			nameMap:     map[string]string{},
 		}
 		result, err := config.buildStructString(*schema.Definitions["oscal-complete-oscal-catalog:catalog"].TypeObject)
@@ -196,7 +222,7 @@ func TestBuildStructString(t *testing.T) {
 			tags:        []string{"json", "yaml"},
 			definitions: definitions,
 			pkgName:     "oscalTypes",
-			refQueue:    *NewRefQueue(),
+			refQueue:    NewRefQueue(),
 			nameMap:     map[string]string{},
 		}
 		result, err := config.buildStructString(*schema.Definitions["oscal-complete-oscal-control-common:include-all"].TypeObject)
@@ -290,7 +316,7 @@ func TestGetTypeSuffix(t *testing.T) {
 		tags:        []string{"json", "yaml"},
 		definitions: definitions,
 		pkgName:     "oscalTypes",
-		refQueue:    *NewRefQueue(),
+		refQueue:    NewRefQueue(),
 		nameMap:     map[string]string{},
 	}
 	t.Run("It returns the object typename given a schema object", func(t *testing.T) {
@@ -355,7 +381,7 @@ func TestBuildTypeString(t *testing.T) {
 		tags:        []string{"json", "yaml"},
 		definitions: definitions,
 		pkgName:     "oscalTypes",
-		refQueue:    *NewRefQueue(),
+		refQueue:    NewRefQueue(),
 		nameMap:     map[string]string{},
 	}
 

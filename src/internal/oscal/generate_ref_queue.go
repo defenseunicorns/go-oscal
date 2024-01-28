@@ -1,14 +1,16 @@
 package oscal
 
 type RefQueue struct {
-	refs   []string
-	refMap map[string]bool
+	refs       []string
+	refMap     map[string]bool
+	refHistory []string
 }
 
-func NewRefQueue() *RefQueue {
-	return &RefQueue{
-		refs:   []string{},
-		refMap: map[string]bool{},
+func NewRefQueue() RefQueue {
+	return RefQueue{
+		refs:       []string{},
+		refMap:     map[string]bool{},
+		refHistory: []string{},
 	}
 }
 
@@ -16,6 +18,7 @@ func (r *RefQueue) Add(ref string) {
 	if _, ok := r.refMap[ref]; !ok {
 		r.refMap[ref] = true
 		r.refs = append(r.refs, ref)
+		r.refHistory = append(r.refHistory, ref)
 	}
 }
 
@@ -30,6 +33,10 @@ func (r *RefQueue) Pop() string {
 		return ref
 	}
 	return ""
+}
+
+func (r *RefQueue) History() []string {
+	return r.refHistory
 }
 
 func (r *RefQueue) Len() int {
