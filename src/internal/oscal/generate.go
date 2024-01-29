@@ -150,7 +150,9 @@ func (c *GeneratorConfig) buildStructString(def jsonschema.Schema) (structString
 	structStr := fmt.Sprintf("type %s struct {\n", name)
 	var keys []string
 	for key := range def.Properties {
-		keys = append(keys, key)
+		if !KeysToIgnore[key] {
+			keys = append(keys, key)
+		}
 	}
 	slices.Sort(keys)
 
@@ -284,10 +286,7 @@ func (c *GeneratorConfig) handleDuplicates(ref string, name string, schema jsons
 		if currentRef != ref {
 			parent := schema.Parent
 
-			parentRef, err := getRef(*parent)
-			if err != nil {
-				return ref, name
-			}
+			parentRef, _ := getRef(*parent)
 
 			if parentRef != "" {
 				prefix := getNameFromRef(parentRef)

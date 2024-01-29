@@ -25,7 +25,6 @@ const (
 	oscal106FilePath                string = "../../../schema/complete/oscal_complete_schema-1-0-6.json"
 	oscal110FilePath                string = "../../../schema/complete/oscal_complete_schema-1-1-0.json"
 	oscal111FilePath                string = "../../../schema/complete/oscal_complete_schema-1-1-1.json"
-	oscal111FixedFilePath           string = "../../pkg/validation/schema/oscal_complete_schema-1-1-1.json"
 	componentExpectedPropertiesFile string = "../../../testdata/generation/component/expected-properties.txt"
 	sspExpectedPropertiesFile       string = "../../../testdata/generation/ssp/expected-properties.txt"
 	componentExpectedStructDataFile string = "../../../testdata/generation/component/expected-struct-data.txt"
@@ -35,7 +34,7 @@ const (
 )
 
 var (
-	schemaPaths   = []string{oscal104FilePath, oscal105FilePath, oscal106FilePath, oscal110FilePath, oscal111FilePath, oscalComponentSchemaFilePath, oscalSSPSchemaFilePath, oscal111FixedFilePath}
+	schemaPaths   = []string{oscal104FilePath, oscal105FilePath, oscal106FilePath, oscal110FilePath, oscal111FilePath, oscalComponentSchemaFilePath, oscalSSPSchemaFilePath}
 	schemaMutex   = sync.Mutex{}
 	schemaByteMap = map[string][]byte{}
 	writeOutput   = false
@@ -47,14 +46,14 @@ func TestGenerate(t *testing.T) {
 
 	t.Run("It generates the types for a given complete schema", func(t *testing.T) {
 		t.Parallel()
-		bytes, err := Generate(schemaByteMap[oscal104FilePath], "oscalTypes", []string{"json", "yaml"})
+		bytes, err := Generate(schemaByteMap[oscal110FilePath], "oscalTypes", []string{"json", "yaml"})
 
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
 		}
 
 		if writeOutput {
-			utils.WriteOutput(bytes, "../../../test_out/oscal-1-0-4/types.go")
+			utils.WriteOutput(bytes, "../../../test_out/oscal-1-1-0/types.go")
 		}
 	})
 
@@ -70,34 +69,13 @@ func TestGenerate(t *testing.T) {
 			utils.WriteOutput(bytes, "../../../test_out/component/types.go")
 		}
 	})
-
-	t.Run("Test against fixed schema in validation", func(t *testing.T) {
-		t.Parallel()
-		actual, err := Generate(schemaByteMap[oscal104FilePath], "oscalTypes", []string{"json", "yaml"})
-		if err != nil {
-			t.Errorf("expected no error, got %v", err)
-		}
-
-		expected, err := Generate(schemaByteMap[oscal104FilePath], "oscalTypes", []string{"json", "yaml"})
-
-		if err != nil {
-			t.Errorf("expected no error, got %v", err)
-		}
-
-		actualString := string(actual)
-		expectedString := string(expected)
-
-		if actualString != expectedString {
-			t.Errorf("expected %s, got %s", expectedString, actualString)
-		}
-	})
 }
 
 func TestGenerateDifferences(t *testing.T) {
 	t.Parallel()
 	getSchemaByteMap(t)
 
-	// t.Skip("Skipping test. This test is not meant to be run in CI. It is meant to be run locally to generate the expected output files.")
+	t.Skip("Skipping test. This test is not meant to be run in CI. It is meant to be run locally to generate the expected output files.")
 	expectedBytes, err := os.ReadFile(expected111FilePath)
 	if err != nil {
 		t.Fatal(err)
@@ -156,53 +134,41 @@ func TestBuildStructs(t *testing.T) {
 	t.Parallel()
 	getSchemaByteMap(t)
 
-	schema, err := buildSchema(schemaByteMap[oscal111FilePath])
-	if err != nil {
-		t.Errorf("expected no error, got %v", err)
-	}
+	schemas := []string{oscal104FilePath, oscal105FilePath, oscal106FilePath, oscal110FilePath, oscal111FilePath}
 
-	definitions, err := getDefinitionMap(schema)
-	if err != nil {
-		t.Errorf("expected no error, got %v", err)
-	}
-
-	t.Run("There should be no duplicate struct names in the struct map", func(t *testing.T) {
-		refQueue := NewRefQueue()
-		for _, oneOf := range schema.OneOf {
-			for _, pSOB := range oneOf.TypeObject.Properties {
-				prop := pSOB.TypeObject
-				if prop.Ref != nil && *prop.Ref != "#json-schema-directive" {
-					refQueue.Add(*prop.Ref)
-				}
-			}
-
-		}
-		config := GeneratorConfig{
-			tags:        []string{"json", "yaml"},
-			definitions: definitions,
-			pkgName:     "oscalTypes",
-			refQueue:    refQueue,
-			structMap:   map[string]string{},
-			nameMap:     map[string]string{},
-		}
-		err := config.buildStructs()
+	for _, path := range schemas {
+		schema, err := buildSchema(schemaByteMap[path])
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
 		}
-		structMap := make(map[string]string)
-		duplicates := []string{}
-		for k, v := range config.structMap {
-			firstLine := strings.Split(v, "\n")[0]
-			if _, ok := structMap[firstLine]; ok {
-				duplicates = append(duplicates, structMap[firstLine])
-				duplicates = append(duplicates, k)
-			}
-			structMap[firstLine] = k
+
+		config := NewGeneratorConfig([]string{"json", "yaml"}, "oscalTypes")
+
+		err = config.initBuild(&schema)
+
+		err = config.buildStructs()
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
 		}
+		var structMap = map[string]string{}
+		duplicates := []string{}
+		for k, value := range config.structMap {
+			firstLine := strings.ReplaceAll(strings.Split(value, "\n")[0], " ", "")
+			mapValue := structMap[firstLine]
+			if mapValue == "" {
+				structMap[firstLine] = k
+				continue
+			}
+
+			if mapValue != k {
+				duplicates = append(duplicates, "Duplicate struct name found: ", k, " and ", mapValue)
+			}
+		}
+
 		if len(duplicates) > 0 {
 			t.Errorf("expected no duplicates, got %v", duplicates)
 		}
-	})
+	}
 
 }
 

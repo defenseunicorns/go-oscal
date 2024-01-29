@@ -14,6 +14,10 @@ var RefsToIgnore map[string]bool = map[string]bool{
 	"#json-schema-directive": true,
 }
 
+var KeysToIgnore map[string]bool = map[string]bool{
+	"$schema": true,
+}
+
 const headerComment string = `/*
 	This file was auto-generated with go-oscal.
 

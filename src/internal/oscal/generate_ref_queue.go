@@ -15,7 +15,7 @@ func NewRefQueue() RefQueue {
 }
 
 func (r *RefQueue) Add(ref string) {
-	if _, ok := r.refMap[ref]; !ok {
+	if has := r.refMap[ref]; !has {
 		r.refMap[ref] = true
 		r.refs = append(r.refs, ref)
 		r.refHistory = append(r.refHistory, ref)
