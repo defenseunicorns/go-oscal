@@ -175,6 +175,7 @@ func (c *GeneratorConfig) buildStructString(def jsonschema.Schema) (structString
 	return string(formattedStruct), err
 }
 
+// buildTypeString builds the type string for a given property.
 func (c *GeneratorConfig) buildTypeString(property jsonschema.Schema) (propType string, err error) {
 	var possibleRefs []string
 
@@ -183,7 +184,7 @@ func (c *GeneratorConfig) buildTypeString(property jsonschema.Schema) (propType 
 		// convert json type to go type
 		propType = getGoType(jsonType)
 		// if the type is not primitive, we need to add the name of the type
-		if !isPrimitiveType(jsonType) {
+		if !isPrimitiveJsonType(jsonType) {
 			name, err := c.findSubType(property)
 			if err != nil {
 				return "", err
@@ -229,11 +230,15 @@ func (c *GeneratorConfig) buildTypeString(property jsonschema.Schema) (propType 
 	}
 }
 
+// findSubType finds the name of the type for the given schema.
 func (c *GeneratorConfig) findSubType(schema jsonschema.Schema) (name string, err error) {
-	simpleType := getSimpleType(schema)
+	simpleType := getJsonType(schema)
 	switch simpleType {
 	case "object":
-		ref := getRef(schema)
+		ref, err := getRef(schema)
+		if err != nil {
+			return name, err
+		}
 		name = getNameFromRef(ref)
 		ref, name = c.handleDuplicates(ref, name, schema)
 		c.nameMap[name] = ref
@@ -266,17 +271,24 @@ func (c *GeneratorConfig) findSubType(schema jsonschema.Schema) (name string, er
 			err = fmt.Errorf("could not determine name for %v", schema)
 		}
 	default:
-		name = getSimpleType(schema)
+		name = getJsonType(schema)
 	}
 
 	return name, err
 }
 
+// handleDuplicates checks if the name is already in use and if so, appends the parent name to the name.
+// TODO: handle errors, no parent, etc.
 func (c *GeneratorConfig) handleDuplicates(ref string, name string, schema jsonschema.Schema) (string, string) {
 	if currentRef, ok := c.nameMap[name]; ok {
 		if currentRef != ref {
 			parent := schema.Parent
-			parentRef := getRef(*parent)
+
+			parentRef, err := getRef(*parent)
+			if err != nil {
+				return ref, name
+			}
+
 			if parentRef != "" {
 				prefix := getNameFromRef(parentRef)
 				if prefix != name {

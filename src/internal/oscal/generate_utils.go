@@ -82,6 +82,7 @@ var intToWordMap = []string{
 	"nine",
 }
 
+// buildStructs builds the structs for each definition in the schema
 func buildTagString(tags []string, field string, required bool) string {
 	tagStrings := []string{}
 	tagSuffix := ",omitempty"
@@ -103,41 +104,33 @@ func buildTagString(tags []string, field string, required bool) string {
 	return "`" + strings.Join(tagStrings, " ") + "`"
 }
 
-func getRef(schema jsonschema.Schema) string {
+// getRef builds a ref string from a schema
+func getRef(schema jsonschema.Schema) (string, error) {
 	if schema.Ref != nil {
-		return *schema.Ref
+		return *schema.Ref, nil
 	} else if schema.ID != nil {
-		return *schema.ID
+		return *schema.ID, nil
 	} else if schema.Title != nil {
 		split := strings.Split(*schema.Title, " ")
 		name := ""
 		for _, s := range split {
 			name += FmtFieldName(s)
 		}
-		return "#/definitions/" + name
+		return "#/definitions/" + name, nil
 	}
-	return ""
+	return "", fmt.Errorf("unable to get ref from schema")
 }
 
-// returns the type of the schema
-func getSimpleType(schema jsonschema.Schema) string {
+// returns the json type of the schema
+func getJsonType(schema jsonschema.Schema) string {
 	if schema.Type != nil {
 		return string(*schema.Type.SimpleTypes)
 	}
 	return ""
 }
 
-func isArrayType(t string) bool {
-	lower := strings.ToLower(t)
-	return lower == "array"
-}
-
-func isObjectType(t string) bool {
-	lower := strings.ToLower(t)
-	return lower == "object"
-}
-
-func isPrimitiveType(t string) bool {
+// isPrimitiveJsonType returns true if the type is a primitive type
+func isPrimitiveJsonType(t string) bool {
 	lower := strings.ToLower(t)
 	switch lower {
 	case "string":
@@ -152,6 +145,7 @@ func isPrimitiveType(t string) bool {
 	return false
 }
 
+// getGoType returns the Go type for a given JSON type
 func getGoType(t string) string {
 	lower := strings.ToLower(t)
 	switch lower {
@@ -169,12 +163,14 @@ func getGoType(t string) string {
 	return ""
 }
 
+// populateSchema unmarshals the OSCAL JSON schema file into a jsonschema.Schema object
 func populateSchema(oscalSchema []byte) (jsonschema.Schema, error) {
 	schema := jsonschema.Schema{}
 	err := schema.UnmarshalJSON(oscalSchema)
 	return schema, err
 }
 
+// getNameFromRef returns the name of the struct from a ref
 func getNameFromRef(ref string) string {
 	pattern := regexp.MustCompile("[/_]")
 	splitPathSeperator := pattern.Split(ref, -1)
@@ -187,7 +183,15 @@ func getNameFromRef(ref string) string {
 func getDefinitionMap(schema jsonschema.Schema) (map[string]jsonschema.Schema, error) {
 	result := make(map[string]jsonschema.Schema)
 	for definition, item := range schema.Definitions {
-		if typeObj := *item.TypeObject; typeObj.ID != nil {
+		typeObj := *item.TypeObject
+
+		// If the object has no Parent, set the parent to the schema
+		if typeObj.Parent == nil {
+			typeObj.Parent = &schema
+		}
+
+		// If the object has an ID, use that as the key, otherwise use the definition name
+		if typeObj.ID != nil {
 			result[*item.TypeObject.ID] = typeObj
 		} else {
 			result["#/definitions/"+definition] = typeObj

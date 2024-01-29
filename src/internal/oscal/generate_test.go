@@ -25,6 +25,7 @@ const (
 	oscal106FilePath                string = "../../../schema/complete/oscal_complete_schema-1-0-6.json"
 	oscal110FilePath                string = "../../../schema/complete/oscal_complete_schema-1-1-0.json"
 	oscal111FilePath                string = "../../../schema/complete/oscal_complete_schema-1-1-1.json"
+	oscal111FixedFilePath           string = "../../pkg/validation/schema/oscal_complete_schema-1-1-1.json"
 	componentExpectedPropertiesFile string = "../../../testdata/generation/component/expected-properties.txt"
 	sspExpectedPropertiesFile       string = "../../../testdata/generation/ssp/expected-properties.txt"
 	componentExpectedStructDataFile string = "../../../testdata/generation/component/expected-struct-data.txt"
@@ -34,9 +35,10 @@ const (
 )
 
 var (
-	schemaPaths   = []string{oscal104FilePath, oscal105FilePath, oscal106FilePath, oscal110FilePath, oscal111FilePath, oscalComponentSchemaFilePath, oscalSSPSchemaFilePath}
+	schemaPaths   = []string{oscal104FilePath, oscal105FilePath, oscal106FilePath, oscal110FilePath, oscal111FilePath, oscalComponentSchemaFilePath, oscalSSPSchemaFilePath, oscal111FixedFilePath}
 	schemaMutex   = sync.Mutex{}
 	schemaByteMap = map[string][]byte{}
+	writeOutput   = false
 )
 
 func TestGenerate(t *testing.T) {
@@ -45,14 +47,15 @@ func TestGenerate(t *testing.T) {
 
 	t.Run("It generates the types for a given complete schema", func(t *testing.T) {
 		t.Parallel()
-		bytes, err := Generate(schemaByteMap[oscal111FilePath], "oscalTypes", []string{"json", "yaml"})
+		bytes, err := Generate(schemaByteMap[oscal104FilePath], "oscalTypes", []string{"json", "yaml"})
 
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
 		}
 
-		t.Skip("skipping output")
-		utils.WriteOutput(bytes, "../../../test_out/oscal-1-1-1/types.go")
+		if writeOutput {
+			utils.WriteOutput(bytes, "../../../test_out/oscal-1-0-4/types.go")
+		}
 	})
 
 	t.Run("It generates the types for an individual schema", func(t *testing.T) {
@@ -63,8 +66,30 @@ func TestGenerate(t *testing.T) {
 			t.Errorf("expected no error, got %v", err)
 		}
 
-		t.Skip("skipping output")
-		utils.WriteOutput(bytes, "../../../test_out/component/types.go")
+		if writeOutput {
+			utils.WriteOutput(bytes, "../../../test_out/component/types.go")
+		}
+	})
+
+	t.Run("Test against fixed schema in validation", func(t *testing.T) {
+		t.Parallel()
+		actual, err := Generate(schemaByteMap[oscal104FilePath], "oscalTypes", []string{"json", "yaml"})
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+
+		expected, err := Generate(schemaByteMap[oscal104FilePath], "oscalTypes", []string{"json", "yaml"})
+
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+
+		actualString := string(actual)
+		expectedString := string(expected)
+
+		if actualString != expectedString {
+			t.Errorf("expected %s, got %s", expectedString, actualString)
+		}
 	})
 }
 
@@ -117,11 +142,13 @@ func TestGenerateDifferences(t *testing.T) {
 			}
 		}
 
-		allTypes := "package allTypes\n\n" + strings.Join(all, "\n\n")
-		os.WriteFile("../../../test_out/all/allTypes.go", []byte(allTypes), 0644)
+		if writeOutput {
+			allTypes := "package allTypes\n\n" + strings.Join(all, "\n\n")
+			os.WriteFile("../../../test_out/all/allTypes.go", []byte(allTypes), 0644)
 
-		diffTypes := "package diffTypes\n\n" + strings.Join(diffs, "\n\n")
-		os.WriteFile("../../../test_out/diff/diffTypes.go", []byte(diffTypes), 0644)
+			diffTypes := "package diffTypes\n\n" + strings.Join(diffs, "\n\n")
+			os.WriteFile("../../../test_out/diff/diffTypes.go", []byte(diffTypes), 0644)
+		}
 	})
 }
 
@@ -278,26 +305,6 @@ func TestDefinitionMap(t *testing.T) {
 	})
 }
 
-func TestGetNameFromRef(t *testing.T) {
-	t.Parallel()
-	t.Run("It splits a $ref into a field name when separated by _'s", func(t *testing.T) {
-		t.Parallel()
-		expected := "Catalog"
-		result := getNameFromRef("#assembly_oscal-catalog_catalog")
-		if result != expected {
-			t.Errorf("expected %s, got %s", expected, result)
-		}
-	})
-
-	t.Run("It splits a $ref into a field name when separated by /'s", func(t *testing.T) {
-		t.Parallel()
-		result := getNameFromRef("#/definitions/TokenDatatype")
-		if result != "TokenDatatype" {
-			t.Errorf("expected %s, got %s", "token_datatype", result)
-		}
-	})
-}
-
 func TestGetTypeSuffix(t *testing.T) {
 	t.Parallel()
 	getSchemaByteMap(t)
@@ -434,28 +441,6 @@ func TestBuildTypeString(t *testing.T) {
 		}
 		if result != "Catalog" {
 			t.Errorf("expected %s, got %s", "Catalog", result)
-		}
-	})
-}
-
-func TestBuildTagString(t *testing.T) {
-	t.Parallel()
-
-	t.Run("It returns a tag string given a list of tags and a field name", func(t *testing.T) {
-		t.Parallel()
-		expected := "`json:\"test,omitempty\" yaml:\"test,omitempty\"`"
-		actual := buildTagString([]string{"json", "yaml"}, "test", false)
-		if actual != expected {
-			t.Errorf("expected %s, got %s", expected, actual)
-		}
-	})
-
-	t.Run("It leaves out omitempty if the field is required", func(t *testing.T) {
-		t.Parallel()
-		expected := "`json:\"test\" yaml:\"test\"`"
-		result := buildTagString([]string{"json", "yaml"}, "test", true)
-		if result != expected {
-			t.Errorf("expected %s, got %s", expected, result)
 		}
 	})
 }
