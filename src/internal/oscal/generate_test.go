@@ -1,140 +1,89 @@
 package oscal
 
 import (
+	"go/format"
 	"os"
 	"strings"
 	"sync"
 	"testing"
 
-	"github.com/defenseunicorns/go-oscal/src/internal/utils"
 	"github.com/swaggest/jsonschema-go"
 )
 
 const (
-	oscalComponentSchemaFilePath    string = "../../../schema/component/oscal_component_schema-1-1-1.json"
-	oscalSSPSchemaFilePath          string = "../../../schema/ssp/oscal_ssp_schema-1-1-1.json"
-	fieldsPresentFilePath           string = "../../../testdata/fields-present.json"
-	fieldsMissingFilePath           string = "../../../testdata/fields-missing.json"
-	expected104FilePath             string = "../../../testdata/generation/oscal-1-0-4/types.go"
-	expected105FilePath             string = "../../types/oscal-1-0-5/types.go"
-	expected106FilePath             string = "../../types/oscal-1-0-6/types.go"
-	expected110FilePath             string = "../../types/oscal-1-1-0/types.go"
-	expected111FilePath             string = "../../types/oscal-1-1-1/types.go"
-	oscal104FilePath                string = "../../../schema/complete/oscal_complete_schema-1-0-5.json"
-	oscal105FilePath                string = "../../../schema/complete/oscal_complete_schema-1-0-5.json"
-	oscal106FilePath                string = "../../../schema/complete/oscal_complete_schema-1-0-6.json"
-	oscal110FilePath                string = "../../../schema/complete/oscal_complete_schema-1-1-0.json"
-	oscal111FilePath                string = "../../../schema/complete/oscal_complete_schema-1-1-1.json"
-	componentExpectedPropertiesFile string = "../../../testdata/generation/component/expected-properties.txt"
-	sspExpectedPropertiesFile       string = "../../../testdata/generation/ssp/expected-properties.txt"
-	componentExpectedStructDataFile string = "../../../testdata/generation/component/expected-struct-data.txt"
-	sspExpectedStructDataFile       string = "../../../testdata/generation/ssp/expected-struct-data.txt"
-	expectedComponentOutputFile     string = "../../../testdata/generation/component/expected-oscal-model-struct.txt"
-	sspExpectedOutputFile           string = "../../../testdata/generation/ssp/expected-oscal-model-struct.txt"
+	oscalComponentSchemaFilePath string = "../../../schema/component/oscal_component_schema-1-1-1.json"
+	oscalSSPSchemaFilePath       string = "../../../schema/ssp/oscal_ssp_schema-1-1-1.json"
+	fieldsPresentFilePath        string = "../../../testdata/fields-present.json"
+	fieldsMissingFilePath        string = "../../../testdata/fields-missing.json"
+	oscal104FilePath             string = "../../pkg/validation/schema/oscal_complete_schema-1-0-4.json"
+	oscal105FilePath             string = "../../pkg/validation/schema/oscal_complete_schema-1-0-5.json"
+	oscal106FilePath             string = "../../pkg/validation/schema/oscal_complete_schema-1-0-6.json"
+	oscal110FilePath             string = "../../pkg/validation/schema/oscal_complete_schema-1-1-0.json"
+	oscal111FilePath             string = "../../pkg/validation/schema/oscal_complete_schema-1-1-1.json"
 )
 
 var (
-	schemaPaths   = []string{oscal104FilePath, oscal105FilePath, oscal106FilePath, oscal110FilePath, oscal111FilePath, oscalComponentSchemaFilePath, oscalSSPSchemaFilePath}
-	schemaMutex   = sync.Mutex{}
-	schemaByteMap = map[string][]byte{}
-	writeOutput   = false
+	schemaPaths            = []string{oscal104FilePath, oscal105FilePath, oscal106FilePath, oscal110FilePath, oscal111FilePath, oscalComponentSchemaFilePath, oscalSSPSchemaFilePath}
+	schemaMutex            = sync.Mutex{}
+	schemaByteMap          = map[string][]byte{}
+	writeOutput            = false
+	deterministicTestCount = 10
 )
 
 func TestGenerate(t *testing.T) {
 	t.Parallel()
 	getSchemaByteMap(t)
+	testCases := map[string][]byte{
+		"oscal-1-0-4": schemaByteMap[oscal104FilePath],
+		"oscal-1-0-5": schemaByteMap[oscal105FilePath],
+		"oscal-1-0-6": schemaByteMap[oscal106FilePath],
+		"oscal-1-1-0": schemaByteMap[oscal110FilePath],
+		"oscal-1-1-1": schemaByteMap[oscal111FilePath],
+		"component":   schemaByteMap[oscalComponentSchemaFilePath],
+		"ssp":         schemaByteMap[oscalSSPSchemaFilePath],
+	}
 
-	t.Run("It generates the types for a given complete schema", func(t *testing.T) {
-		t.Parallel()
-		bytes, err := Generate(schemaByteMap[oscal110FilePath], "oscalTypes", []string{"json", "yaml"})
-
+	for path, schemaBytes := range testCases {
+		bytes, err := Generate(schemaBytes, "oscalTypes", []string{"json", "yaml"})
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
 		}
-
 		if writeOutput {
-			utils.WriteOutput(bytes, "../../../test_out/oscal-1-1-0/types.go")
+			os.WriteFile("../../../test_out/"+path+"/types.go", bytes, 0644)
 		}
-	})
-
-	t.Run("It generates the types for an individual schema", func(t *testing.T) {
-		t.Parallel()
-		bytes, err := Generate(schemaByteMap[oscalComponentSchemaFilePath], "oscalTypes", []string{"json", "yaml"})
-
-		if err != nil {
-			t.Errorf("expected no error, got %v", err)
-		}
-
-		if writeOutput {
-			utils.WriteOutput(bytes, "../../../test_out/component/types.go")
-		}
-	})
+	}
 }
 
-func TestGenerateDifferences(t *testing.T) {
+func TestGenerateDeterministic(t *testing.T) {
 	t.Parallel()
 	getSchemaByteMap(t)
 
-	t.Skip("Skipping test. This test is not meant to be run in CI. It is meant to be run locally to generate the expected output files.")
-	expectedBytes, err := os.ReadFile(expected111FilePath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	expected := string(expectedBytes)
+	var previousBytes []byte
+	testCases := [][]byte{schemaByteMap[oscal104FilePath], schemaByteMap[oscal105FilePath], schemaByteMap[oscal106FilePath], schemaByteMap[oscal110FilePath], schemaByteMap[oscal111FilePath]}
 
-	schema, err := buildSchema(schemaByteMap[oscal111FilePath])
-	if err != nil {
-		t.Errorf("expected no error, got %v", err)
-	}
-
-	definitions, err := getDefinitionMap(schema)
-	if err != nil {
-		t.Errorf("expected no error, got %v", err)
-	}
-	t.Run("It builds a struct map given a schema object", func(t *testing.T) {
-		refQueue := NewRefQueue()
-		for _, oneOf := range schema.OneOf {
-			for _, pSOB := range oneOf.TypeObject.Properties {
-				prop := pSOB.TypeObject
-				if prop.Ref != nil && *prop.Ref != "#json-schema-directive" {
-					refQueue.Add(*prop.Ref)
-				}
+	for _, schemaBytes := range testCases {
+		previousBytes = nil
+		for i := 0; i < deterministicTestCount; i++ {
+			bytes, err := Generate(schemaBytes, "oscalTypes", []string{"json", "yaml"})
+			if err != nil {
+				t.Errorf("expected no error, got %v", err)
 			}
-
-		}
-		config := NewGeneratorConfig([]string{"json", "yaml"}, "oscalTypes")
-		config.refQueue = refQueue
-		config.definitions = definitions
-
-		err := config.buildStructs()
-		if err != nil {
-			t.Errorf("expected no error, got %v", err)
-		}
-
-		diffs := []string{}
-		all := []string{}
-		for _, v := range config.structMap {
-			all = append(all, v)
-			if !strings.Contains(expected, v) {
-				diffs = append(diffs, v)
+			if previousBytes == nil {
+				previousBytes = bytes
+				continue
+			}
+			if string(previousBytes) != string(bytes) {
+				t.Error("expected deterministic output")
 			}
 		}
-
-		if writeOutput {
-			allTypes := "package allTypes\n\n" + strings.Join(all, "\n\n")
-			os.WriteFile("../../../test_out/all/allTypes.go", []byte(allTypes), 0644)
-
-			diffTypes := "package diffTypes\n\n" + strings.Join(diffs, "\n\n")
-			os.WriteFile("../../../test_out/diff/diffTypes.go", []byte(diffTypes), 0644)
-		}
-	})
+	}
 }
 
 func TestBuildStructs(t *testing.T) {
 	t.Parallel()
 	getSchemaByteMap(t)
 
-	schemas := []string{oscal104FilePath, oscal105FilePath, oscal106FilePath, oscal110FilePath, oscal111FilePath}
+	schemas := []string{oscal104FilePath, oscal105FilePath, oscal106FilePath, oscal110FilePath, oscal111FilePath, oscalComponentSchemaFilePath, oscalSSPSchemaFilePath}
 
 	for _, path := range schemas {
 		schema, err := buildSchema(schemaByteMap[path])
@@ -198,13 +147,21 @@ func TestBuildStructString(t *testing.T) {
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
 		}
-		expected, err := os.ReadFile("../../../testdata/generation/structs/catalog.go")
+
+		bytes, err := format.Source([]byte(result))
+		if err != nil {
+			t.Fatal(err)
+		}
+		actual := string(bytes)
+
+		bytes, err = os.ReadFile("../../../testdata/generation/structs/catalog.go")
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		os.WriteFile("../../../testdata/generation/catalog.go", []byte(result), 0644)
-		if result != string(expected) {
+		expected := string(bytes)
+
+		if actual != expected {
 			t.Errorf("expected %s, got %s", expected, result)
 		}
 	})
@@ -222,51 +179,19 @@ func TestBuildStructString(t *testing.T) {
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
 		}
+
+		bytes, err := format.Source([]byte(result))
+		if err != nil {
+			t.Fatal(err)
+		}
+		actual := string(bytes)
 		expected, err := os.ReadFile("../../../testdata/generation/structs/include-all.go")
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		if result != string(expected) {
-			t.Errorf("expected %s, got %s", expected, result)
-		}
-	})
-}
-
-func TestDefinitionMap(t *testing.T) {
-	t.Parallel()
-	getSchemaByteMap(t)
-
-	schema, err := buildSchema(schemaByteMap[oscal111FilePath])
-	if err != nil {
-		t.Errorf("expected no error, got %v", err)
-	}
-
-	definitionMap, err := getDefinitionMap(schema)
-	if err != nil {
-		t.Errorf("expected no error, got %v", err)
-	}
-
-	t.Run("It maps $id's to their respective definitions", func(t *testing.T) {
-		t.Parallel()
-		result, ok := definitionMap["#assembly_oscal-catalog_catalog"]
-		if !ok {
-			t.Errorf("expected a result, got nil")
-		}
-		if *result.ID != "#assembly_oscal-catalog_catalog" {
-			t.Errorf("expected %s, got %s", "#assembly_oscal-catalog_catalog", *result.ID)
-		}
-	})
-
-	t.Run("it maps definitions to a $ref pattern if no $id is present", func(t *testing.T) {
-		t.Parallel()
-		result, ok := definitionMap["#/definitions/TokenDatatype"]
-		if !ok {
-			t.Errorf("expected a result, got nil")
-		}
-
-		if *result.Type.SimpleTypes != "string" {
-			t.Errorf("expected %s, got %v", "string", result.Type.SimpleTypes)
+		if actual != string(expected) {
+			t.Errorf("expected %s, got %s", expected, actual)
 		}
 	})
 }

@@ -45,6 +45,7 @@ func Generate(oscalSchema []byte, pkgName string, tags []string) (typeBytes []by
 
 	config := NewGeneratorConfig(tags, pkgName)
 
+	// Initialize the build process.
 	err = config.initBuild(&schema)
 	if err != nil {
 		return typeBytes, err
@@ -55,14 +56,19 @@ func Generate(oscalSchema []byte, pkgName string, tags []string) (typeBytes []by
 		return typeBytes, err
 	}
 
+	// Add header comment
 	typeString := fmt.Sprintf("%s\n", headerComment)
+	// Add the package name
 	typeString += fmt.Sprintf("package %s\n\n", pkgName)
+
+	// Add the struct definitions in order of creation.
 	for _, ref := range config.refQueue.History() {
 		typeString += config.structMap[ref] + "\n\n"
 	}
 
 	typeBytes = []byte(typeString)
 
+	// Format the bytes
 	typeBytes, err = format.Source(typeBytes)
 	if err != nil {
 		return typeBytes, err
@@ -71,6 +77,7 @@ func Generate(oscalSchema []byte, pkgName string, tags []string) (typeBytes []by
 	return typeBytes, nil
 }
 
+// initBuild initializes the build process by adding the root schema to the ref queue and building the definitions map.
 func (c *GeneratorConfig) initBuild(schema *jsonschema.Schema) (err error) {
 	if schema.ID == nil {
 		return fmt.Errorf("unable to find $id in schema")
@@ -88,6 +95,7 @@ func (c *GeneratorConfig) initBuild(schema *jsonschema.Schema) (err error) {
 		return nil
 	}
 
+	// No properties, so we need to add the properties from the oneOf schemas.
 	if schema.Properties == nil {
 		schema.Properties = map[string]jsonschema.SchemaOrBool{}
 		if schema.OneOf != nil {
@@ -111,6 +119,7 @@ func (c *GeneratorConfig) initBuild(schema *jsonschema.Schema) (err error) {
 }
 
 func (c *GeneratorConfig) buildStructs() (err error) {
+	// While the ref queue is not empty, pop the ref and build the struct string.
 	for c.refQueue.Len() > 0 {
 		ref := c.refQueue.Pop()
 
@@ -147,19 +156,30 @@ func (c *GeneratorConfig) buildStructString(def jsonschema.Schema) (structString
 		return structString, err
 	}
 
+	// Add top level struct definition
 	structStr := fmt.Sprintf("type %s struct {\n", name)
+
+	// create a slice of the keys in the properties map
 	var keys []string
 	for key := range def.Properties {
 		if !KeysToIgnore[key] {
 			keys = append(keys, key)
 		}
 	}
+	// Sort the keys alphabetically
 	slices.Sort(keys)
 
+	// Add the properties to the struct string
 	for _, key := range keys {
+		// Set the parent of the property schema to the definition
+		// Allows for the parent to be used in case of duplicate types
 		def.Properties[key].TypeObject.Parent = &def
+
+		// Get the property schema
 		prop := def.Properties[key]
 		propSchema := prop.TypeObject
+
+		// Build the property name, type, and tags
 		propName := FmtFieldName(key)
 		propType, err := c.buildTypeString(*propSchema)
 		if err != nil {
@@ -168,13 +188,13 @@ func (c *GeneratorConfig) buildStructString(def jsonschema.Schema) (structString
 		propTags := buildTagString(c.tags, key, required[key])
 		structStr += fmt.Sprintf("\t%s %s %s\n", propName, propType, propTags)
 	}
+	// Close the struct
 	structStr += "}"
-	formattedStruct, err := format.Source([]byte(structStr))
 	if err != nil {
 		return structStr, err
 	}
 
-	return string(formattedStruct), err
+	return structStr, err
 }
 
 // buildTypeString builds the type string for a given property.
@@ -195,10 +215,12 @@ func (c *GeneratorConfig) buildTypeString(property jsonschema.Schema) (propType 
 		}
 		return propType, err
 	} else if property.Ref != nil {
+		// If the property is a ref, we need to find the schema for the ref and build the type string for that schema.
 		def, ok := c.definitions[*property.Ref]
 		if !ok {
 			return "", fmt.Errorf("unable to find schema for %s", *property.Ref)
 		}
+		// Set the parent of the definition to the property
 		def.Parent = &property
 		return c.buildTypeString(def)
 
@@ -223,6 +245,7 @@ func (c *GeneratorConfig) buildTypeString(property jsonschema.Schema) (propType 
 			if !ok {
 				return "", fmt.Errorf("unable to find schema for %s", possibleRefs[0])
 			}
+			// Set the parent of the definition to the property
 			def.Parent = &property
 			return c.buildTypeString(def)
 		} else {
@@ -237,18 +260,24 @@ func (c *GeneratorConfig) findSubType(schema jsonschema.Schema) (name string, er
 	simpleType := getJsonType(schema)
 	switch simpleType {
 	case "object":
+		// If the schema has a ref, we need to find the name of the ref.
 		ref, err := getRef(schema)
 		if err != nil {
 			return name, err
 		}
+		// Create a name from the ref
 		name = getNameFromRef(ref)
+		// Check if the name is already in use and if so, append the parent name to the name.
 		ref, name = c.handleDuplicates(ref, name, schema)
 		c.nameMap[name] = ref
+		// Add the ref to the ref queue if it is not already in the queue.
 		c.refQueue.Add(ref)
+		// Add the schema to the definitions map if it is not already in the map.
 		if _, ok := c.definitions[ref]; !ok {
 			c.definitions[ref] = schema
 		}
 	case "array":
+		// If the schema has items, we need to find the name of the items.
 		if schema.Items.SchemaOrBoolEns() != nil {
 			def := *schema.Items.SchemaOrBool.TypeObject
 			def.Parent = &schema
@@ -280,7 +309,6 @@ func (c *GeneratorConfig) findSubType(schema jsonschema.Schema) (name string, er
 }
 
 // handleDuplicates checks if the name is already in use and if so, appends the parent name to the name.
-// TODO: handle errors, no parent, etc.
 func (c *GeneratorConfig) handleDuplicates(ref string, name string, schema jsonschema.Schema) (string, string) {
 	if currentRef, ok := c.nameMap[name]; ok {
 		if currentRef != ref {
@@ -291,11 +319,6 @@ func (c *GeneratorConfig) handleDuplicates(ref string, name string, schema jsons
 			if parentRef != "" {
 				prefix := getNameFromRef(parentRef)
 				if prefix != name {
-					// pattern := regexp.MustCompile(`[a-z]+`)
-					// split := pattern.Split(prefix, -1)
-					// if len(split) > 2 {
-					// 	prefix = strings.Join(split, "")
-					// }
 					newName := prefix + name
 					newRef := "#/definitions/" + newName
 					return c.handleDuplicates(newRef, newName, *parent)

@@ -30,13 +30,12 @@ func TestGetRef(t *testing.T) {
 	t.Parallel()
 	getSchemaByteMap(t)
 
-	schema, err := buildSchema(schemaByteMap[oscal111FilePath])
-	if err != nil {
-		t.Fatalf("error building schema: %s", err)
-	}
-
 	t.Run("It returns the ref if it exists", func(t *testing.T) {
 		t.Parallel()
+		schema, err := buildSchema(schemaByteMap[oscal111FilePath])
+		if err != nil {
+			t.Fatalf("error building schema: %s", err)
+		}
 		schemaWithRef := schema.OneOf[0].TypeObject.Properties["catalog"].TypeObject
 
 		expected := "#assembly_oscal-catalog_catalog"
@@ -53,6 +52,10 @@ func TestGetRef(t *testing.T) {
 
 	t.Run("It returns the id if it exists", func(t *testing.T) {
 		t.Parallel()
+		schema, err := buildSchema(schemaByteMap[oscal111FilePath])
+		if err != nil {
+			t.Fatalf("error building schema: %s", err)
+		}
 		schemaWitId := schema.Definitions["oscal-complete-oscal-catalog:catalog"].TypeObject
 		expected := "#assembly_oscal-catalog_catalog"
 
@@ -68,6 +71,10 @@ func TestGetRef(t *testing.T) {
 
 	t.Run("It builds a ref with the title if no id and no ref exist", func(t *testing.T) {
 		t.Parallel()
+		schema, err := buildSchema(schemaByteMap[oscal111FilePath])
+		if err != nil {
+			t.Fatalf("error building schema: %s", err)
+		}
 		schemaWithNoIdOrRef := schema.Definitions["oscal-complete-oscal-control-common:parameter-constraint"].TypeObject.Properties["tests"].TypeObject.Items.SchemaOrBool.TypeObject
 		expected := "#/definitions/ConstraintTest"
 
@@ -83,11 +90,15 @@ func TestGetRef(t *testing.T) {
 
 	t.Run("It returns an error if no ref, id, or title exist", func(t *testing.T) {
 		t.Parallel()
+		schema, err := buildSchema(schemaByteMap[oscal111FilePath])
+		if err != nil {
+			t.Fatalf("error building schema: %s", err)
+		}
 		schemaWithNoIdOrRef := schema.Definitions["oscal-complete-oscal-control-common:parameter-constraint"].TypeObject.Properties["tests"].TypeObject.Items.SchemaOrBool.TypeObject
 		schemaWithNoIdOrRef.Title = nil
 		schemaWithNoIdOrRef.ID = nil
 
-		_, err := getRef(*schemaWithNoIdOrRef)
+		_, err = getRef(*schemaWithNoIdOrRef)
 
 		if err == nil {
 			t.Errorf("expected an error, got nil")
@@ -203,6 +214,44 @@ func TestGetNameFromRef(t *testing.T) {
 			t.Fatalf("error getNameFromRef(): expected: %s | got: %s", expected, actual)
 		}
 	}
+}
+
+func TestDefinitionMap(t *testing.T) {
+	t.Parallel()
+	getSchemaByteMap(t)
+
+	schema, err := buildSchema(schemaByteMap[oscal111FilePath])
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+
+	definitionMap, err := getDefinitionMap(schema)
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+
+	t.Run("It maps $id's to their respective definitions", func(t *testing.T) {
+		t.Parallel()
+		result, ok := definitionMap["#assembly_oscal-catalog_catalog"]
+		if !ok {
+			t.Errorf("expected a result, got nil")
+		}
+		if *result.ID != "#assembly_oscal-catalog_catalog" {
+			t.Errorf("expected %s, got %s", "#assembly_oscal-catalog_catalog", *result.ID)
+		}
+	})
+
+	t.Run("it maps definitions to a $ref pattern if no $id is present", func(t *testing.T) {
+		t.Parallel()
+		result, ok := definitionMap["#/definitions/TokenDatatype"]
+		if !ok {
+			t.Errorf("expected a result, got nil")
+		}
+
+		if *result.Type.SimpleTypes != "string" {
+			t.Errorf("expected %s, got %v", "string", result.Type.SimpleTypes)
+		}
+	})
 }
 
 // TestFmtFieldName tests that we handle formatting a json string to a go struct correctly.
