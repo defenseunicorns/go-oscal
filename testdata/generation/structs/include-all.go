@@ -1,2 +1,1 @@
-type IncludeAll struct {
-}
+type IncludeAll = map[string]interface{}

@@ -7,6 +7,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/defenseunicorns/go-oscal/src/internal/utils"
 	"github.com/swaggest/jsonschema-go"
 )
 
@@ -49,7 +50,7 @@ func TestGenerate(t *testing.T) {
 			t.Errorf("expected no error, got %v", err)
 		}
 		if writeOutput {
-			os.WriteFile("../../../test_out/"+path+"/types.go", bytes, 0644)
+			utils.WriteOutput(bytes, "../../../test_out/"+path+"/types.go")
 		}
 	}
 }
@@ -166,7 +167,7 @@ func TestBuildStructString(t *testing.T) {
 		}
 	})
 
-	t.Run("It handles an object with no properties", func(t *testing.T) {
+	t.Run("It handles an object with no properties by aliasing it to map[string]interface{} for json representation", func(t *testing.T) {
 		t.Parallel()
 		config := GeneratorConfig{
 			tags:        []string{"json", "yaml"},
@@ -193,6 +194,23 @@ func TestBuildStructString(t *testing.T) {
 		if actual != string(expected) {
 			t.Errorf("expected %s, got %s", expected, actual)
 		}
+	})
+
+	t.Run("It adds an alias if one exists", func(t *testing.T) {
+		t.Parallel()
+		config := NewGeneratorConfig([]string{"json", "yaml"}, "oscalTypes")
+		config.definitions = definitions
+		config.initBuild(&schema)
+
+		result, err := config.buildStructString(config.definitions[config.refQueue.Pop()])
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+
+		if !strings.Contains(result, "type OscalModels = OscalCompleteSchema") {
+			t.Errorf("expected %s to contain %s", result, "type OscalModels = OscalCompleteSchema")
+		}
+
 	})
 }
 

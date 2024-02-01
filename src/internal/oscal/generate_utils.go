@@ -18,6 +18,10 @@ var KeysToIgnore map[string]bool = map[string]bool{
 	"$schema": true,
 }
 
+var Aliases map[string][]string = map[string][]string{
+	"OscalCompleteSchema": {"OscalModels"},
+}
+
 const headerComment string = `/*
 	This file was auto-generated with go-oscal.
 

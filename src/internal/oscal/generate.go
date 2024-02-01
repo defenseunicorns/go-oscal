@@ -156,9 +156,6 @@ func (c *GeneratorConfig) buildStructString(def jsonschema.Schema) (structString
 		return structString, err
 	}
 
-	// Add top level struct definition
-	structStr := fmt.Sprintf("type %s struct {\n", name)
-
 	// create a slice of the keys in the properties map
 	var keys []string
 	for key := range def.Properties {
@@ -168,6 +165,22 @@ func (c *GeneratorConfig) buildStructString(def jsonschema.Schema) (structString
 	}
 	// Sort the keys alphabetically
 	slices.Sort(keys)
+
+	// If there are no properties, return a map[string]interface{} type
+	if len(keys) == 0 {
+		structString = fmt.Sprintf("type %s = map[string]interface{}", name)
+		return structString, err
+	}
+
+	// Generate aliases for the struct if they exist
+	if aliases, ok := Aliases[name]; ok {
+		for _, alias := range aliases {
+			structString += fmt.Sprintf("type %s = %s\n", alias, name)
+		}
+	}
+
+	// Add top level struct definition
+	structString += fmt.Sprintf("type %s struct {\n", name)
 
 	// Add the properties to the struct string
 	for _, key := range keys {
@@ -183,18 +196,18 @@ func (c *GeneratorConfig) buildStructString(def jsonschema.Schema) (structString
 		propName := FmtFieldName(key)
 		propType, err := c.buildTypeString(*propSchema)
 		if err != nil {
-			return structStr, err
+			return structString, err
 		}
 		propTags := buildTagString(c.tags, key, required[key])
-		structStr += fmt.Sprintf("\t%s %s %s\n", propName, propType, propTags)
+		structString += fmt.Sprintf("\t%s %s %s\n", propName, propType, propTags)
 	}
 	// Close the struct
-	structStr += "}"
+	structString += "}"
 	if err != nil {
-		return structStr, err
+		return structString, err
 	}
 
-	return structStr, err
+	return structString, err
 }
 
 // buildTypeString builds the type string for a given property.
