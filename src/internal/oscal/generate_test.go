@@ -34,25 +34,48 @@ var (
 func TestGenerate(t *testing.T) {
 	t.Parallel()
 	getSchemaByteMap(t)
-	testCases := map[string][]byte{
-		"oscal-1-0-4": schemaByteMap[oscal104FilePath],
-		"oscal-1-0-5": schemaByteMap[oscal105FilePath],
-		"oscal-1-0-6": schemaByteMap[oscal106FilePath],
-		"oscal-1-1-0": schemaByteMap[oscal110FilePath],
-		"oscal-1-1-1": schemaByteMap[oscal111FilePath],
-		"component":   schemaByteMap[oscalComponentSchemaFilePath],
-		"ssp":         schemaByteMap[oscalSSPSchemaFilePath],
-	}
 
-	for path, schemaBytes := range testCases {
-		bytes, err := Generate(schemaBytes, "oscalTypes", []string{"json", "yaml"})
-		if err != nil {
-			t.Errorf("expected no error, got %v", err)
+	t.Run("CompleteSchema", func(t *testing.T) {
+
+		testCases := map[string][]byte{
+			"oscal-1-0-4": schemaByteMap[oscal104FilePath],
+			"oscal-1-0-5": schemaByteMap[oscal105FilePath],
+			"oscal-1-0-6": schemaByteMap[oscal106FilePath],
+			"oscal-1-1-0": schemaByteMap[oscal110FilePath],
+			"oscal-1-1-1": schemaByteMap[oscal111FilePath],
 		}
-		if writeOutput {
-			utils.WriteOutput(bytes, "../../../test_out/"+path+"/types.go")
+
+		for path, schemaBytes := range testCases {
+			pkgName := strings.ReplaceAll(path, "-", "_")
+			pkgName = strings.ReplaceAll(pkgName, "oscal", "oscalTypes")
+			bytes, err := Generate(schemaBytes, pkgName, []string{"json", "yaml"})
+			if err != nil {
+				t.Errorf("expected no error, got %v", err)
+			}
+			if writeOutput {
+				utils.WriteOutput(bytes, "../../types/"+path+"/types.go")
+			}
 		}
-	}
+	})
+
+	t.Run("Individual Schemas", func(t *testing.T) {
+
+		testCases := map[string][]byte{
+			"component": schemaByteMap[oscalComponentSchemaFilePath],
+			"ssp":       schemaByteMap[oscalSSPSchemaFilePath],
+		}
+
+		for path, schemaBytes := range testCases {
+			pkgName := "oscal" + FmtFieldName(path) + "Types"
+			bytes, err := Generate(schemaBytes, pkgName, []string{"json", "yaml"})
+			if err != nil {
+				t.Errorf("expected no error, got %v", err)
+			}
+			if writeOutput {
+				utils.WriteOutput(bytes, "../../../test_out/"+path+"/types.go")
+			}
+		}
+	})
 }
 
 func TestGenerateDeterministic(t *testing.T) {
