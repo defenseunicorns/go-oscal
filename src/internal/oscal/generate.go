@@ -3,6 +3,7 @@ package oscal
 import (
 	"fmt"
 	"go/format"
+	"reflect"
 	"slices"
 
 	"github.com/swaggest/jsonschema-go"
@@ -324,11 +325,21 @@ func (c *GeneratorConfig) findSubType(schema jsonschema.Schema) (name string, er
 // handleDuplicates checks if the name is already in use and if so, appends the parent name to the name.
 func (c *GeneratorConfig) handleDuplicates(ref string, name string, schema jsonschema.Schema) (string, string) {
 	if currentRef, ok := c.nameMap[name]; ok {
+		// Points to a different definition
 		if currentRef != ref {
+			// If the definitions are the same, return the current ref and name
+			existing := c.definitions[currentRef]
+			if reflect.DeepEqual(existing, schema) {
+				return currentRef, name
+			}
+			// If the definitions are different, try the title
+			if schema.Title != nil && (existing.Title == nil || *existing.Title != *schema.Title) {
+				newName := getNameFromTitle(*schema.Title)
+				return c.handleDuplicates(getRefWithName(newName), newName, schema)
+			}
+			// If the title is the same, try the parent
 			parent := schema.Parent
-
 			parentRef, _ := getRef(*parent)
-
 			if parentRef != "" {
 				prefix := getNameFromRef(parentRef)
 				if prefix != name {

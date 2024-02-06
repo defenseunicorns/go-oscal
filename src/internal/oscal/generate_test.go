@@ -118,6 +118,9 @@ func TestBuildStructs(t *testing.T) {
 		config := NewGeneratorConfig([]string{"json", "yaml"}, "oscalTypes")
 
 		err = config.initBuild(&schema)
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
 
 		err = config.buildStructs()
 		if err != nil {

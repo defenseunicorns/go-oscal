@@ -239,28 +239,28 @@ type Parameter struct {
 }
 
 type Capability struct {
-	ControlImplementations []CapabilityControlImplementation `json:"control-implementations,omitempty" yaml:"control-implementations,omitempty"`
-	Description            string                            `json:"description" yaml:"description"`
-	IncorporatesComponents []IncorporatesComponent           `json:"incorporates-components,omitempty" yaml:"incorporates-components,omitempty"`
-	Links                  []Link                            `json:"links,omitempty" yaml:"links,omitempty"`
-	Name                   string                            `json:"name" yaml:"name"`
-	Props                  []Property                        `json:"props,omitempty" yaml:"props,omitempty"`
-	Remarks                string                            `json:"remarks,omitempty" yaml:"remarks,omitempty"`
-	UUID                   string                            `json:"uuid" yaml:"uuid"`
+	ControlImplementations []ControlImplementationSet `json:"control-implementations,omitempty" yaml:"control-implementations,omitempty"`
+	Description            string                     `json:"description" yaml:"description"`
+	IncorporatesComponents []IncorporatesComponent    `json:"incorporates-components,omitempty" yaml:"incorporates-components,omitempty"`
+	Links                  []Link                     `json:"links,omitempty" yaml:"links,omitempty"`
+	Name                   string                     `json:"name" yaml:"name"`
+	Props                  []Property                 `json:"props,omitempty" yaml:"props,omitempty"`
+	Remarks                string                     `json:"remarks,omitempty" yaml:"remarks,omitempty"`
+	UUID                   string                     `json:"uuid" yaml:"uuid"`
 }
 
 type DefinedComponent struct {
-	ControlImplementations []DefinedComponentControlImplementation `json:"control-implementations,omitempty" yaml:"control-implementations,omitempty"`
-	Description            string                                  `json:"description" yaml:"description"`
-	Links                  []Link                                  `json:"links,omitempty" yaml:"links,omitempty"`
-	Props                  []Property                              `json:"props,omitempty" yaml:"props,omitempty"`
-	Protocols              []Protocol                              `json:"protocols,omitempty" yaml:"protocols,omitempty"`
-	Purpose                string                                  `json:"purpose,omitempty" yaml:"purpose,omitempty"`
-	Remarks                string                                  `json:"remarks,omitempty" yaml:"remarks,omitempty"`
-	ResponsibleRoles       []ResponsibleRole                       `json:"responsible-roles,omitempty" yaml:"responsible-roles,omitempty"`
-	Title                  string                                  `json:"title" yaml:"title"`
-	Type                   string                                  `json:"type" yaml:"type"`
-	UUID                   string                                  `json:"uuid" yaml:"uuid"`
+	ControlImplementations []ControlImplementationSet `json:"control-implementations,omitempty" yaml:"control-implementations,omitempty"`
+	Description            string                     `json:"description" yaml:"description"`
+	Links                  []Link                     `json:"links,omitempty" yaml:"links,omitempty"`
+	Props                  []Property                 `json:"props,omitempty" yaml:"props,omitempty"`
+	Protocols              []Protocol                 `json:"protocols,omitempty" yaml:"protocols,omitempty"`
+	Purpose                string                     `json:"purpose,omitempty" yaml:"purpose,omitempty"`
+	Remarks                string                     `json:"remarks,omitempty" yaml:"remarks,omitempty"`
+	ResponsibleRoles       []ResponsibleRole          `json:"responsible-roles,omitempty" yaml:"responsible-roles,omitempty"`
+	Title                  string                     `json:"title" yaml:"title"`
+	Type                   string                     `json:"type" yaml:"type"`
+	UUID                   string                     `json:"uuid" yaml:"uuid"`
 }
 
 type ImportComponentDefinition struct {
@@ -560,13 +560,13 @@ type ReferencedControlObjectives struct {
 }
 
 type AssessedControls struct {
-	Description     string                              `json:"description,omitempty" yaml:"description,omitempty"`
-	ExcludeControls []AssessedControlsSelectControlById `json:"exclude-controls,omitempty" yaml:"exclude-controls,omitempty"`
-	IncludeAll      IncludeAll                          `json:"include-all,omitempty" yaml:"include-all,omitempty"`
-	IncludeControls []AssessedControlsSelectControlById `json:"include-controls,omitempty" yaml:"include-controls,omitempty"`
-	Links           []Link                              `json:"links,omitempty" yaml:"links,omitempty"`
-	Props           []Property                          `json:"props,omitempty" yaml:"props,omitempty"`
-	Remarks         string                              `json:"remarks,omitempty" yaml:"remarks,omitempty"`
+	Description     string          `json:"description,omitempty" yaml:"description,omitempty"`
+	ExcludeControls []SelectControl `json:"exclude-controls,omitempty" yaml:"exclude-controls,omitempty"`
+	IncludeAll      IncludeAll      `json:"include-all,omitempty" yaml:"include-all,omitempty"`
+	IncludeControls []SelectControl `json:"include-controls,omitempty" yaml:"include-controls,omitempty"`
+	Links           []Link          `json:"links,omitempty" yaml:"links,omitempty"`
+	Props           []Property      `json:"props,omitempty" yaml:"props,omitempty"`
+	Remarks         string          `json:"remarks,omitempty" yaml:"remarks,omitempty"`
 }
 
 type AssociatedActivity struct {
@@ -658,9 +658,9 @@ type ParameterSelection struct {
 	HowMany string   `json:"how-many,omitempty" yaml:"how-many,omitempty"`
 }
 
-type CapabilityControlImplementation struct {
+type ControlImplementationSet struct {
 	Description             string                                        `json:"description" yaml:"description"`
-	ImplementedRequirements []ControlImplementationImplementedRequirement `json:"implemented-requirements" yaml:"implemented-requirements"`
+	ImplementedRequirements []ImplementedRequirementControlImplementation `json:"implemented-requirements" yaml:"implemented-requirements"`
 	Links                   []Link                                        `json:"links,omitempty" yaml:"links,omitempty"`
 	Props                   []Property                                    `json:"props,omitempty" yaml:"props,omitempty"`
 	SetParameters           []SetParameter                                `json:"set-parameters,omitempty" yaml:"set-parameters,omitempty"`
@@ -671,16 +671,6 @@ type CapabilityControlImplementation struct {
 type IncorporatesComponent struct {
 	ComponentUuid string `json:"component-uuid" yaml:"component-uuid"`
 	Description   string `json:"description" yaml:"description"`
-}
-
-type DefinedComponentControlImplementation struct {
-	Description             string                                        `json:"description" yaml:"description"`
-	ImplementedRequirements []ControlImplementationImplementedRequirement `json:"implemented-requirements" yaml:"implemented-requirements"`
-	Links                   []Link                                        `json:"links,omitempty" yaml:"links,omitempty"`
-	Props                   []Property                                    `json:"props,omitempty" yaml:"props,omitempty"`
-	SetParameters           []SetParameter                                `json:"set-parameters,omitempty" yaml:"set-parameters,omitempty"`
-	Source                  string                                        `json:"source" yaml:"source"`
-	UUID                    string                                        `json:"uuid" yaml:"uuid"`
 }
 
 type Protocol struct {
@@ -774,8 +764,8 @@ type CombinationRule struct {
 }
 
 type CustomGrouping struct {
-	Groups         []CustomGroupingGroup `json:"groups,omitempty" yaml:"groups,omitempty"`
-	InsertControls []InsertControls      `json:"insert-controls,omitempty" yaml:"insert-controls,omitempty"`
+	Groups         []ControlGroup   `json:"groups,omitempty" yaml:"groups,omitempty"`
+	InsertControls []InsertControls `json:"insert-controls,omitempty" yaml:"insert-controls,omitempty"`
 }
 
 type Flat = map[string]interface{}
@@ -948,7 +938,7 @@ type SelectObjectiveById struct {
 	ObjectiveId string `json:"objective-id" yaml:"objective-id"`
 }
 
-type AssessedControlsSelectControlById struct {
+type SelectControl struct {
 	ControlId    string   `json:"control-id" yaml:"control-id"`
 	StatementIds []string `json:"statement-ids,omitempty" yaml:"statement-ids,omitempty"`
 }
@@ -997,16 +987,16 @@ type ConstraintTest struct {
 	Remarks    string `json:"remarks,omitempty" yaml:"remarks,omitempty"`
 }
 
-type ControlImplementationImplementedRequirement struct {
-	ControlId        string                            `json:"control-id" yaml:"control-id"`
-	Description      string                            `json:"description" yaml:"description"`
-	Links            []Link                            `json:"links,omitempty" yaml:"links,omitempty"`
-	Props            []Property                        `json:"props,omitempty" yaml:"props,omitempty"`
-	Remarks          string                            `json:"remarks,omitempty" yaml:"remarks,omitempty"`
-	ResponsibleRoles []ResponsibleRole                 `json:"responsible-roles,omitempty" yaml:"responsible-roles,omitempty"`
-	SetParameters    []SetParameter                    `json:"set-parameters,omitempty" yaml:"set-parameters,omitempty"`
-	Statements       []ImplementedRequirementStatement `json:"statements,omitempty" yaml:"statements,omitempty"`
-	UUID             string                            `json:"uuid" yaml:"uuid"`
+type ImplementedRequirementControlImplementation struct {
+	ControlId        string                           `json:"control-id" yaml:"control-id"`
+	Description      string                           `json:"description" yaml:"description"`
+	Links            []Link                           `json:"links,omitempty" yaml:"links,omitempty"`
+	Props            []Property                       `json:"props,omitempty" yaml:"props,omitempty"`
+	Remarks          string                           `json:"remarks,omitempty" yaml:"remarks,omitempty"`
+	ResponsibleRoles []ResponsibleRole                `json:"responsible-roles,omitempty" yaml:"responsible-roles,omitempty"`
+	SetParameters    []SetParameter                   `json:"set-parameters,omitempty" yaml:"set-parameters,omitempty"`
+	Statements       []ControlStatementImplementation `json:"statements,omitempty" yaml:"statements,omitempty"`
+	UUID             string                           `json:"uuid" yaml:"uuid"`
 }
 
 type PortRange struct {
@@ -1070,16 +1060,16 @@ type MatchControlsByPattern struct {
 	Pattern string `json:"pattern,omitempty" yaml:"pattern,omitempty"`
 }
 
-type CustomGroupingGroup struct {
-	Class          string                `json:"class,omitempty" yaml:"class,omitempty"`
-	Groups         []CustomGroupingGroup `json:"groups,omitempty" yaml:"groups,omitempty"`
-	ID             string                `json:"id,omitempty" yaml:"id,omitempty"`
-	InsertControls []InsertControls      `json:"insert-controls,omitempty" yaml:"insert-controls,omitempty"`
-	Links          []Link                `json:"links,omitempty" yaml:"links,omitempty"`
-	Params         []Parameter           `json:"params,omitempty" yaml:"params,omitempty"`
-	Parts          []Part                `json:"parts,omitempty" yaml:"parts,omitempty"`
-	Props          []Property            `json:"props,omitempty" yaml:"props,omitempty"`
-	Title          string                `json:"title" yaml:"title"`
+type ControlGroup struct {
+	Class          string           `json:"class,omitempty" yaml:"class,omitempty"`
+	Groups         []ControlGroup   `json:"groups,omitempty" yaml:"groups,omitempty"`
+	ID             string           `json:"id,omitempty" yaml:"id,omitempty"`
+	InsertControls []InsertControls `json:"insert-controls,omitempty" yaml:"insert-controls,omitempty"`
+	Links          []Link           `json:"links,omitempty" yaml:"links,omitempty"`
+	Params         []Parameter      `json:"params,omitempty" yaml:"params,omitempty"`
+	Parts          []Part           `json:"parts,omitempty" yaml:"parts,omitempty"`
+	Props          []Property       `json:"props,omitempty" yaml:"props,omitempty"`
+	Title          string           `json:"title" yaml:"title"`
 }
 
 type InsertControls struct {
@@ -1174,7 +1164,7 @@ type ObjectiveStatus struct {
 	State   string `json:"state" yaml:"state"`
 }
 
-type ImplementedRequirementStatement struct {
+type ControlStatementImplementation struct {
 	Description      string            `json:"description" yaml:"description"`
 	Links            []Link            `json:"links,omitempty" yaml:"links,omitempty"`
 	Props            []Property        `json:"props,omitempty" yaml:"props,omitempty"`

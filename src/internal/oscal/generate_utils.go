@@ -119,14 +119,22 @@ func getRef(schema jsonschema.Schema) (string, error) {
 	} else if schema.ID != nil {
 		return *schema.ID, nil
 	} else if schema.Title != nil {
-		split := strings.Split(*schema.Title, " ")
-		name := ""
-		for _, s := range split {
-			name += FmtFieldName(s)
-		}
-		return "#/definitions/" + name, nil
+		return getRefWithName(getNameFromTitle(*schema.Title)), nil
 	}
 	return "", fmt.Errorf("unable to get ref from schema")
+}
+
+func getNameFromTitle(title string) string {
+	split := strings.Split(title, " ")
+	name := ""
+	for _, s := range split {
+		name += FmtFieldName(s)
+	}
+	return name
+}
+
+func getRefWithName(name string) string {
+	return "#/definitions/" + name
 }
 
 // returns the json type of the schema
