@@ -1,9 +1,17 @@
-## Differences
+# Change Log
+All notable changes to this project will be documented in this file.
+ 
+The format is based on [Keep a Changelog](http://keepachangelog.com/)
+and this project adheres to [Semantic Versioning](http://semver.org/).
+ 
+## [Unreleased] - yyyy-mm-dd
+
+### Changed
 - Types now belong to unique packages in the format `oscalTypes_X_X_X` (ie: `oscalTypes_1_0_4`)
 - Now uses the schema information to generate types
 - update `OscalModels` is now an alias for `OscalCompleteSchema`
 
-### 1.0.4, 1.0.5, 1.0.6, 1.1.0, 1.1.1
+#### oscal types versions: 1.0.4, 1.0.5, 1.0.6, 1.1.0, 1.1.1
 
 - update `AssessmentPlan.TermsAndConditions` is now of type `AssessmentPlanTermsAndConditions` per the schema `title`
   - Renamed from `TermsAndConditions`
@@ -22,7 +30,7 @@
 
 - update `PoamItem.Origins` to be of type `[]PoamItemOrigin`
   - rename `Origins1` to `PoamItemOrigin`
-  - fixes `PoamItem.Origins` type that was previously linked to the incorrect definition
+  - fix `PoamItem.Origins` type that was previously linked to the incorrect definition
 
 - update `Merge.Combine` to be of type `CombinationRule`
   - rename `Combine` to `CombinationRule` per schema title
@@ -31,7 +39,7 @@
   - rename `Custom` to `CustomGrouping` per schema title
 
 - rename `AssemblyOscalSspControlImplementation` to `ControlImplementation`
-  - fixes `SystemSecurityPlan.ControlImplementation` now referencing the correct definition
+  - fix `SystemSecurityPlan.ControlImplementation` now referencing the correct definition
 
 - update `SystemComponent.Status` is now of type `SystemComponentStatus`
   - create `SystemComponentStatus`
@@ -48,7 +56,7 @@
   - create `ImplementedRequirementControlImplementation struct` with the definition previously associated with `ImplementedRequirement` which is now linked to `ControlImplementationSet` used by `Catalog` and `DefinedComponent`
 
 - update `FindingTarget.Status` to be of type `ObjectiveStatus`
-  - fixes incorrect definition for `FindingTarget.Status` that had missing field `Reason`
+  - fix incorrect definition for `FindingTarget.Status` that had missing field `Reason`
   - create `ObjectiveStatus`
 
 - Rename `Statement` to `ControlStatementImplementation`
@@ -61,10 +69,10 @@
   - create `RiskLogEntry struct` type.
   - fix `RiskLog.Entries` was previously linked to the wrong definition of `AssessmentLogEntry` which differs from the `RiskLogEntry`
 
-### 1.0.4, 1.0.5, 1.0.6
+#### oscal types versions: 1.0.4, 1.0.5, 1.0.6
 
 - rename `AssemblyOscalProfileSelectControlById` to `SelectControlById`
-  - fixes `Import` and `InsertControls` `IncludeControls` and `ExcludeControls` now referencing correct definition
+  - fix `Import` and `InsertControls` `IncludeControls` and `ExcludeControls` now referencing correct definition
 
 - update `AssessedControls` fields `IncludeControls` and `ExcludeControls` to be of type `SelectControl` 
  - create `SelectControl struct` which has the definition previously assigned to `SelectControlById`
@@ -83,9 +91,9 @@
 - rename `IntegrityImpact` to `IntegrityImpactLevel` per schema title
   - update `InformationType.IntegrityImpact` to be of type `IntegrityImpactLevel`
 
-- Fix `CustomGrouping.Groups` (previously `Custom.Groups`) to be of type `ControlGroup` as the definition differs from that of previously declared `Group struct`
+- fix `CustomGrouping.Groups` (previously `Custom.Groups`) to be of type `ControlGroup` as the definition differs from that of previously declared `Group struct`
 
-### 1.1.0, 1.1.1
+#### oscal types versions: 1.1.0, 1.1.1
 
 - rename `Flat` to `FlatWithoutGroup` due to schema title change
   - update `FlatWithoutGroup` is now a type alias for `map[string]interface{}` in order to support marshaling and field access for what is an `anonymous` schema object
@@ -95,7 +103,7 @@
   - update `AssessedControls` fields `IncludeControls` and `ExcludeControls` to be of type `AssessedControlsSelectControlById` 
   
 - rename `AssemblyOscalProfileSelectControlById` to `SelectControlById`
-  - fixes `Import` and `InsertControls` `IncludeControls` and `ExcludeControls` now referencing correct definition
+  - fix `Import` and `InsertControls` `IncludeControls` and `ExcludeControls` now referencing correct definition
   
 - rename `AssemblyOscalProfileGroup` to `CustomGroupingGroup`
   - fix improper links to `Group` (should have been `AssemblyOscalProfileGroup` previously, now `CustomGroupingGroup`) in `CustomGrouping` (previously `Custom`) and `Merge` structs.
