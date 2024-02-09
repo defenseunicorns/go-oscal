@@ -1,0 +1,1 @@
+type IncludeAll = map[string]interface{}

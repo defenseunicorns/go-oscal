@@ -6,7 +6,7 @@ import (
 
 	"github.com/defenseunicorns/go-oscal/src/gooscaltest"
 	"github.com/defenseunicorns/go-oscal/src/internal/utils"
-	V104 "github.com/defenseunicorns/go-oscal/src/types/oscal-1-0-4"
+	oscalTypes_1_0_4 "github.com/defenseunicorns/go-oscal/src/types/oscal-1-0-4"
 	"gopkg.in/yaml.v3"
 )
 
@@ -121,7 +121,7 @@ func TestModelUtils(t *testing.T) {
 	t.Run("coerceToJsonMap", func(t *testing.T) {
 		t.Parallel()
 		var (
-			componentDefinition = V104.OscalModels{}
+			componentDefinition = oscalTypes_1_0_4.OscalModels{}
 			yamlModel           = map[string]interface{}{}
 		)
 		bytes := []byte(jsonString)

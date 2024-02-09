@@ -3,11 +3,8 @@ package oscal
 import (
 	"fmt"
 	"go/format"
-	"log"
-	"sort"
-	"strconv"
-	"strings"
-	"unicode"
+	"reflect"
+	"slices"
 
 	"github.com/swaggest/jsonschema-go"
 )
@@ -20,739 +17,334 @@ type BaseFlags struct {
 	Tags       string // -t / --tags
 }
 
-const headerComment string = `/*
-	This file was auto-generated with go-oscal.
-
-	To regenerate:
-	
-	go-oscal generate \
-		--input-file <path_to_oscal_json_schema_file> \
-		--output-file <name_of_go_types_file> // the path to this file must already exist \
-		--tags json,yaml // the tags to add to the Go structs \
-		--pkg <name_of_your_go_package> // defaults to "main"
-
-	For more information on how to use go-oscal: go-oscal --help
-
-	Source: https://github.com/defenseunicorns/go-oscal
-	*/`
-
-// commonInitialisms is a set of common initialisms.
-// Only add entries that are highly unlikely to be non-initialisms.
-// For instance, "ID" is fine (Freudian code is rare), but "AND" is not.
-var commonInitialisms = map[string]bool{
-	"API":   true,
-	"ASCII": true,
-	"CPU":   true,
-	"CSS":   true,
-	"DNS":   true,
-	"EOF":   true,
-	"GUID":  true,
-	"HTML":  true,
-	"HTTP":  true,
-	"HTTPS": true,
-	"ID":    true,
-	"IP":    true,
-	"JSON":  true,
-	"LHS":   true,
-	"QPS":   true,
-	"RAM":   true,
-	"RHS":   true,
-	"RPC":   true,
-	"SLA":   true,
-	"SMTP":  true,
-	"SSH":   true,
-	"TLS":   true,
-	"TTL":   true,
-	"UI":    true,
-	"UID":   true,
-	"UUID":  true,
-	"URI":   true,
-	"URL":   true,
-	"UTF8":  true,
-	"VM":    true,
-	"XML":   true,
-	"NTP":   true,
-	"DB":    true,
+type GeneratorConfig struct {
+	tags        []string
+	pkgName     string
+	refQueue    RefQueue
+	definitions map[string]jsonschema.Schema
+	structMap   map[string]string
+	nameMap     map[string]string
 }
 
-var intToWordMap = []string{
-	"zero",
-	"one",
-	"two",
-	"three",
-	"four",
-	"five",
-	"six",
-	"seven",
-	"eight",
-	"nine",
+func NewGeneratorConfig(tags []string, pkgName string) GeneratorConfig {
+	return GeneratorConfig{
+		tags:        tags,
+		pkgName:     pkgName,
+		refQueue:    NewRefQueue(),
+		definitions: map[string]jsonschema.Schema{},
+		structMap:   map[string]string{},
+		nameMap:     map[string]string{},
+	}
 }
 
 // Generate a struct definition given a JSON string representation of an object.
-func Generate(oscalSchema []byte, pkgName string, tags []string) ([]byte, error) {
-
-	// unmarshall to the schema object
-	schema := jsonschema.Schema{}
-	schema.UnmarshalJSON(oscalSchema)
-
-	// Identify the OSCAL model under generation
-	models, err := getOscalModel(schema)
+func Generate(oscalSchema []byte, pkgName string, tags []string) (typeBytes []byte, err error) {
+	schema, err := populateSchema(oscalSchema)
 	if err != nil {
-		return nil, err
+		return typeBytes, err
 	}
 
-	// Generate a map with unique Id as key and existing schemaOrBool as value
-	idMap, err := generateUniqueIdMap(schema)
+	config := NewGeneratorConfig(tags, pkgName)
+
+	// Initialize the build process.
+	err = config.initBuild(&schema)
 	if err != nil {
-		return nil, err
+		return typeBytes, err
 	}
 
-	// Instantiate variable for storing the data
-	modelTypeMap := make(map[string][]string)
+	err = config.buildStructs()
+	if err != nil {
+		return typeBytes, err
+	}
 
-	for _, model := range models {
-		// Get the $id for the OSCAL model under generation
-		// we'll just set this to the first one for now
-		modelId, err := setOscalModelRef(model)
+	// Add header comment
+	typeString := fmt.Sprintf("%s\n", headerComment)
+	// Add the package name
+	typeString += fmt.Sprintf("package %s\n\n", pkgName)
+
+	// Add the struct definitions in order of creation.
+	for _, ref := range config.refQueue.History() {
+		typeString += config.structMap[ref] + "\n\n"
+	}
+
+	typeBytes = []byte(typeString)
+
+	// Format the bytes
+	typeBytes, err = format.Source(typeBytes)
+	if err != nil {
+		return typeBytes, err
+	}
+
+	return typeBytes, nil
+}
+
+// initBuild initializes the build process by adding the root schema to the ref queue and building the definitions map.
+func (c *GeneratorConfig) initBuild(schema *jsonschema.Schema) (err error) {
+	if schema.ID == nil {
+		return fmt.Errorf("unable to find $id in schema")
+	}
+
+	if schema.Definitions != nil {
+		c.definitions, err = getDefinitionMap(*schema)
 		if err != nil {
-			return nil, err
-		}
-		generateModelTypes(idMap, modelId, strings.Split(modelId, "_")[2], tags, modelTypeMap)
-	}
-
-	// Construct header comment and package name.
-	structString := fmt.Sprintf("%s\n\npackage %s\n", headerComment, pkgName)
-
-	// Construct top-level OscalModel struct.
-	toplevel, err := generateOscalModelStruct(models, pkgName, tags)
-	if err != nil {
-		return nil, err
-	}
-	structString += toplevel
-
-	// Construct structs for oscal models.
-	structString += generateStruct(modelTypeMap)
-
-	formattedStruct, err := format.Source([]byte(structString))
-	if err != nil {
-		err = fmt.Errorf("error formatting: %s, was formatting\n%s", err, structString)
-		return nil, err
-	}
-
-	return formattedStruct, nil
-}
-
-// setOscalModelRef determines which OSCAL model $ref to use based on the model name.
-// TODO: Look at removing this required translation to allow generation of all OSCAL models and de-duplication
-func setOscalModelRef(oscalModel string) (string, error) {
-	// Check which OSCAL model we're working with, and set the $ref accordingly.
-	if oscalModel == "system-security-plan" {
-		return "#assembly_oscal-ssp_system-security-plan", nil
-	}
-
-	// Infinite loop problem - Investigate
-	if oscalModel == "assessment-plan" {
-		return "#assembly_oscal-ap_assessment-plan", nil
-	}
-
-	// Infinite loop problem - Investigate
-	if oscalModel == "assessment-results" {
-		return "#assembly_oscal-ar_assessment-results", nil
-	}
-
-	// Infinite loop problem - Investigate
-	if oscalModel == "plan-of-action-and-milestones" {
-		return "#assembly_oscal-poam_plan-of-action-and-milestones", nil
-	}
-
-	if oscalModel == "component-definition" {
-		return "#assembly_oscal-component-definition_component-definition", nil
-	}
-
-	if oscalModel == "catalog" {
-		return "#assembly_oscal-catalog_catalog", nil
-	}
-
-	if oscalModel == "profile" {
-		return "#assembly_oscal-profile_profile", nil
-	}
-
-	return "", fmt.Errorf("Unsupported OSCAL model. Currently supported OSCAL models are Component Definition and System Security Plan.")
-}
-
-// getOscalModel determines which OSCAL model we're working with.
-func getOscalModel(schema jsonschema.Schema) ([]string, error) {
-
-	// We could evaluate if oneOf exists first - otherwise revert to required
-	if len(schema.OneOf) > 0 {
-		// Attempt total generation
-		models := make([]string, 0)
-		for _, item := range schema.OneOf {
-			models = append(models, item.TypeObject.Required...)
-		}
-		return models, nil
-	}
-
-	if len(schema.Required) > 0 {
-		return schema.Required, nil
-	}
-
-	return []string{}, fmt.Errorf("Top-level 'required' field not found or is not populated. Please verify the OSCAL JSON schema file is valid.")
-}
-
-// TODO: Look into full definition naming when processing multiple schemas - unsupported at this time
-// create a map with $id primary keys and the object values
-func generateUniqueIdMap(schema jsonschema.Schema) (map[string]jsonschema.SchemaOrBool, error) {
-	result := make(map[string]jsonschema.SchemaOrBool)
-
-	for definition, item := range schema.Definitions {
-		if strings.Contains(definition, "Datatype") {
-			result["#/definitions/"+definition] = item
-		} else if definition == "json-schema-definition" {
-			// Skipping - TODO: determine relevance in the golang structs
-			continue
-		} else {
-			result[*item.TypeObject.ID] = item
-		}
-
-	}
-
-	return result, nil
-}
-
-// getRequiredFields collects the required fields in each OSCAL model definition.
-func getRequiredFields(obj map[string]jsonschema.SchemaOrBool, structId string) map[string]bool {
-	requiredFields := make(map[string]bool)
-
-	if required := obj[structId].TypeObject.Required; required != nil {
-		for _, v := range required {
-			requiredFields[v] = true
+			return err
 		}
 	}
 
-	return requiredFields
-}
-
-// formatStructTags formats Go struct tags.
-func formatStructTags(obj map[string]jsonschema.SchemaOrBool, structId string, key string, tags []string) []string {
-	requiredFields := getRequiredFields(obj, structId)
-
-	tagList := []string{}
-	for _, tag := range tags {
-		// If this field is not required, then add omitempty to tag.
-		if _, ok := requiredFields[key]; !ok {
-			tagList = append(tagList, fmt.Sprintf("%s:\"%s,%s\"", tag, key, "omitempty"))
-		} else {
-			tagList = append(tagList, fmt.Sprintf("%s:\"%s\"", tag, key))
-		}
-	}
-
-	return tagList
-}
-
-// buildStructData loops through "properties" fields
-// and constructs data for Go structs.
-func buildStructData(prop map[string]jsonschema.SchemaOrBool, obj map[string]jsonschema.SchemaOrBool, structId string, tags []string, structData []string, modelMap map[string][]string) ([]string, error) {
-	keys := make([]string, 0, len(prop))
-
-	for k := range prop {
-		keys = append(keys, k)
-	}
-
-	// sort the string array
-	sort.Strings(keys)
-
-	for _, key := range keys {
-
-		simple, err := prop[key].ToSimpleMap()
-		if err != nil {
-			return nil, err
-		}
-		valueName := FmtFieldName(key)
-		tagList := formatStructTags(obj, structId, key, tags)
-
-		if prop[key].TypeObject.Type != nil {
-			switch value := simple["type"].(string); value {
-			case "string":
-				structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, value, strings.Join(tagList, " ")))
-			case "boolean":
-				structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, "bool", strings.Join(tagList, " ")))
-			case "integer":
-				structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, "int", strings.Join(tagList, " ")))
-			case "array":
-				// If type array and ref is populated
-				if ref := prop[key].TypeObject.Items.SchemaOrBool.TypeObject.Ref; ref != nil {
-					var objectType string
-					if strings.Contains(*ref, "Datatype") {
-						objectType, err = generateModelTypes(obj, *ref, strings.Split(*ref, "/")[2], tags, modelMap)
-						if err != nil {
-							return nil, err
-						}
-					} else {
-						objectType, err = generateModelTypes(obj, *ref, strings.Split(*ref, "_")[2], tags, modelMap)
-						if err != nil {
-							return nil, err
+	// No properties, so we need to add the properties from the oneOf schemas.
+	if schema.Properties == nil {
+		schema.Properties = map[string]jsonschema.SchemaOrBool{}
+		if schema.OneOf != nil {
+			for _, oneOf := range schema.OneOf {
+				if oneOf.TypeObject.Properties != nil {
+					for key, prop := range oneOf.TypeObject.Properties {
+						if prop.TypeObject.Ref != nil && !RefsToIgnore[*prop.TypeObject.Ref] {
+							schema.Properties[key] = prop
 						}
 					}
-
-					structData = append(structData, fmt.Sprintf("%s []%s `%s`", valueName, objectType, strings.Join(tagList, " ")))
-				} else {
-					// TODO: would anyof/allof ever be evaluated here?
-
-					// if array and no ref populated - check for items
-					if items := prop[key].TypeObject.Items.SchemaOrBool; items != nil {
-						singular := *prop[key].TypeObject.Items.SchemaOrBool.TypeObject.Title
-						obj[valueName] = *prop[key].TypeObject.Items.SchemaOrBool
-						objectType, err := generateModelTypes(obj, valueName, singular, tags, modelMap)
-						if err != nil {
-							return nil, err
-						}
-						structData = append(structData, fmt.Sprintf("%s []%s `%s`", valueName, objectType, strings.Join(tagList, " ")))
-					} else {
-						// TODO: Error Handling
-						log.Println("Did not find ref/items/allof/anyof")
-					}
-
-				}
-			case "object":
-				obj[valueName] = prop[key]
-				objectType, err := generateModelTypes(obj, valueName, valueName, tags, modelMap)
-				if err != nil {
-					return nil, err
-				}
-				structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, objectType, strings.Join(tagList, " ")))
-			default:
-				// TODO: Error handling
-				log.Printf("type not defined: %v", value)
-			}
-		} else if ref := prop[key].TypeObject.Ref; ref != nil {
-			var objectType string
-			if strings.Contains(*ref, "Datatype") {
-				objectType, err = generateModelTypes(obj, *ref, strings.Split(*ref, "/")[2], tags, modelMap)
-				if err != nil {
-					return nil, err
-				}
-			} else {
-				objectType, err = generateModelTypes(obj, *ref, strings.Split(*ref, "_")[2], tags, modelMap)
-				if err != nil {
-					return nil, err
 				}
 			}
-			structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, objectType, strings.Join(tagList, " ")))
-		} else if anyof := prop[key].TypeObject.AnyOf; anyof != nil {
-			// TODO: support OR operation and enums - for now we will locate the ref
-			for _, schema := range prop[key].TypeObject.AnyOf {
-				if ref := schema.TypeObject.Ref; ref != nil {
-					var objectType string
-					if strings.Contains(*ref, "Datatype") {
-						objectType, err = generateModelTypes(obj, *ref, strings.Split(*ref, "/")[2], tags, modelMap)
-						if err != nil {
-							return nil, err
-						}
-					} else {
-						objectType, err = generateModelTypes(obj, *ref, strings.Split(*ref, "_")[2], tags, modelMap)
-						if err != nil {
-							return nil, err
-						}
-					}
-					structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, objectType, strings.Join(tagList, " ")))
-				}
-			}
-
-		} else if allof := prop[key].TypeObject.AllOf; allof != nil {
-
-			for _, schema := range prop[key].TypeObject.AllOf {
-				// TODO: support AND operation and enums - for now we will locate the ref
-				if ref := schema.TypeObject.Ref; ref != nil {
-					var objectType string
-					if strings.Contains(*ref, "Datatype") {
-						objectType, err = generateModelTypes(obj, *ref, strings.Split(*ref, "/")[2], tags, modelMap)
-						if err != nil {
-							return nil, err
-						}
-					} else {
-						objectType, err = generateModelTypes(obj, *ref, strings.Split(*ref, "_")[2], tags, modelMap)
-						if err != nil {
-							return nil, err
-						}
-					}
-					structData = append(structData, fmt.Sprintf("%s %s `%s`", valueName, objectType, strings.Join(tagList, " ")))
-				}
-			}
-		} else {
-			// TODO: Error Handling
-			log.Printf("no type or ref for: %s\n", key)
-
 		}
 	}
 
-	return structData, nil
+	// add the schema to the definitions map
+	c.definitions[*schema.ID] = *schema
+	// Add the root schema to the ref queue.
+	c.refQueue.Add(*schema.ID)
+	return err
 }
 
-func generateModelTypes(obj map[string]jsonschema.SchemaOrBool, structId string, structName string, tags []string, modelMap map[string][]string) (string, error) {
-	// use structId to search for existing data in modelMap
-	if mapId, ok := modelMap[structId]; ok && mapId != nil {
-		return modelMap[structId][0], nil
-	}
+func (c *GeneratorConfig) buildStructs() (err error) {
+	// While the ref queue is not empty, pop the ref and build the struct string.
+	for c.refQueue.Len() > 0 {
+		ref := c.refQueue.Pop()
 
-	// If the object has properties
-	if obj[structId].TypeObject.Properties != nil {
-		properties := obj[structId].TypeObject.Properties
-		formattedStructName := []string{FmtFieldName(structName)}
-		modelMap[structId] = formattedStructName
-		structData, err := buildStructData(properties, obj, structId, tags, formattedStructName, modelMap)
-		if err != nil {
-			return "", err
-		}
-		modelMap[structId] = structData
-	} else if objType := obj[structId].TypeObject.Type; objType != nil {
-		simple, err := obj[structId].ToSimpleMap()
-		if err != nil {
-			return "", err
-		}
-		switch value := simple["type"].(string); value {
-		case "string":
-			return "string", nil
-		case "boolean":
-			return "bool", nil
-		case "array":
-			return "array", nil
-		case "object":
-			// Edge case here for empty objects (ie `include-all`)
-			formattedStructName := []string{FmtFieldName(structName)}
-			modelMap[structId] = formattedStructName
-			return formattedStructName[0], nil
-		default:
-			//TODO: Error Handling
-			log.Printf("type not defined: %v", value)
-		}
-	} else if ref := obj[structId].TypeObject.Ref; ref != nil {
-		switch *ref {
-		case "#/definitions/Base64Datatype":
-			return "string", nil
-		case "#/definitions/DateTimeWithTimezoneDatatype":
-			return "string", nil
-		case "#/definitions/EmailAddressDatatype":
-			return "string", nil
-		case "#/definitions/IntegerDatatype":
-			return "int", nil
-		case "#/definitions/NonNegativeIntegerDatatype":
-			return "int", nil
-		case "#/definitions/StringDatatype":
-			return "string", nil
-		case "#/definitions/TokenDatatype":
-			return "string", nil
-		case "#/definitions/URIDatatype":
-			return "string", nil
-		case "#/definitions/URIReferenceDatatype":
-			return "string", nil
-		case "#/definitions/UUIDDatatype":
-			return "string", nil
-		}
-
-		reference, err := obj[*ref].ToSimpleMap()
-		if err != nil {
-			return "", err
-		}
-
-		switch value := reference["type"].(string); value {
-		case "string":
-			return "string", nil
-		case "boolean":
-			return "bool", nil
-		case "array":
-			return "array", nil
-		default:
-			log.Printf("type not defined: %v", value)
-		}
-
-	} else if allof := obj[structId].TypeObject.AllOf; allof != nil {
-		for _, schema := range allof {
-			// TODO: support AND operation and enums - for now we will locate the ref
-			if ref := schema.TypeObject.Ref; ref != nil {
-				switch *ref {
-				case "#/definitions/Base64Datatype":
-					return "string", nil
-				case "#/definitions/DateTimeWithTimezoneDatatype":
-					return "string", nil
-				case "#/definitions/EmailAddressDatatype":
-					return "string", nil
-				case "#/definitions/IntegerDatatype":
-					return "int", nil
-				case "#/definitions/NonNegativeIntegerDatatype":
-					return "int", nil
-				case "#/definitions/StringDatatype":
-					return "string", nil
-				case "#/definitions/TokenDatatype":
-					return "string", nil
-				case "#/definitions/URIDatatype":
-					return "string", nil
-				case "#/definitions/URIReferenceDatatype":
-					return "string", nil
-				case "#/definitions/UUIDDatatype":
-					return "string", nil
-				}
-			}
-		}
-	} else if anyof := obj[structId].TypeObject.AnyOf; anyof != nil {
-		for _, schema := range anyof {
-			// TODO: support AND operation and enums - for now we will locate the ref
-			if ref := schema.TypeObject.Ref; ref != nil {
-				switch *ref {
-				case "#/definitions/Base64Datatype":
-					return "string", nil
-				case "#/definitions/DateTimeWithTimezoneDatatype":
-					return "string", nil
-				case "#/definitions/EmailAddressDatatype":
-					return "string", nil
-				case "#/definitions/IntegerDatatype":
-					return "int", nil
-				case "#/definitions/NonNegativeIntegerDatatype":
-					return "int", nil
-				case "#/definitions/StringDatatype":
-					return "string", nil
-				case "#/definitions/TokenDatatype":
-					return "string", nil
-				case "#/definitions/URIDatatype":
-					return "string", nil
-				case "#/definitions/URIReferenceDatatype":
-					return "string", nil
-				case "#/definitions/UUIDDatatype":
-					return "string", nil
-				}
-			}
-		}
-	} else {
-		// TODO: Error Handling
-		log.Println("did not find properties or type")
-		log.Printf("structId: %s\n", structId)
-	}
-
-	formattedStructName := FmtFieldName(structName)
-
-	return formattedStructName, nil
-}
-
-// generateOscalModelStruct generates the top-level struct for OSCAL data models.
-func generateOscalModelStruct(oscalModels []string, pkgName string, tags []string) (string, error) {
-
-	structString := fmt.Sprintf("type OscalModels struct {\n")
-
-	for _, oscalModel := range oscalModels {
-		// Example: Format the string from 'oscal-model' to 'OscalModel'.
-		formattedOscalModelName := FmtFieldName(oscalModel)
-
-		// Format struct tags.
-		tagList := []string{}
-		for _, tag := range tags {
-			tagList = append(tagList, fmt.Sprintf("%s:\"%s,omitempty\"", tag, oscalModel))
-		}
-
-		structString += fmt.Sprintf("\t%s %s `%s`\n", formattedOscalModelName, formattedOscalModelName, strings.Join(tagList, " "))
-	}
-
-	structString += fmt.Sprintf("}\n")
-
-	// Format the Go struct.
-	formattedStruct, err := format.Source([]byte(structString))
-	if err != nil {
-		return "", fmt.Errorf("error formatting:\n%s", structString)
-	}
-
-	return string(formattedStruct), nil
-}
-
-// handleDuplicateStructNames ensures we do not generate structs with duplicate struct names.
-func handleDuplicateStructNames(existingValueMap map[string]bool, key, value string) string {
-	var typesString string
-	var i int = 0
-
-	// If the struct name does not already exist, mark it as existing and generate a struct for it.
-	if _, ok := existingValueMap[value]; !ok {
-		existingValueMap[value] = true
-		typesString += fmt.Sprintf("\ntype %s struct {", value)
-	} else if strings.Contains(key, "#assembly") {
-		// If the key for this value contains "#assembly" in the string,
-		// let's use the key itself as the struct name.
-		structName := strings.Trim(key, "#")
-		formattedStructName := FmtFieldName(structName)
-		typesString += fmt.Sprintf("\ntype %s struct {", formattedStructName)
-	} else {
-		// In this case, the key is identical to the value,
-		// which means we need to add a unique identifier to the struct name.
-		i++
-		typesString += fmt.Sprintf("\ntype %s%v struct {", key, i)
-	}
-
-	return typesString
-}
-
-func generateStruct(structMap map[string][]string) string {
-	var typesString string
-	existingValueMap := map[string]bool{}
-
-	// create string array and populate it from the map
-	keys := make([]string, 0, len(structMap))
-
-	for k := range structMap {
-		keys = append(keys, k)
-	}
-
-	// sort the string array
-	sort.Strings(keys)
-
-	// Begin generation of the structs
-	for _, k := range keys {
-		for index, value := range structMap[k] {
-			if index == 0 {
-				typesString += handleDuplicateStructNames(existingValueMap, k, value)
-			} else {
-				typesString += fmt.Sprintf("\n\t%s", value)
-			}
-		}
-		typesString += "\n}\n"
-
-	}
-
-	return typesString
-}
-
-/*
-	FmtFieldName formats a string as a struct key
-
-Example:
-
-	FmtFieldName("foo_id")
-
-	Output: FooID
-*/
-func FmtFieldName(s string) string {
-	runes := []rune(s)
-	for len(runes) > 0 && !unicode.IsLetter(runes[0]) && !unicode.IsDigit(runes[0]) {
-		runes = runes[1:]
-	}
-	if len(runes) == 0 {
-		return "_"
-	}
-
-	s = stringifyFirstChar(string(runes))
-	name := lintFieldName(s)
-	runes = []rune(name)
-	for i, c := range runes {
-		ok := unicode.IsLetter(c) || unicode.IsDigit(c)
-		if i == 0 {
-			ok = unicode.IsLetter(c)
-		}
+		// Look up the schema for the ref, return an error if not found.
+		def, ok := c.definitions[ref]
 		if !ok {
-			runes[i] = '_'
+			return fmt.Errorf("unable to find schema for %s", ref)
 		}
+
+		// Build the struct string for the ref.
+		structString, err := c.buildStructString(def)
+		if err != nil {
+			return err
+		}
+
+		// Add the struct string to the struct map.
+		c.structMap[ref] = structString
 	}
-	s = string(runes)
-	s = strings.Trim(s, "_")
-	if len(s) == 0 {
-		return "_"
-	}
-	result := ""
-	for _, v := range strings.Split(s, "_") {
-		runes := []rune(v)
-		runes[0] = unicode.ToUpper(runes[0])
-		result += string(runes)
-	}
-	return result
+
+	return err
 }
 
-func lintFieldName(name string) string {
-	// Fast path for simple cases: "_" and all lowercase.
-	if name == "_" {
-		return name
+func (c *GeneratorConfig) buildStructString(def jsonschema.Schema) (structString string, err error) {
+
+	// Create a map of required fields
+	required := map[string]bool{}
+	for _, req := range def.Required {
+		required[req] = true
 	}
 
-	allLower := true
-	for _, r := range name {
-		if !unicode.IsLower(r) {
-			allLower = false
-			break
-		}
-	}
-	if allLower {
-		runes := []rune(name)
-		if u := strings.ToUpper(name); commonInitialisms[u] {
-			copy(runes[0:], []rune(u))
-		} else {
-			runes[0] = unicode.ToUpper(runes[0])
-		}
-		return string(runes)
-	}
-
-	allUpperWithUnderscore := true
-	for _, r := range name {
-		if !unicode.IsUpper(r) && r != '_' {
-			allUpperWithUnderscore = false
-			break
-		}
-	}
-	if allUpperWithUnderscore {
-		name = strings.ToLower(name)
-	}
-
-	// Split camelCase at any lower->upper transition, and split on underscores.
-	// Check each word for common initialisms.
-	runes := []rune(name)
-	w, i := 0, 0 // index of start of word, scan
-	for i+1 <= len(runes) {
-		eow := false // whether we hit the end of a word
-
-		if i+1 == len(runes) {
-			eow = true
-		} else if runes[i+1] == '_' {
-			// underscore; shift the remainder forward over any run of underscores
-			eow = true
-			n := 1
-			for i+n+1 < len(runes) && runes[i+n+1] == '_' {
-				n++
-			}
-
-			// Leave at most one underscore if the underscore is between two digits
-			if i+n+1 < len(runes) && unicode.IsDigit(runes[i]) && unicode.IsDigit(runes[i+n+1]) {
-				n--
-			}
-
-			copy(runes[i+1:], runes[i+n+1:])
-			runes = runes[:len(runes)-n]
-		} else if unicode.IsLower(runes[i]) && !unicode.IsLower(runes[i+1]) {
-			// lower -> non-lower
-			eow = true
-		}
-		i++
-		if !eow {
-			continue
-		}
-
-		// [w,i) is a word.
-		word := string(runes[w:i])
-		if u := strings.ToUpper(word); commonInitialisms[u] {
-			// All the common initialisms are ASCII,
-			// so we can replace the bytes exactly.
-			copy(runes[w:], []rune(u))
-
-		} else if strings.ToLower(word) == word {
-			// already all lowercase, and not the first word, so uppercase the first character.
-			runes[w] = unicode.ToUpper(runes[w])
-		}
-		w = i
-	}
-	return string(runes)
-}
-
-// convert first character ints to strings
-func stringifyFirstChar(str string) string {
-	first := str[:1]
-
-	i, err := strconv.ParseInt(first, 10, 8)
-
+	// Get the name of the struct
+	name, err := c.findSubType(def)
 	if err != nil {
-		return str
+		return structString, err
 	}
 
-	return intToWordMap[i] + "_" + str[1:]
+	// create a slice of the keys in the properties map
+	var keys []string
+	for key := range def.Properties {
+		if !KeysToIgnore[key] {
+			keys = append(keys, key)
+		}
+	}
+	// Sort the keys alphabetically
+	slices.Sort(keys)
+
+	// If there are no properties, return a map[string]interface{} type
+	if len(keys) == 0 {
+		structString = fmt.Sprintf("type %s = map[string]interface{}", name)
+		return structString, err
+	}
+
+	// Generate aliases for the struct if they exist
+	if aliases, ok := Aliases[name]; ok {
+		for _, alias := range aliases {
+			structString += fmt.Sprintf("type %s = %s\n", alias, name)
+		}
+	}
+
+	// Add top level struct definition
+	structString += fmt.Sprintf("type %s struct {\n", name)
+
+	// Add the properties to the struct string
+	for _, key := range keys {
+		// Set the parent of the property schema to the definition
+		// Allows for the parent to be used in case of duplicate types
+		def.Properties[key].TypeObject.Parent = &def
+
+		// Get the property schema
+		prop := def.Properties[key]
+		propSchema := prop.TypeObject
+
+		// Build the property name, type, and tags
+		propName := FmtFieldName(key)
+		propType, err := c.buildTypeString(*propSchema)
+		if err != nil {
+			return structString, err
+		}
+		propTags := buildTagString(c.tags, key, required[key])
+		structString += fmt.Sprintf("\t%s %s %s\n", propName, propType, propTags)
+	}
+	// Close the struct
+	structString += "}"
+	if err != nil {
+		return structString, err
+	}
+
+	return structString, err
+}
+
+// buildTypeString builds the type string for a given property.
+func (c *GeneratorConfig) buildTypeString(property jsonschema.Schema) (propType string, err error) {
+	var possibleRefs []string
+
+	if property.Type != nil && property.Type.SimpleTypes != nil {
+		jsonType := string(*property.Type.SimpleTypes)
+		// convert json type to go type
+		propType = getGoType(jsonType)
+		// if the type is not primitive, we need to add the name of the type
+		if !isPrimitiveJsonType(jsonType) {
+			name, err := c.findSubType(property)
+			if err != nil {
+				return "", err
+			}
+			propType += name
+		}
+		return propType, err
+	} else if property.Ref != nil {
+		// If the property is a ref, we need to find the schema for the ref and build the type string for that schema.
+		def, ok := c.definitions[*property.Ref]
+		if !ok {
+			return "", fmt.Errorf("unable to find schema for %s", *property.Ref)
+		}
+		// Set the parent of the definition to the property
+		def.Parent = &property
+		return c.buildTypeString(def)
+
+	} else {
+		// TODO: Handle anyOf, allOf, oneOf
+		// We should be creating new structs for these types.
+		// Right now assumes that the first is a ref to a primitive per the current patterns. This may not be true.
+		// Should probably create a new struct with each of the possible types. (logic for creating golang enum?, just use primitives?, "or" types?)
+		for _, schema := range property.AllOf {
+			if schema.TypeObject.Ref != nil {
+				possibleRefs = append(possibleRefs, *schema.TypeObject.Ref)
+			}
+		}
+		for _, schema := range property.AnyOf {
+			if schema.TypeObject.Ref != nil {
+				possibleRefs = append(possibleRefs, *schema.TypeObject.Ref)
+			}
+		}
+		// Find the first possible ref and recurse.
+		if len(possibleRefs) > 0 {
+			def, ok := c.definitions[possibleRefs[0]]
+			if !ok {
+				return "", fmt.Errorf("unable to find schema for %s", possibleRefs[0])
+			}
+			// Set the parent of the definition to the property
+			def.Parent = &property
+			return c.buildTypeString(def)
+		} else {
+			// Could not determine the type of the prop so return an error.
+			return "", fmt.Errorf("could not determine type for property %v", property)
+		}
+	}
+}
+
+// findSubType finds the name of the type for the given schema.
+func (c *GeneratorConfig) findSubType(schema jsonschema.Schema) (name string, err error) {
+	simpleType := getJsonType(schema)
+	switch simpleType {
+	case "object":
+		// If the schema has a ref, we need to find the name of the ref.
+		ref, err := getRef(schema)
+		if err != nil {
+			return name, err
+		}
+		// Create a name from the ref
+		name = getNameFromRef(ref)
+		// Check if the name is already in use and if so, append the parent name to the name.
+		ref, name = c.handleDuplicates(ref, name, schema)
+		c.nameMap[name] = ref
+		// Add the ref to the ref queue if it is not already in the queue.
+		c.refQueue.Add(ref)
+		// Add the schema to the definitions map if it is not already in the map.
+		if _, ok := c.definitions[ref]; !ok {
+			c.definitions[ref] = schema
+		}
+	case "array":
+		// If the schema has items, we need to find the name of the items.
+		if schema.Items.SchemaOrBoolEns() != nil {
+			def := *schema.Items.SchemaOrBool.TypeObject
+			def.Parent = &schema
+			name, err = c.buildTypeString(def)
+		} else if schema.Items.SchemaArray != nil {
+			def := *schema.Items.SchemaArray[0].TypeObject
+			def.Parent = &schema
+			name, err = c.buildTypeString(def)
+		} else {
+			err = fmt.Errorf("could not determine name for %v", schema)
+		}
+	case "":
+		if schema.Ref != nil {
+			def := c.definitions[*schema.Ref]
+			def.Parent = &schema
+			name, err = c.buildTypeString(def)
+		} else if schema.ID != nil {
+			def := c.definitions[*schema.ID]
+			def.Parent = &schema
+			name, err = c.buildTypeString(def)
+		} else {
+			err = fmt.Errorf("could not determine name for %v", schema)
+		}
+	default:
+		name = getJsonType(schema)
+	}
+
+	return name, err
+}
+
+// handleDuplicates checks if the name is already in use and if so, appends the parent name to the name.
+func (c *GeneratorConfig) handleDuplicates(ref string, name string, schema jsonschema.Schema) (string, string) {
+	if currentRef, ok := c.nameMap[name]; ok {
+		// Points to a different definition
+		if currentRef != ref {
+			// If the definitions are the same, return the current ref and name
+			existing := c.definitions[currentRef]
+			if reflect.DeepEqual(existing, schema) {
+				return currentRef, name
+			}
+			// If the definitions are different, try the title
+			if schema.Title != nil && (existing.Title == nil || *existing.Title != *schema.Title) {
+				newName := getNameFromTitle(*schema.Title)
+				return c.handleDuplicates(getRefWithName(newName), newName, schema)
+			}
+			// If the title is the same, try the parent
+			parent := schema.Parent
+			parentRef, _ := getRef(*parent)
+			if parentRef != "" {
+				prefix := getNameFromRef(parentRef)
+				if prefix != name {
+					newName := prefix + name
+					newRef := "#/definitions/" + newName
+					return c.handleDuplicates(newRef, newName, *parent)
+				}
+			}
+			return c.handleDuplicates(ref, name, *parent)
+		}
+	}
+	return ref, name
 }

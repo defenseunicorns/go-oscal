@@ -1,568 +1,384 @@
 package oscal
 
 import (
-	"fmt"
+	"go/format"
 	"os"
-	"reflect"
-	"sort"
 	"strings"
+	"sync"
 	"testing"
 
+	"github.com/defenseunicorns/go-oscal/src/internal/utils"
 	"github.com/swaggest/jsonschema-go"
 )
 
 const (
-	oscalComponentSchemaFilePath string = "../../../schema/component/oscal_component_schema-1-1-1.json"
-	oscalSSPSchemaFilePath       string = "../../../schema/ssp/oscal_ssp_schema-1-1-1.json"
-	fieldsPresentFilePath        string = "../../../testdata/fields-present.json"
-	fieldsMissingFilePath        string = "../../../testdata/fields-missing.json"
+	fieldsPresentFilePath string = "../../../testdata/fields-present.json"
+	fieldsMissingFilePath string = "../../../testdata/fields-missing.json"
+	oscal104FilePath      string = "../../pkg/validation/schema/oscal_complete_schema-1-0-4.json"
+	oscal105FilePath      string = "../../pkg/validation/schema/oscal_complete_schema-1-0-5.json"
+	oscal106FilePath      string = "../../pkg/validation/schema/oscal_complete_schema-1-0-6.json"
+	oscal110FilePath      string = "../../pkg/validation/schema/oscal_complete_schema-1-1-0.json"
+	oscal111FilePath      string = "../../pkg/validation/schema/oscal_complete_schema-1-1-1.json"
 )
 
-// TestGetOscalModel tests that we can get the value of the top-level 'required' field,
-// which is the name of the OSCAL model, and that we can convert it to a string properly.
-func TestGetOscalModel(t *testing.T) {
-	testdata := &BaseFlags{
-		InputFile: fieldsPresentFilePath,
-	}
+var (
+	schemaPaths            = []string{oscal104FilePath, oscal105FilePath, oscal106FilePath, oscal110FilePath, oscal111FilePath}
+	schemaMutex            = sync.Mutex{}
+	schemaByteMap          = map[string][]byte{}
+	writeOutput            = false
+	deterministicTestCount = 10
+)
 
-	schema, err := readFileToSchema(testdata.InputFile)
-	if err != nil {
-		t.Fatal(err)
-	}
+func TestGenerate(t *testing.T) {
+	t.Parallel()
+	getSchemaByteMap(t)
 
-	expected := []string{"test-data"}
-	actual, err := getOscalModel(schema)
-	if err != nil {
-		t.Fatal(err)
-	}
+	t.Run("CompleteSchema", func(t *testing.T) {
 
-	if !reflect.DeepEqual(actual, expected) {
-		t.Fatalf("error getOscalModel(): expected: %s | got: %s", expected, actual)
-	}
+		testCases := map[string][]byte{
+			"oscal-1-0-4": schemaByteMap[oscal104FilePath],
+			"oscal-1-0-5": schemaByteMap[oscal105FilePath],
+			"oscal-1-0-6": schemaByteMap[oscal106FilePath],
+			"oscal-1-1-0": schemaByteMap[oscal110FilePath],
+			"oscal-1-1-1": schemaByteMap[oscal111FilePath],
+		}
+
+		for path, schemaBytes := range testCases {
+			pkgName := strings.ReplaceAll(path, "-", "_")
+			pkgName = strings.ReplaceAll(pkgName, "oscal", "oscalTypes")
+			bytes, err := Generate(schemaBytes, pkgName, []string{"json", "yaml"})
+			if err != nil {
+				t.Errorf("expected no error, got %v", err)
+			}
+			if writeOutput {
+				utils.WriteOutput(bytes, "../../types/"+path+"/types.go")
+			}
+		}
+	})
+
 }
 
-// TestSetOscalModelRefComponent tests that we can set the OSCAL model $ref correctly for the OSCAL Component Definition schema.
-func TestSetOscalModelRefComponent(t *testing.T) {
-	expected := "#assembly_oscal-component-definition_component-definition"
-	actual, err := setOscalModelRef("component-definition")
-	if err != nil {
-		t.Fatal(err)
-	}
+func TestGenerateDeterministic(t *testing.T) {
+	t.Parallel()
+	getSchemaByteMap(t)
 
-	if expected != actual {
-		t.Fatalf("error setOscalModelRef(): expected: %s | got: %s", expected, actual)
-	}
-}
+	var previousBytes []byte
+	testCases := [][]byte{schemaByteMap[oscal104FilePath], schemaByteMap[oscal105FilePath], schemaByteMap[oscal106FilePath], schemaByteMap[oscal110FilePath], schemaByteMap[oscal111FilePath]}
 
-// TestSetOscalModelRefSSP tests that we can set the OSCAL model $ref correctly for the OSCAL SSP schema.
-func TestSetOscalModelRefSSP(t *testing.T) {
-	expected := "#assembly_oscal-ssp_system-security-plan"
-	actual, err := setOscalModelRef("system-security-plan")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if expected != actual {
-		t.Fatalf("error setOscalModelRef(): expected: %s | got: %s", expected, actual)
-	}
-}
-
-// TestGenerateUniqueIdMapComponent tests that the generateUniqueIdMap function
-// returns the correct 'properties' from the OSCAL Component Definition schema.
-func TestGenerateUniqueIdMapComponent(t *testing.T) {
-	expectedPropertiesFile := "../../../schema/component/expected-properties.txt"
-
-	testdata := &BaseFlags{
-		InputFile: oscalComponentSchemaFilePath,
-	}
-
-	schema, err := readFileToSchema(testdata.InputFile)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	oscalModel, err := getOscalModel(schema)
-	if err != nil {
-		t.Fatal(err)
-	}
-	modelId, err := setOscalModelRef(oscalModel[0])
-	if err != nil {
-		t.Fatal(err)
-	}
-	actualMap, err := generateUniqueIdMap(schema)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	properties := actualMap[modelId].TypeObject.Properties
-
-	expected, err := readTestFile(expectedPropertiesFile)
-	if err != nil {
-		t.Fatal(err)
-	}
-	actual := preparePropertiesForAssertion(properties)
-
-	if expected != actual {
-		t.Fatalf("error generateUniqueIdMap():\n\nexpected: \n%s\n\ngot: \n%s", expected, actual)
-	}
-}
-
-// TestGenerateUniqueIdMapSSP tests that the generateUniqueIdMap function
-// returns the correct 'properties' from the OSCAL SSP schema.
-func TestGenerateUniqueIdMapSSP(t *testing.T) {
-	expectedPropertiesFile := "../../../schema/ssp/expected-properties.txt"
-
-	testdata := &BaseFlags{
-		InputFile: oscalSSPSchemaFilePath,
-	}
-
-	schema, err := readFileToSchema(testdata.InputFile)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	oscalModel, err := getOscalModel(schema)
-	if err != nil {
-		t.Fatal(err)
-	}
-	modelId, err := setOscalModelRef(oscalModel[0])
-	if err != nil {
-		t.Fatal(err)
-	}
-	actualMap, err := generateUniqueIdMap(schema)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	properties := actualMap[modelId].TypeObject.Properties
-
-	expected, err := readTestFile(expectedPropertiesFile)
-	if err != nil {
-		t.Fatal(err)
-	}
-	actual := preparePropertiesForAssertion(properties)
-
-	if expected != actual {
-		t.Fatalf("error generateUniqueIdMap():\n\nexpected: \n%s\n\ngot: \n%s", expected, actual)
-	}
-}
-
-// TestFormatStructTagsComponent tests that we can format Go struct tags from the OSCAL Component Definition schema correctly.
-func TestFormatStructTagsComponent(t *testing.T) {
-	testdata := &BaseFlags{
-		InputFile: oscalComponentSchemaFilePath,
-	}
-
-	schema, err := readFileToSchema(testdata.InputFile)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	oscalModel, err := getOscalModel(schema)
-	if err != nil {
-		t.Fatal(err)
-	}
-	modelId, err := setOscalModelRef(oscalModel[0])
-	if err != nil {
-		t.Fatal(err)
-	}
-	idMap, err := generateUniqueIdMap(schema)
-	if err != nil {
-		t.Fatal(err)
-	}
-	actualTagList := formatStructTags(idMap, modelId, "uuid", []string{"json", "yaml"})
-
-	expected := "json:\"uuid\" yaml:\"uuid\""
-	// Convert the string slice to a string for assertion.
-	actual := strings.Join(actualTagList, " ")
-
-	if expected != actual {
-		t.Fatalf("error formatStructTags(): expected: %s | got: %s", expected, actual)
-	}
-}
-
-// TestFormatStructTagsSSP tests that we can format Go struct tags from the OSCAL SSP schema correctly.
-func TestFormatStructTagsSSP(t *testing.T) {
-	testdata := &BaseFlags{
-		InputFile: oscalSSPSchemaFilePath,
-	}
-
-	schema, err := readFileToSchema(testdata.InputFile)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	oscalModel, err := getOscalModel(schema)
-	if err != nil {
-		t.Fatal(err)
-	}
-	modelId, err := setOscalModelRef(oscalModel[0])
-	if err != nil {
-		t.Fatal(err)
-	}
-	idMap, err := generateUniqueIdMap(schema)
-	if err != nil {
-		t.Fatal(err)
-	}
-	actualTagList := formatStructTags(idMap, modelId, "uuid", []string{"json", "yaml"})
-
-	expected := "json:\"uuid\" yaml:\"uuid\""
-	// Convert the string slice to a string for assertion.
-	actual := strings.Join(actualTagList, " ")
-
-	if expected != actual {
-		t.Fatalf("error formatStructTags(): expected: %s | got: %s", expected, actual)
-	}
-}
-
-// TestFmtFieldName tests that we handle formatting a json string to a go struct correctly.
-func TestFmtFieldName(t *testing.T) {
-	type TestCase struct {
-		in  string
-		out string
-	}
-
-	testCases := []TestCase{
-		{in: "foo_id", out: "FooID"},
-		{in: "fooId", out: "FooID"},
-		{in: "foo_url", out: "FooURL"},
-		{in: "foobar", out: "Foobar"},
-		{in: "url_sample", out: "URLSample"},
-		{in: "_id", out: "ID"},
-		{in: "__id", out: "ID"},
-	}
-
-	for _, testCase := range testCases {
-		actual := FmtFieldName(testCase.in)
-		expected := testCase.out
-		if expected != actual {
-			t.Fatalf("error FmtFieldName(): expected: %s | got: %s", expected, actual)
+	for _, schemaBytes := range testCases {
+		previousBytes = nil
+		for i := 0; i < deterministicTestCount; i++ {
+			bytes, err := Generate(schemaBytes, "oscalTypes", []string{"json", "yaml"})
+			if err != nil {
+				t.Errorf("expected no error, got %v", err)
+			}
+			if previousBytes == nil {
+				previousBytes = bytes
+				continue
+			}
+			if string(previousBytes) != string(bytes) {
+				t.Error("expected deterministic output")
+			}
 		}
 	}
 }
 
-// TestBuildStructDataComponent tests that we can construct Go struct data for the OSCAL Component Definition schema correctly.
-func TestBuildStructDataComponent(t *testing.T) {
-	expectedStructDataFile := "../../../schema/component/expected-struct-data.txt"
+func TestBuildStructs(t *testing.T) {
+	t.Parallel()
+	getSchemaByteMap(t)
 
-	testdata := &BaseFlags{
-		InputFile: oscalComponentSchemaFilePath,
+	schemas := []string{oscal104FilePath, oscal105FilePath, oscal106FilePath, oscal110FilePath, oscal111FilePath}
+
+	for _, path := range schemas {
+		schema, err := buildSchema(schemaByteMap[path])
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+
+		config := NewGeneratorConfig([]string{"json", "yaml"}, "oscalTypes")
+
+		err = config.initBuild(&schema)
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+
+		err = config.buildStructs()
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+		var structMap = map[string]string{}
+		duplicates := []string{}
+		for k, value := range config.structMap {
+			firstLine := strings.ReplaceAll(strings.Split(value, "\n")[0], " ", "")
+			mapValue := structMap[firstLine]
+			if mapValue == "" {
+				structMap[firstLine] = k
+				continue
+			}
+
+			if mapValue != k {
+				duplicates = append(duplicates, "Duplicate struct name found: ", k, " and ", mapValue)
+			}
+		}
+
+		if len(duplicates) > 0 {
+			t.Errorf("expected no duplicates, got %v", duplicates)
+		}
 	}
 
-	schema, err := readFileToSchema(testdata.InputFile)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	oscalModel, err := getOscalModel(schema)
-	if err != nil {
-		t.Fatal(err)
-	}
-	modelId, err := setOscalModelRef(oscalModel[0])
-	if err != nil {
-		t.Fatal(err)
-	}
-	idMap, err := generateUniqueIdMap(schema)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	modelTypeMap := make(map[string][]string)
-
-	properties := idMap[modelId].TypeObject.Properties
-	actualStructData, err := buildStructData(properties, idMap, modelId, []string{"json", "yaml"}, []string{""}, modelTypeMap)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	expected, err := readTestFile(expectedStructDataFile)
-	if err != nil {
-		t.Fatal(err)
-	}
-	actual := sortStringSliceAndConvertToString(actualStructData)
-
-	if expected != actual {
-		t.Fatalf("error buildStructData():\n\nexpected: \n%s\n\ngot: \n%s", expected, actual)
-	}
 }
 
-// TestBuildStructDataSSP tests that we can construct Go struct data for the OSCAL SSP schema correctly.
-func TestBuildStructDataSSP(t *testing.T) {
-	expectedStructDataFile := "../../../schema/ssp/expected-struct-data.txt"
-
-	testdata := &BaseFlags{
-		InputFile: oscalSSPSchemaFilePath,
-	}
-
-	schema, err := readFileToSchema(testdata.InputFile)
+func TestBuildStructString(t *testing.T) {
+	t.Parallel()
+	getSchemaByteMap(t)
+	schema, err := buildSchema(schemaByteMap[oscal111FilePath])
 	if err != nil {
-		t.Fatal(err)
+		t.Errorf("expected no error, got %v", err)
 	}
 
-	oscalModel, err := getOscalModel(schema)
+	definitions, err := getDefinitionMap(schema)
 	if err != nil {
-		t.Fatal(err)
-	}
-	modelId, err := setOscalModelRef(oscalModel[0])
-	if err != nil {
-		t.Fatal(err)
-	}
-	idMap, err := generateUniqueIdMap(schema)
-	if err != nil {
-		t.Fatal(err)
+		t.Errorf("expected no error, got %v", err)
 	}
 
-	modelTypeMap := make(map[string][]string)
+	t.Run("It builds a struct string given a schema object", func(t *testing.T) {
+		t.Parallel()
+		config := GeneratorConfig{
+			tags:        []string{"json", "yaml"},
+			definitions: definitions,
+			pkgName:     "oscalTypes",
+			refQueue:    NewRefQueue(),
+			nameMap:     map[string]string{},
+		}
+		result, err := config.buildStructString(*schema.Definitions["oscal-complete-oscal-catalog:catalog"].TypeObject)
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
 
-	properties := idMap[modelId].TypeObject.Properties
-	actualStructData, err := buildStructData(properties, idMap, modelId, []string{"json", "yaml"}, []string{""}, modelTypeMap)
-	if err != nil {
-		t.Fatal(err)
-	}
+		bytes, err := format.Source([]byte(result))
+		if err != nil {
+			t.Fatal(err)
+		}
+		actual := string(bytes)
 
-	expected, err := readTestFile(expectedStructDataFile)
-	if err != nil {
-		t.Fatal(err)
-	}
-	actual := sortStringSliceAndConvertToString(actualStructData)
+		bytes, err = os.ReadFile("../../../testdata/generation/structs/catalog.go")
+		if err != nil {
+			t.Fatal(err)
+		}
 
-	if expected != actual {
-		t.Fatalf("error buildStructData():\n\nexpected: \n%s\n\ngot: \n%s", expected, actual)
-	}
+		expected := string(bytes)
+
+		if actual != expected {
+			t.Errorf("expected %s, got %s", expected, result)
+		}
+	})
+
+	t.Run("It handles an object with no properties by aliasing it to map[string]interface{} for json representation", func(t *testing.T) {
+		t.Parallel()
+		config := GeneratorConfig{
+			tags:        []string{"json", "yaml"},
+			definitions: definitions,
+			pkgName:     "oscalTypes",
+			refQueue:    NewRefQueue(),
+			nameMap:     map[string]string{},
+		}
+		result, err := config.buildStructString(*schema.Definitions["oscal-complete-oscal-control-common:include-all"].TypeObject)
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+
+		bytes, err := format.Source([]byte(result))
+		if err != nil {
+			t.Fatal(err)
+		}
+		actual := string(bytes)
+		expected, err := os.ReadFile("../../../testdata/generation/structs/include-all.go")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if actual != string(expected) {
+			t.Errorf("expected %s, got %s", expected, actual)
+		}
+	})
+
+	t.Run("It adds an alias if one exists", func(t *testing.T) {
+		t.Parallel()
+		config := NewGeneratorConfig([]string{"json", "yaml"}, "oscalTypes")
+		config.definitions = definitions
+		config.initBuild(&schema)
+
+		result, err := config.buildStructString(config.definitions[config.refQueue.Pop()])
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+
+		if !strings.Contains(result, "type OscalModels = OscalCompleteSchema") {
+			t.Errorf("expected %s to contain %s", result, "type OscalModels = OscalCompleteSchema")
+		}
+
+	})
 }
 
-// TestGenerateModelTypesComponent tests that we can generate the top-level "ComponentDefinition" struct name correctly for the OSCAL Component Definition schema.
-func TestGenerateModelTypesComponent(t *testing.T) {
-	testdata := &BaseFlags{
-		InputFile: oscalComponentSchemaFilePath,
+func TestGetTypeSuffix(t *testing.T) {
+	t.Parallel()
+	getSchemaByteMap(t)
+
+	schema, err := buildSchema(schemaByteMap[oscal111FilePath])
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
 	}
 
-	schema, err := readFileToSchema(testdata.InputFile)
+	definitions, err := getDefinitionMap(schema)
 	if err != nil {
-		t.Fatal(err)
+		t.Errorf("expected no error, got %v", err)
 	}
 
-	oscalModel, err := getOscalModel(schema)
-	if err != nil {
-		t.Fatal(err)
+	config := GeneratorConfig{
+		tags:        []string{"json", "yaml"},
+		definitions: definitions,
+		pkgName:     "oscalTypes",
+		refQueue:    NewRefQueue(),
+		nameMap:     map[string]string{},
 	}
-	modelId, err := setOscalModelRef(oscalModel[0])
-	if err != nil {
-		t.Fatal(err)
-	}
-	idMap, err := generateUniqueIdMap(schema)
-	if err != nil {
-		t.Fatal(err)
-	}
+	t.Run("It returns the object typename given a schema object", func(t *testing.T) {
+		result, err := config.findSubType(*schema.Definitions["oscal-complete-oscal-catalog:catalog"].TypeObject)
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+		if result != "Catalog" {
+			t.Errorf("expected %s, got %s", "Catalog", result)
+		}
+	})
 
-	modelTypeMap := make(map[string][]string)
+	t.Run("It returns an array complex type name given a schema array", func(t *testing.T) {
+		result, err := config.findSubType(*schema.Definitions["oscal-complete-oscal-catalog:catalog"].TypeObject.Properties["groups"].TypeObject)
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+		if result != "Group" {
+			t.Errorf("expected %s, got %s", "Group", result)
+		}
+	})
 
-	expected := "ComponentDefinition"
-	actual, err := generateModelTypes(idMap, modelId, strings.Split(modelId, "_")[2], []string{""}, modelTypeMap)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if expected != actual {
-		t.Fatalf("error generateModelTypes(): expected: %s | got: %s", expected, actual)
-	}
+	t.Run("It uses the the title to contain the type if no $ref or $id is present and adds to queue", func(t *testing.T) {
+		ref := "#/definitions/ConstraintTest"
+		found := false
+		result, err := config.findSubType(*schema.Definitions["oscal-complete-oscal-control-common:parameter-constraint"].TypeObject.Properties["tests"].TypeObject)
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+		if result != "ConstraintTest" {
+			t.Errorf("expected %s, got %s", "ConstraintTest", result)
+		}
+		for _, q := range config.refQueue.refs {
+			if q == ref {
+				found = true
+			}
+		}
+		if !found {
+			t.Errorf("expected %s to be in queue", ref)
+		}
+		if config.definitions[ref].Type == nil {
+			t.Errorf("expected %s to be in definitions", ref)
+		}
+	})
 }
 
-// TestGenerateModelTypesSSP tests that we can generate the top-level "SystemSecurityPlan" struct name correctly for the OSCAL SSP schema.
-func TestGenerateModelTypesSSP(t *testing.T) {
-	testdata := &BaseFlags{
-		InputFile: oscalSSPSchemaFilePath,
+func TestBuildTypeString(t *testing.T) {
+	t.Parallel()
+	getSchemaByteMap(t)
+
+	schema, err := buildSchema(schemaByteMap[oscal111FilePath])
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
 	}
 
-	schema, err := readFileToSchema(testdata.InputFile)
+	definitions, err := getDefinitionMap(schema)
 	if err != nil {
-		t.Fatal(err)
+		t.Errorf("expected no error, got %v", err)
 	}
 
-	oscalModel, err := getOscalModel(schema)
-	if err != nil {
-		t.Fatal(err)
-	}
-	modelId, err := setOscalModelRef(oscalModel[0])
-	if err != nil {
-		t.Fatal(err)
-	}
-	idMap, err := generateUniqueIdMap(schema)
-	if err != nil {
-		t.Fatal(err)
+	config := GeneratorConfig{
+		tags:        []string{"json", "yaml"},
+		definitions: definitions,
+		pkgName:     "oscalTypes",
+		refQueue:    NewRefQueue(),
+		nameMap:     map[string]string{},
 	}
 
-	modelTypeMap := make(map[string][]string)
+	t.Run("It returns the associated primitive gotype when given a schema of a primitive type", func(t *testing.T) {
+		result, err := config.buildTypeString(*schema.Definitions["oscal-complete-oscal-catalog:catalog"].TypeObject.Properties["uuid"].TypeObject)
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+		if result != "string" {
+			t.Errorf("expected %s, got %s", "string", result)
+		}
 
-	expected := "SystemSecurityPlan"
-	actual, err := generateModelTypes(idMap, modelId, strings.Split(modelId, "_")[2], []string{""}, modelTypeMap)
-	if err != nil {
-		t.Fatal(err)
-	}
+	})
 
-	if expected != actual {
-		t.Fatalf("error generateModelTypes(): expected: %s | got: %s", expected, actual)
-	}
+	t.Run("It returns the first ref type when given a schema that implements allOf", func(t *testing.T) {
+		result, err := config.buildTypeString(*schema.Definitions["oscal-complete-oscal-control-common:parameter-selection"].TypeObject.Properties["how-many"].TypeObject)
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+		if result != "string" {
+			t.Errorf("expected %s, got %s", "string", result)
+		}
+
+	})
+
+	t.Run("It returns the first ref type when given a schema that implements anyOf", func(t *testing.T) {
+		result, err := config.buildTypeString(*schema.Definitions["oscal-complete-oscal-metadata:link"].TypeObject.Properties["rel"].TypeObject)
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+		if result != "string" {
+			t.Errorf("expected %s, got %s", "string", result)
+		}
+	})
+
+	t.Run("It returns an array type in the format []type when given a schema that implements array", func(t *testing.T) {
+		result, err := config.buildTypeString(*schema.Definitions["oscal-complete-oscal-catalog:catalog"].TypeObject.Properties["groups"].TypeObject)
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+		if result != "[]Group" {
+			t.Errorf("expected %s, got %s", "[]Group", result)
+		}
+	})
+
+	t.Run("It returns the struct name of the object when given a schema that implements object", func(t *testing.T) {
+		result, err := config.buildTypeString(*schema.Definitions["oscal-complete-oscal-catalog:catalog"].TypeObject)
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+		if result != "Catalog" {
+			t.Errorf("expected %s, got %s", "Catalog", result)
+		}
+	})
 }
 
-// TestGenerateOscalComponentModelStruct tests that we can generate the 'OscalModel' struct correctly for the OSCAL Component Definition schema.
-func TestGenerateOscalComponentModelStruct(t *testing.T) {
-	expectedOutputFile := "../../../schema/component/expected-oscal-model-struct.txt"
-
-	testdata := &BaseFlags{
-		InputFile: oscalComponentSchemaFilePath,
-	}
-
-	schema, err := readFileToSchema(testdata.InputFile)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	oscalModel, err := getOscalModel(schema)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	expected, err := readTestFile(expectedOutputFile)
-	if err != nil {
-		t.Fatal(err)
-	}
-	actualString, err := generateOscalModelStruct(oscalModel, "", []string{"json", "yaml"})
-	if err != nil {
-		t.Fatal(err)
-	}
-	// Trim leading and trailing white space from string.
-	actual := strings.TrimSpace(actualString)
-
-	if expected != actual {
-		t.Fatalf("error generateOscalModelsStruct():\n\nexpected: \n%s\n\ngot: \n%s", expected, actual)
-	}
-}
-
-// TestGenerateOscalSSPModelStruct tests that we can generate the 'OscalModel' struct correctly for the OSCAL SSP schema.
-func TestGenerateOscalSSPModelStruct(t *testing.T) {
-	expectedOutputFile := "../../../schema/ssp/expected-oscal-model-struct.txt"
-
-	testdata := &BaseFlags{
-		InputFile: oscalSSPSchemaFilePath,
-	}
-
-	schema, err := readFileToSchema(testdata.InputFile)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	oscalModel, err := getOscalModel(schema)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	expected, err := readTestFile(expectedOutputFile)
-	if err != nil {
-		t.Fatal(err)
-	}
-	actualString, err := generateOscalModelStruct(oscalModel, "", []string{"json", "yaml"})
-	if err != nil {
-		t.Fatal(err)
-	}
-	// Trim leading and trailing white space from string.
-	actual := strings.TrimSpace(actualString)
-
-	if expected != actual {
-		t.Fatalf("error generateOscalModelsStruct():\n\nexpected: \n%s\n\ngot: \n%s", expected, actual)
-	}
-}
-
-// TestHandleDuplicateStructNamesWithAssemblyKey tests that we can handle duplicate struct names correctly when map keys begin with #assembly.
-func TestHandleDuplicateStructNamesWithAssemblyKey(t *testing.T) {
-	existingValueMap := map[string]bool{}
-
-	// Populate the map with a random value to test against.
-	existingValueMap["RandomValue"] = true
-
-	// The fake data we're passing in mocks a map key that begins with #assembly,
-	// and a map value (RandomValue) that already exists, so we're expecting the handleDuplicateStructNames() function
-	// to format the map key and use it as the struct name.
-	expected := fmt.Sprintf("\ntype %s struct {", "AssemblyTestDataRandom")
-	actual := handleDuplicateStructNames(existingValueMap, "#assembly_test-data_random", "RandomValue")
-
-	if expected != actual {
-		t.Fatalf("error handleDuplicateStructNames():\nexpected:%s\n\ngot: %s", expected, actual)
-	}
-}
-
-// TestHandleDuplicateStructNamesWithIdenticalKeyValue tests that we can handle duplicate struct names correctly when a map key is identical to its value.
-func TestHandleDuplicateStructNamesWithIdenticalKeyValue(t *testing.T) {
-	existingValueMap := map[string]bool{}
-
-	// Populate the map with a random value to test against.
-	existingValueMap["RandomValue"] = true
-
-	// The fake data we're passing in mocks a map key that is identical to its value,
-	// so the key and value is RandomValue, which already exists, so we're expecting the handleDuplicateStructNames() function
-	// to append a number to the value as a unique identifier.
-	expected := fmt.Sprintf("\ntype %s struct {", "RandomValue1")
-	actual := handleDuplicateStructNames(existingValueMap, "RandomValue", "RandomValue")
-
-	if expected != actual {
-		t.Fatalf("error handleDuplicateStructNames():\nexpected:%s\n\ngot: %s", expected, actual)
-	}
-}
-
-// preparePropertiesForAssertion converts 'properties' values in an OSCAL schema file
-// to strings and sorts them in alphabetical order for asserting the output against test data.
-func preparePropertiesForAssertion(properties map[string]jsonschema.SchemaOrBool) string {
-	// Store the properties fields to a string slice and sort it.
-	propertiesSlice := make([]string, 0)
-	for property := range properties {
-		propertiesSlice = append(propertiesSlice, property)
-	}
-
-	propertiesString := sortStringSliceAndConvertToString(propertiesSlice)
-
-	return propertiesString
-}
-
-// sortStringSliceAndConvertToString sorts a string slice in increasing order,
-// converts the string slice to a string, and trims away any white space for assertion.
-func sortStringSliceAndConvertToString(dataSlice []string) string {
-	var dataString string
-
-	sort.Strings(dataSlice)
-
-	// Convert the sorted string slice to a string so that we can assert the output.
-	for _, data := range dataSlice {
-		dataString += fmt.Sprintf("%s\n", data)
-	}
-
-	// Trim leading and trailing white space from string.
-	testDataString := strings.TrimSpace(dataString)
-
-	return testDataString
-}
-
-// readTestFile reads data from a file and returns it as a string.
-func readTestFile(testFile string) (string, error) {
-	dataBytes, err := os.ReadFile(testFile)
-	if err != nil {
-		return "", err
-	}
-
-	testFileString := string(dataBytes)
-
-	return testFileString, nil
-}
-
-func readFileToSchema(filepath string) (jsonschema.Schema, error) {
-
-	bytes, err := os.ReadFile(filepath)
+func buildSchema(schemaBytes []byte) (jsonschema.Schema, error) {
+	schema := jsonschema.Schema{}
+	err := schema.UnmarshalJSON(schemaBytes)
 	if err != nil {
 		return jsonschema.Schema{}, err
 	}
-
-	schema := jsonschema.Schema{}
-	schema.UnmarshalJSON(bytes)
-
 	return schema, nil
+}
 
+func getSchemaByteMap(t *testing.T) {
+	schemaMutex.Lock()
+	defer schemaMutex.Unlock()
+	if len(schemaByteMap) == 0 {
+		for _, path := range schemaPaths {
+			bytes, err := os.ReadFile(path)
+			if err != nil {
+				panic(err)
+			}
+			schemaByteMap[path] = bytes
+		}
+	}
 }
