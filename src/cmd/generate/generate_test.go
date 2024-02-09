@@ -10,7 +10,7 @@ import (
 
 func TestGenerateCmd(t *testing.T) {
 	t.Parallel()
-	testInput := "../../../schema/complete/oscal_complete_schema-1-0-4.json"
+	testInput := "../../pkg/validation/schema/oscal_complete_schema-1-0-4.json"
 	packageName := "oscalTypes"
 	tags := "json,yaml"
 	tempDir := t.TempDir()

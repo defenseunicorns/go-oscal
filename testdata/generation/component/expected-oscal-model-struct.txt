@@ -1,3 +1,0 @@
-type OscalModels struct {
-	ComponentDefinition ComponentDefinition `json:"component-definition,omitempty" yaml:"component-definition,omitempty"`
-}

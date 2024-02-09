@@ -91,11 +91,6 @@ func (c *GeneratorConfig) initBuild(schema *jsonschema.Schema) (err error) {
 		}
 	}
 
-	if schema.Ref != nil {
-		c.refQueue.Add(*schema.Ref)
-		return nil
-	}
-
 	// No properties, so we need to add the properties from the oneOf schemas.
 	if schema.Properties == nil {
 		schema.Properties = map[string]jsonschema.SchemaOrBool{}

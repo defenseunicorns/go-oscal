@@ -12,19 +12,17 @@ import (
 )
 
 const (
-	oscalComponentSchemaFilePath string = "../../../schema/component/oscal_component_schema-1-1-1.json"
-	oscalSSPSchemaFilePath       string = "../../../schema/ssp/oscal_ssp_schema-1-1-1.json"
-	fieldsPresentFilePath        string = "../../../testdata/fields-present.json"
-	fieldsMissingFilePath        string = "../../../testdata/fields-missing.json"
-	oscal104FilePath             string = "../../pkg/validation/schema/oscal_complete_schema-1-0-4.json"
-	oscal105FilePath             string = "../../pkg/validation/schema/oscal_complete_schema-1-0-5.json"
-	oscal106FilePath             string = "../../pkg/validation/schema/oscal_complete_schema-1-0-6.json"
-	oscal110FilePath             string = "../../pkg/validation/schema/oscal_complete_schema-1-1-0.json"
-	oscal111FilePath             string = "../../pkg/validation/schema/oscal_complete_schema-1-1-1.json"
+	fieldsPresentFilePath string = "../../../testdata/fields-present.json"
+	fieldsMissingFilePath string = "../../../testdata/fields-missing.json"
+	oscal104FilePath      string = "../../pkg/validation/schema/oscal_complete_schema-1-0-4.json"
+	oscal105FilePath      string = "../../pkg/validation/schema/oscal_complete_schema-1-0-5.json"
+	oscal106FilePath      string = "../../pkg/validation/schema/oscal_complete_schema-1-0-6.json"
+	oscal110FilePath      string = "../../pkg/validation/schema/oscal_complete_schema-1-1-0.json"
+	oscal111FilePath      string = "../../pkg/validation/schema/oscal_complete_schema-1-1-1.json"
 )
 
 var (
-	schemaPaths            = []string{oscal104FilePath, oscal105FilePath, oscal106FilePath, oscal110FilePath, oscal111FilePath, oscalComponentSchemaFilePath, oscalSSPSchemaFilePath}
+	schemaPaths            = []string{oscal104FilePath, oscal105FilePath, oscal106FilePath, oscal110FilePath, oscal111FilePath}
 	schemaMutex            = sync.Mutex{}
 	schemaByteMap          = map[string][]byte{}
 	writeOutput            = false
@@ -58,24 +56,6 @@ func TestGenerate(t *testing.T) {
 		}
 	})
 
-	t.Run("Individual Schemas", func(t *testing.T) {
-
-		testCases := map[string][]byte{
-			"component": schemaByteMap[oscalComponentSchemaFilePath],
-			"ssp":       schemaByteMap[oscalSSPSchemaFilePath],
-		}
-
-		for path, schemaBytes := range testCases {
-			pkgName := "oscal" + FmtFieldName(path) + "Types"
-			bytes, err := Generate(schemaBytes, pkgName, []string{"json", "yaml"})
-			if err != nil {
-				t.Errorf("expected no error, got %v", err)
-			}
-			if writeOutput {
-				utils.WriteOutput(bytes, "../../../test_out/"+path+"/types.go")
-			}
-		}
-	})
 }
 
 func TestGenerateDeterministic(t *testing.T) {
@@ -107,7 +87,7 @@ func TestBuildStructs(t *testing.T) {
 	t.Parallel()
 	getSchemaByteMap(t)
 
-	schemas := []string{oscal104FilePath, oscal105FilePath, oscal106FilePath, oscal110FilePath, oscal111FilePath, oscalComponentSchemaFilePath, oscalSSPSchemaFilePath}
+	schemas := []string{oscal104FilePath, oscal105FilePath, oscal106FilePath, oscal110FilePath, oscal111FilePath}
 
 	for _, path := range schemas {
 		schema, err := buildSchema(schemaByteMap[path])
