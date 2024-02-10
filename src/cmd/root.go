@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/defenseunicorns/go-oscal/src/cmd/doctor"
 	"github.com/defenseunicorns/go-oscal/src/cmd/generate"
 	"github.com/defenseunicorns/go-oscal/src/cmd/revise"
 	"github.com/defenseunicorns/go-oscal/src/cmd/validate"
@@ -44,6 +45,7 @@ func Execute() {
 		generate.GenerateCmd,
 		revise.ReviseCmd,
 		validate.ValidateCmd,
+		doctor.DoctorCmd,
 	}
 
 	RootCmd.AddCommand(commands...)

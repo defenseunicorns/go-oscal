@@ -72,3 +72,10 @@ func IsJsonOrYaml(path string) (err error) {
 	}
 	return nil
 }
+
+func IsJson(path string) (err error) {
+	if !strings.HasSuffix(path, ".json") {
+		return errors.New("please specify a json file")
+	}
+	return nil
+}

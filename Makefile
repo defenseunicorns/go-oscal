@@ -10,13 +10,14 @@ BINDIR       := $(CURDIR)/bin
 BINNAME      ?= go-oscal
 INSTALL_PATH ?= /usr/local/bin
 OSCAL_LATEST := 1-1-1
-OSCAL_COMPONENT_SCHEMA_FILE := schema/component/oscal_component_schema-$(OSCAL_LATEST).json
-OSCAL_SSP_SCHEMA_FILE := schema/ssp/oscal_ssp_schema.json
+OSCAL_LATEST_SCHEMA := src/pkg/validation/schema/oscal-$(OSCAL_LATEST).json
+OSCAL_LATEST_OUTPUT := src/types/oscal-$(OSCAL_LATEST)/
 
 # Git vars
 GIT_COMMIT = $(shell git rev-parse HEAD)
 GIT_SHA    = $(shell git rev-parse --short HEAD)
 GIT_TAG    = $(shell git describe --tags --abbrev=0 --exact-match 2>/dev/null)
+
 
 # Go CLI options
 PKG         := ./...
@@ -61,34 +62,14 @@ build: $(BINDIR)/$(BINNAME) ## Build the project.
 $(BINDIR)/$(BINNAME): $(SRC)
 	CGO_ENABLED=$(CGO_ENABLED) go build $(GOFLAGS) -trimpath -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o '$(BINDIR)/$(BINNAME)' .
 
-.PHONY: generate-compdef-stdout
-generate-compdef-stdout: clean build ## Generate Go structs from OSCAL component-definition JSON schema and outputs to stdout.
-	$(BINDIR)/$(BINNAME) generate -f $(OSCAL_COMPONENT_SCHEMA_FILE) --pkg componentDefinition --tags json,yaml
-
-.PHONY: generate-ssp-stdout
-generate-ssp-stdout: clean build ## Generate Go structs from OSCAL system-security-plan JSON schema and outputs to stdout.
-	$(BINDIR)/$(BINNAME) generate -f $(OSCAL_SSP_SCHEMA_FILE) --pkg ssp --tags json,yaml
-
 .PHONY: test
 test: build ## Run automated tests.
 	go clean -testcache && go test $(GOFLAGS) -run $(TESTS) $(PKG) $(TESTFLAGS)
-
-.PHONY: run-main-compdef
-run-main-compdef: ## useful for running the main.go file without having to compile
-	go run main.go -f $(OSCAL_COMPONENT_SCHEMA_FILE) --tags json,yaml
-
-.PHONY: run-main-ssp
-run-main-ssp: ## useful for running the main.go file without having to compile
-	go run main.go -f $(OSCAL_SSP_SCHEMA_FILE) --tags json,yaml
 
 .PHONY: install
 install: ## Install binary to $INSTALL_PATH.
 	@install "$(BINDIR)/$(BINNAME)" "$(INSTALL_PATH)/$(BINNAME)"
 
-.PHONY: generate-latest-compdef
-generate-latest-compdef: clean build
-	$(BINDIR)/$(BINNAME) generate -f $(OSCAL_COMPONENT_SCHEMA_FILE) --pkg compdeftypes --tags json,yaml -o src/types/oscal-1-1-1/component-definition/types.go
-
-.PHONY: generate-latest-ssp
-generate-latest-ssp: clean build
-	$(BINDIR)/$(BINNAME) generate -f $(OSCAL_SSP_SCHEMA_FILE) --pkg ssptypes --tags json,yaml -o src/types/oscal-1-1-1/system-security-plan/types.go
+.PHONY: generate-latest
+generate-latest-schema: clean build
+	$(BINDIR)/$(BINNAME) generate -f $(OSCAL_LATEST_SCHEMA) --tags json,yaml -o $(OSCAL_LATEST_OUTPUT)/types.go

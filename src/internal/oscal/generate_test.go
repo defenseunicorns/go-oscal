@@ -25,7 +25,7 @@ var (
 	schemaPaths            = []string{oscal104FilePath, oscal105FilePath, oscal106FilePath, oscal110FilePath, oscal111FilePath}
 	schemaMutex            = sync.Mutex{}
 	schemaByteMap          = map[string][]byte{}
-	writeOutput            = false
+	writeOutput            = true
 	deterministicTestCount = 10
 )
 
