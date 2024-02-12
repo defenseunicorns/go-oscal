@@ -14,11 +14,11 @@ import (
 const (
 	fieldsPresentFilePath string = "../../../testdata/fields-present.json"
 	fieldsMissingFilePath string = "../../../testdata/fields-missing.json"
-	oscal104FilePath      string = "../../pkg/validation/schema/oscal_complete_schema-1-0-4.json"
-	oscal105FilePath      string = "../../pkg/validation/schema/oscal_complete_schema-1-0-5.json"
-	oscal106FilePath      string = "../../pkg/validation/schema/oscal_complete_schema-1-0-6.json"
-	oscal110FilePath      string = "../../pkg/validation/schema/oscal_complete_schema-1-1-0.json"
-	oscal111FilePath      string = "../../pkg/validation/schema/oscal_complete_schema-1-1-1.json"
+	oscal104FilePath      string = "../../internal/schemas/oscal_complete_schema-1-0-4.json"
+	oscal105FilePath      string = "../../internal/schemas/oscal_complete_schema-1-0-5.json"
+	oscal106FilePath      string = "../../internal/schemas/oscal_complete_schema-1-0-6.json"
+	oscal110FilePath      string = "../../internal/schemas/oscal_complete_schema-1-1-0.json"
+	oscal111FilePath      string = "../../internal/schemas/oscal_complete_schema-1-1-1.json"
 )
 
 var (

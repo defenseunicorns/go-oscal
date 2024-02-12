@@ -9,9 +9,9 @@ SHELL := bash
 BINDIR       := $(CURDIR)/bin
 BINNAME      ?= go-oscal
 INSTALL_PATH ?= /usr/local/bin
-OSCAL_LATEST := 1-1-1
-OSCAL_LATEST_SCHEMA := src/pkg/validation/schema/oscal-$(OSCAL_LATEST).json
+OSCAL_LATEST_SCHEMA := src/internal/schemas/oscal_complete_schema-$(OSCAL_LATEST).json
 OSCAL_LATEST_OUTPUT := src/types/oscal-$(OSCAL_LATEST)/
+OSCAL_LATEST_PACKAGE := oscalTypes_$(subst -,_,$(OSCAL_LATEST))
 
 # Git vars
 GIT_COMMIT = $(shell git rev-parse HEAD)
@@ -70,6 +70,17 @@ test: build ## Run automated tests.
 install: ## Install binary to $INSTALL_PATH.
 	@install "$(BINDIR)/$(BINNAME)" "$(INSTALL_PATH)/$(BINNAME)"
 
+.PHONY: upgrade
+upgrade: 
+	make doctor-latest-schema
+	make generate-latest-schema
+	echo -e "---\noscal: v$(subst -,.,$(OSCAL_LATEST))" > update/oscal-version.yaml
+	rm $(UNDOCTORED_SCHEMA)
+
+.PHONY: doctor-latest
+doctor-latest-schema: clean build
+	$(BINDIR)/$(BINNAME) doctor -f $(UNDOCTORED_SCHEMA) -o $(OSCAL_LATEST_SCHEMA)
+
 .PHONY: generate-latest
 generate-latest-schema: clean build
-	$(BINDIR)/$(BINNAME) generate -f $(OSCAL_LATEST_SCHEMA) --tags json,yaml -o $(OSCAL_LATEST_OUTPUT)/types.go
+	$(BINDIR)/$(BINNAME) generate -f $(OSCAL_LATEST_SCHEMA) --pkg $(OSCAL_LATEST_PACKAGE) --tags json,yaml -o $(OSCAL_LATEST_OUTPUT)/types.go

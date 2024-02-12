@@ -3,20 +3,16 @@ package utils
 import (
 	"fmt"
 	"log"
+	"os"
 	"reflect"
 	"regexp"
 	"strings"
+
+	"github.com/defenseunicorns/go-oscal/src/internal/schemas"
 )
 
 var (
-	versionRegexp    = regexp.MustCompile(`^\d+([-\.]\d+){2}$`)
-	supportedVersion = map[string]bool{
-		"1.0.4": true,
-		"1.0.5": true,
-		"1.0.6": true,
-		"1.1.0": true,
-		"1.1.1": true,
-	}
+	versionRegexp = regexp.MustCompile(`^\d+([-\.]\d+){2}$`)
 )
 
 // IsValidOscalVersion returns true if the version is supported, false if not.
@@ -25,7 +21,10 @@ func IsValidOscalVersion(version string) error {
 		return fmt.Errorf("version %s is not a valid version", version)
 	}
 
-	if !supportedVersion[version] {
+	version = FormatOscalVersion(version)
+	schemaPath := schemas.SCHEMA_PREFIX + strings.ReplaceAll(version, ".", "-") + ".json"
+
+	if _, err := schemas.Schemas.Open(schemaPath); os.IsNotExist(err) {
 		return fmt.Errorf("version %s is not supported", version)
 	}
 	return nil
