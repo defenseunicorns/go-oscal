@@ -71,7 +71,7 @@ install: ## Install binary to $INSTALL_PATH.
 	@install "$(BINDIR)/$(BINNAME)" "$(INSTALL_PATH)/$(BINNAME)"
 
 .PHONY: upgrade
-upgrade: 
+upgrade: ## Upgrade oscal schema version and generate new types and doctored schema. 
 	make doctor-latest-schema
 	make generate-latest-schema
 	echo -e "---\noscal: v$(subst -,.,$(OSCAL_LATEST))" > update/oscal-version.yaml

@@ -5,13 +5,13 @@ import (
 	"log"
 	"os"
 
-	"github.com/defenseunicorns/go-oscal/src/internal/oscal"
+	"github.com/defenseunicorns/go-oscal/src/internal/generate"
 	"github.com/defenseunicorns/go-oscal/src/internal/utils"
 
 	"github.com/spf13/cobra"
 )
 
-var opts = &oscal.BaseFlags{}
+var opts = &generate.BaseFlags{}
 
 var GenerateCmd = &cobra.Command{
 	Use:   "generate",
@@ -36,7 +36,7 @@ var GenerateCmd = &cobra.Command{
 	},
 }
 
-func GenerateCommand(flags oscal.BaseFlags) (output []byte, err error) {
+func GenerateCommand(flags generate.BaseFlags) (output []byte, err error) {
 	schemaBytes, err := os.ReadFile(flags.InputFile)
 	if err != nil {
 		return
@@ -48,7 +48,7 @@ func GenerateCommand(flags oscal.BaseFlags) (output []byte, err error) {
 	}
 
 	// Generate the Go structs.
-	output, err = oscal.Generate(schemaBytes, flags.Pkg, tagList)
+	output, err = generate.Generate(schemaBytes, flags.Pkg, tagList)
 	if err != nil {
 		return output, fmt.Errorf("failed to generate Go structs: %s", err)
 	}
