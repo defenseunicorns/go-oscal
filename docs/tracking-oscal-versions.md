@@ -61,4 +61,4 @@ jobs:
 
 ```
 
-The GitHub Action creates an issue on the go-oscal repo to check out the releases for OSCAL to see what has changed. Depending on the change the level of effort for the update can vary.
+The GitHub Action creates an issue on the go-oscal repo to check out the releases for OSCAL to see what has changed. Depending on the change the level of effort for the update can vary. See [upgrading-oscal-version](./upgrading-oscal-version.md) for steps for handling a new release. 
