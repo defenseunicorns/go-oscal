@@ -16,7 +16,7 @@ var opts = &generate.BaseFlags{}
 var GenerateCmd = &cobra.Command{
 	Use:   "generate",
 	Short: "generate Golang data types from OSCAL schema",
-	Long:  "Generate Golang data types from OSCAL schema",
+	Long:  "Generate Golang data types from OSCAL Complete schema.",
 	// Example: generateHelp,
 	RunE: func(cmd *cobra.Command, componentDefinitionPaths []string) error {
 		output, err := GenerateCommand(*opts)
