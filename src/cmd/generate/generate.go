@@ -4,20 +4,19 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 
-	"github.com/defenseunicorns/go-oscal/src/internal/oscal"
+	"github.com/defenseunicorns/go-oscal/src/internal/generate"
 	"github.com/defenseunicorns/go-oscal/src/internal/utils"
 
 	"github.com/spf13/cobra"
 )
 
-var opts = &oscal.BaseFlags{}
+var opts = &generate.BaseFlags{}
 
 var GenerateCmd = &cobra.Command{
 	Use:   "generate",
 	Short: "generate Golang data types from OSCAL schema",
-	Long:  "Generate Golang data types from OSCAL schema",
+	Long:  "Generate Golang data types from OSCAL Complete schema.",
 	// Example: generateHelp,
 	RunE: func(cmd *cobra.Command, componentDefinitionPaths []string) error {
 		output, err := GenerateCommand(*opts)
@@ -30,14 +29,14 @@ var GenerateCmd = &cobra.Command{
 		} else {
 			err = utils.WriteOutput(output, opts.OutputFile)
 			if err != nil {
-				return fmt.Errorf("failed to write output to file: %s\n", err)
+				return fmt.Errorf("failed to write output to file: %s", err)
 			}
 		}
 		return nil
 	},
 }
 
-func GenerateCommand(flags oscal.BaseFlags) (output []byte, err error) {
+func GenerateCommand(flags generate.BaseFlags) (output []byte, err error) {
 	schemaBytes, err := os.ReadFile(flags.InputFile)
 	if err != nil {
 		return
@@ -49,9 +48,9 @@ func GenerateCommand(flags oscal.BaseFlags) (output []byte, err error) {
 	}
 
 	// Generate the Go structs.
-	output, err = oscal.Generate(schemaBytes, flags.Pkg, tagList)
+	output, err = generate.Generate(schemaBytes, flags.Pkg, tagList)
 	if err != nil {
-		return output, fmt.Errorf("failed to generate Go structs: %s\n", err)
+		return output, fmt.Errorf("failed to generate Go structs: %s", err)
 	}
 
 	return
@@ -61,16 +60,5 @@ func init() {
 	GenerateCmd.Flags().StringVarP(&opts.InputFile, "input-file", "f", "", "the path to a oscal json schema file")
 	GenerateCmd.Flags().StringVarP(&opts.OutputFile, "output-file", "o", "", "the name of the file to write the output to (outputs to STDOUT by default)")
 	GenerateCmd.Flags().StringVarP(&opts.Pkg, "pkg", "p", "main", "the name of the package for the generated code")
-	GenerateCmd.Flags().StringVarP(&opts.Tags, "tags", "t", "json", "comma separated list of the tags to put on the struct")
-}
-
-// formatTags formats Go struct tags.
-func formatTags() (tagList []string) {
-	if opts.Tags == "" {
-		tagList = append(tagList, "json")
-	} else {
-		tagList = strings.Split(opts.Tags, ",")
-	}
-
-	return
+	GenerateCmd.Flags().StringVarP(&opts.Tags, "tags", "t", "json,yaml", "comma separated list of the tags to put on the struct")
 }

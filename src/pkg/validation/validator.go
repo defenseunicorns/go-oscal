@@ -1,20 +1,13 @@
 package validation
 
 import (
-	"embed"
 	"encoding/json"
 	"errors"
 	"strings"
 
+	"github.com/defenseunicorns/go-oscal/src/internal/schemas"
 	"github.com/defenseunicorns/go-oscal/src/internal/utils"
 	"github.com/santhosh-tekuri/jsonschema/v5"
-)
-
-//go:embed schema/*.json
-var schemas embed.FS
-
-const (
-	SCHEMA_PREFIX = "oscal_complete_schema-"
 )
 
 type Validator struct {
@@ -113,9 +106,9 @@ func (v *Validator) GetValidationResult() (ValidationResult, error) {
 // Validate validates the model against the schema.
 func (v *Validator) Validate() error {
 	// Build the schema file-path
-	schemaPath := SCHEMA_PREFIX + strings.ReplaceAll(v.schemaVersion, ".", "-") + ".json"
+	schemaPath := schemas.SCHEMA_PREFIX + strings.ReplaceAll(v.schemaVersion, ".", "-") + ".json"
 
-	schemaBytes, err := schemas.ReadFile("schema/" + schemaPath)
+	schemaBytes, err := schemas.Schemas.ReadFile(schemaPath)
 	if err != nil {
 		return err
 	}

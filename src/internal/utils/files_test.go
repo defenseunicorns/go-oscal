@@ -151,4 +151,23 @@ func TestFileUtils(t *testing.T) {
 			}
 		})
 	})
+
+	t.Run("isJson", func(t *testing.T) {
+		t.Parallel()
+		t.Run("returns nil if the file path ends with the .json extension", func(t *testing.T) {
+			t.Parallel()
+			err := utils.IsJson(tmpDir + "/test.json")
+			if err != nil {
+				t.Error("expected no error, got", err)
+			}
+		})
+
+		t.Run("returns an error if the file path does not end with the .json extension", func(t *testing.T) {
+			t.Parallel()
+			err := utils.IsJson(tmpDir + "/test.yaml")
+			if err == nil {
+				t.Error("expected an error, got", err)
+			}
+		})
+	})
 }

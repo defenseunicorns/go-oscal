@@ -1,4 +1,4 @@
-package oscal
+package generate
 
 import (
 	"testing"

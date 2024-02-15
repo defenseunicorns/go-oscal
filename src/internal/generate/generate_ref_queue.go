@@ -1,4 +1,4 @@
-package oscal
+package generate
 
 type RefQueue struct {
 	refs       []string

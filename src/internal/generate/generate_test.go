@@ -1,4 +1,4 @@
-package oscal
+package generate
 
 import (
 	"go/format"
@@ -14,18 +14,18 @@ import (
 const (
 	fieldsPresentFilePath string = "../../../testdata/fields-present.json"
 	fieldsMissingFilePath string = "../../../testdata/fields-missing.json"
-	oscal104FilePath      string = "../../pkg/validation/schema/oscal_complete_schema-1-0-4.json"
-	oscal105FilePath      string = "../../pkg/validation/schema/oscal_complete_schema-1-0-5.json"
-	oscal106FilePath      string = "../../pkg/validation/schema/oscal_complete_schema-1-0-6.json"
-	oscal110FilePath      string = "../../pkg/validation/schema/oscal_complete_schema-1-1-0.json"
-	oscal111FilePath      string = "../../pkg/validation/schema/oscal_complete_schema-1-1-1.json"
+	oscal104FilePath      string = "../../internal/schemas/oscal_complete_schema-1-0-4.json"
+	oscal105FilePath      string = "../../internal/schemas/oscal_complete_schema-1-0-5.json"
+	oscal106FilePath      string = "../../internal/schemas/oscal_complete_schema-1-0-6.json"
+	oscal110FilePath      string = "../../internal/schemas/oscal_complete_schema-1-1-0.json"
+	oscal111FilePath      string = "../../internal/schemas/oscal_complete_schema-1-1-1.json"
 )
 
 var (
 	schemaPaths            = []string{oscal104FilePath, oscal105FilePath, oscal106FilePath, oscal110FilePath, oscal111FilePath}
 	schemaMutex            = sync.Mutex{}
 	schemaByteMap          = map[string][]byte{}
-	writeOutput            = false
+	writeOutput            = true
 	deterministicTestCount = 10
 )
 
