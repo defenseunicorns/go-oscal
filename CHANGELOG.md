@@ -6,11 +6,21 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
  
 ## [Unreleased] - yyyy-mm-dd
 
+### Added
+- `doctor` command to prep new oscal_complete_schema.json from [OSCAL Releases](https://github.com/usnistgov/OSCAL/releases/tag/v1.1.2) for use in the `validate` and `revise` commands. Behavior ported from [oscal-json-doctor](https://github.com/defenseunicorns/oscal-json-doctor) in order to keep all needed functionality within the go-oscal repo. 
+- documentation for `generate` and `doctor` commands
+- documentation for upgrading to a new version of OSCAL (docs/upgrading-oscal-version.md)
+
 ### Changed
-- Types now belong to unique packages in the format `oscalTypes_X_X_X` (ie: `oscalTypes_1_0_4`)
+- [breaking] Types now belong to unique packages in the format `oscalTypes_X_X_X` (ie: `oscalTypes_1_0_4`)
 - Now uses the schema information to generate types
 - update `OscalModels` is now an alias for `OscalCompleteSchema`
+- update makefile to include `upgrade`, `generate-latest-schema`, and `doctor-latest-schema` methods
+- remove make commands related to generating types for individual schemas in favor of using complete schemas only for consistency.
+- moved `src/pkg/validation/schema` to `src/internal/schemas`
+- renamed `src/internal/oscal` to `src/internal/generate` for consistency. 
 
+### Breaking Types Changes
 #### oscal types versions: 1.0.4, 1.0.5, 1.0.6, 1.1.0, 1.1.1
 
 - update `AssessmentPlan.TermsAndConditions` is now of type `AssessmentPlanTermsAndConditions` per the schema `title`
