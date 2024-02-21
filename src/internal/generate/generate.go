@@ -215,11 +215,11 @@ func (c *GeneratorConfig) buildTypeString(property jsonschema.Schema) (propType 
 	var possibleRefs []string
 
 	if property.Type != nil && property.Type.SimpleTypes != nil {
-		jsonType := getJsonType(property)
+		jsonType := getJsonOrCustomType(property)
 		// convert json type to go type
 		propType = getGoType(jsonType)
 		// if the type is not primitive, we need to add the name of the type
-		if !isPrimitiveJsonType(jsonType) {
+		if !isPrimitiveOrCustomJsonType(jsonType) {
 			name, err := c.findSubType(property)
 			if err != nil {
 				return "", err
@@ -270,7 +270,7 @@ func (c *GeneratorConfig) buildTypeString(property jsonschema.Schema) (propType 
 
 // findSubType finds the name of the type for the given schema.
 func (c *GeneratorConfig) findSubType(schema jsonschema.Schema) (name string, err error) {
-	simpleType := getJsonType(schema)
+	simpleType := getJsonOrCustomType(schema)
 	switch simpleType {
 	case "object":
 		// If the schema has a ref, we need to find the name of the ref.

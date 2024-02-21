@@ -123,7 +123,7 @@ func TestGetJsonType(t *testing.T) {
 
 		expected := "object"
 
-		actual := getJsonType(*schemaWithSimpleType)
+		actual := getJsonOrCustomType(*schemaWithSimpleType)
 
 		if actual != expected {
 			t.Errorf("expected %s, got %s", expected, actual)
@@ -135,7 +135,7 @@ func TestGetJsonType(t *testing.T) {
 		schemaWithNoSimpleType := schema.OneOf[0].TypeObject // This schema has no type
 		expected := ""
 
-		actual := getJsonType(*schemaWithNoSimpleType)
+		actual := getJsonOrCustomType(*schemaWithNoSimpleType)
 
 		if actual != expected {
 			t.Errorf("expected %s, got %s", expected, actual)
@@ -162,7 +162,7 @@ func TestIsPrimitiveJsonType(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
-		actual := isPrimitiveJsonType(testCase.in)
+		actual := isPrimitiveOrCustomJsonType(testCase.in)
 		expected := testCase.out
 		if expected != actual {
 			t.Errorf("error isPrimitiveJsonType(): expected: %t | got: %t", expected, actual)
@@ -287,7 +287,7 @@ func TestFmtFieldName(t *testing.T) {
 	}
 }
 
-func TestGetImportKey(t *testing.T) {
+func TestGetCustomTypeKey(t *testing.T) {
 	t.Parallel()
 
 	type TestCase struct {
@@ -306,50 +306,6 @@ func TestGetImportKey(t *testing.T) {
 		expected := testCase.out
 		if expected != actual {
 			t.Fatalf("error getImportKey(): expected: %s | got: %s", expected, actual)
-		}
-	}
-}
-
-func TestGetImportType(t *testing.T) {
-	t.Parallel()
-
-	type TestCase struct {
-		in  string
-		out string
-	}
-
-	testCases := []TestCase{
-		{in: "uri", out: ""},
-		{in: "date-time", out: "time.Time"},
-	}
-
-	for _, testCase := range testCases {
-		actual := getCustomType(testCase.in)
-		expected := testCase.out
-		if expected != actual {
-			t.Fatalf("error getImportType(): expected: %s | got: %s", expected, actual)
-		}
-	}
-}
-
-func TestHasImportKey(t *testing.T) {
-	t.Parallel()
-
-	type TestCase struct {
-		in  string
-		out bool
-	}
-
-	testCases := []TestCase{
-		{in: "uri", out: false},
-		{in: "date-time", out: true},
-	}
-
-	for _, testCase := range testCases {
-		actual := hasCustomType(testCase.in)
-		expected := testCase.out
-		if expected != actual {
-			t.Fatalf("error hasImportKey(): expected: %t | got: %t", expected, actual)
 		}
 	}
 }
