@@ -2,9 +2,12 @@ package generate_test
 
 import (
 	"os"
+	"reflect"
 	"strings"
 	"testing"
 
+	oscalTypes_1_0_4 "github.com/defenseunicorns/go-oscal/src/types/oscal-1-0-4"
+	oscalTypes_1_1_1 "github.com/defenseunicorns/go-oscal/src/types/oscal-1-1-1"
 	"gopkg.in/yaml.v3"
 )
 
@@ -16,8 +19,10 @@ var (
 )
 
 func TestFedrampBaselineYamlFieldsInTypes(t *testing.T) {
+	t.Parallel()
 
 	t.Run("Rev4", func(t *testing.T) {
+		t.Parallel()
 		typeBytes, err := os.ReadFile(oscal104Types)
 		if err != nil {
 			t.Fatal(err)
@@ -43,6 +48,7 @@ func TestFedrampBaselineYamlFieldsInTypes(t *testing.T) {
 	})
 
 	t.Run("Rev5", func(t *testing.T) {
+		t.Parallel()
 		typeBytes, err := os.ReadFile(oscal111Types)
 		if err != nil {
 			t.Fatal(err)
@@ -66,6 +72,96 @@ func TestFedrampBaselineYamlFieldsInTypes(t *testing.T) {
 			ValidateKeys(oscalDoc, string(typeBytes), t)
 		}
 
+	})
+}
+
+func TestFieldStability(t *testing.T) {
+	t.Parallel()
+
+	t.Run("Rev4", func(t *testing.T) {
+		t.Parallel()
+		dir, err := os.ReadDir(rev4YamlPath)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		for _, file := range dir {
+
+			bytes, err := os.ReadFile(rev4YamlPath + file.Name())
+			if err != nil {
+				t.Fatal(err)
+			}
+			oscalDoc := oscalTypes_1_0_4.OscalCompleteSchema{}
+			err = yaml.Unmarshal(bytes, &oscalDoc)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// Marshal the document back to yaml
+			marshaled, err := yaml.Marshal(oscalDoc)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			actual := map[string]interface{}{}
+			expected := map[string]interface{}{}
+			err = yaml.Unmarshal(marshaled, &actual)
+			if err != nil {
+				t.Fatal(err)
+			}
+			err = yaml.Unmarshal(bytes, &expected)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if !reflect.DeepEqual(actual, expected) {
+				t.Error("expected marshaled yaml to be equal to the original yaml")
+			}
+
+		}
+	})
+
+	t.Run("Rev5", func(t *testing.T) {
+		t.Parallel()
+		dir, err := os.ReadDir(rev5YamlPath)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		for _, file := range dir {
+
+			bytes, err := os.ReadFile(rev5YamlPath + file.Name())
+			if err != nil {
+				t.Fatal(err)
+			}
+			oscalDoc := map[string]interface{}{}
+			err = yaml.Unmarshal(bytes, &oscalDoc)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// Marshal the document back to yaml
+			marshaled, err := yaml.Marshal(oscalDoc)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			actual := oscalTypes_1_1_1.OscalCompleteSchema{}
+			expected := map[string]interface{}{}
+			err = yaml.Unmarshal(marshaled, &actual)
+			if err != nil {
+				t.Fatal(err)
+			}
+			err = yaml.Unmarshal(bytes, &expected)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if !reflect.DeepEqual(actual, expected) {
+				t.Error("expected marshaled yaml to be equal to the original yaml")
+			}
+
+		}
 	})
 }
 
