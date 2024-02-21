@@ -2,6 +2,8 @@ package generate
 
 import (
 	"testing"
+
+	"github.com/swaggest/jsonschema-go"
 )
 
 func TestBuildTagString(t *testing.T) {
@@ -155,6 +157,8 @@ func TestIsPrimitiveJsonType(t *testing.T) {
 		{in: "number", out: true},
 		{in: "integer", out: true},
 		{in: "object", out: false},
+		{in: "array", out: false},
+		{in: "date-time", out: true},
 	}
 
 	for _, testCase := range testCases {
@@ -181,6 +185,7 @@ func TestGetGoType(t *testing.T) {
 		{in: "integer", out: "int"},
 		{in: "array", out: "[]"},
 		{in: "object", out: ""},
+		{in: "date-time", out: "time.Time"},
 	}
 
 	for _, testCase := range testCases {
@@ -278,6 +283,73 @@ func TestFmtFieldName(t *testing.T) {
 		expected := testCase.out
 		if expected != actual {
 			t.Fatalf("error FmtFieldName(): expected: %s | got: %s", expected, actual)
+		}
+	}
+}
+
+func TestGetImportKey(t *testing.T) {
+	t.Parallel()
+
+	type TestCase struct {
+		in  string
+		out string
+	}
+
+	testCases := []TestCase{
+		{in: "uri", out: ""},
+		{in: "date-time", out: "date-time"},
+	}
+
+	for _, testCase := range testCases {
+		schema := jsonschema.Schema{Format: &testCase.in}
+		actual := getCustomTypeKey(schema)
+		expected := testCase.out
+		if expected != actual {
+			t.Fatalf("error getImportKey(): expected: %s | got: %s", expected, actual)
+		}
+	}
+}
+
+func TestGetImportType(t *testing.T) {
+	t.Parallel()
+
+	type TestCase struct {
+		in  string
+		out string
+	}
+
+	testCases := []TestCase{
+		{in: "uri", out: ""},
+		{in: "date-time", out: "time.Time"},
+	}
+
+	for _, testCase := range testCases {
+		actual := getCustomType(testCase.in)
+		expected := testCase.out
+		if expected != actual {
+			t.Fatalf("error getImportType(): expected: %s | got: %s", expected, actual)
+		}
+	}
+}
+
+func TestHasImportKey(t *testing.T) {
+	t.Parallel()
+
+	type TestCase struct {
+		in  string
+		out bool
+	}
+
+	testCases := []TestCase{
+		{in: "uri", out: false},
+		{in: "date-time", out: true},
+	}
+
+	for _, testCase := range testCases {
+		actual := hasCustomType(testCase.in)
+		expected := testCase.out
+		if expected != actual {
+			t.Fatalf("error hasImportKey(): expected: %t | got: %t", expected, actual)
 		}
 	}
 }

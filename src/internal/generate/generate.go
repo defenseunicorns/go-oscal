@@ -59,8 +59,16 @@ func Generate(oscalSchema []byte, pkgName string, tags []string) (typeBytes []by
 
 	// Add header comment
 	typeString := fmt.Sprintf("%s\n", headerComment)
+
 	// Add the package name
 	typeString += fmt.Sprintf("package %s\n\n", pkgName)
+
+	// Add additional imports
+	typeString += "import (\n"
+	for _, imp := range AdditionalImports {
+		typeString += fmt.Sprintf("\t\"%s\"\n", imp)
+	}
+	typeString += ")\n\n"
 
 	// Add the struct definitions in order of creation.
 	for _, ref := range config.refQueue.History() {
@@ -211,7 +219,7 @@ func (c *GeneratorConfig) buildTypeString(property jsonschema.Schema) (propType 
 	var possibleRefs []string
 
 	if property.Type != nil && property.Type.SimpleTypes != nil {
-		jsonType := string(*property.Type.SimpleTypes)
+		jsonType := getJsonType(property)
 		// convert json type to go type
 		propType = getGoType(jsonType)
 		// if the type is not primitive, we need to add the name of the type
@@ -311,7 +319,7 @@ func (c *GeneratorConfig) findSubType(schema jsonschema.Schema) (name string, er
 			err = fmt.Errorf("could not determine name for %v", schema)
 		}
 	default:
-		name = getJsonType(schema)
+		name = simpleType
 	}
 
 	return name, err

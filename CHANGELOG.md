@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `doctor` command to prep new oscal_complete_schema.json from [OSCAL Releases](https://github.com/usnistgov/OSCAL/releases/tag/v1.1.2) for use in the `validate` and `revise` commands. Behavior ported from [oscal-json-doctor](https://github.com/defenseunicorns/oscal-json-doctor) in order to keep all needed functionality within the go-oscal repo. 
 - documentation for `generate` and `doctor` commands
 - documentation for upgrading to a new version of OSCAL (docs/upgrading-oscal-version.md)
+- Added support for custom types. 
 
 ### Changed
 - [breaking] Types now belong to unique packages in the format `oscalTypes_X_X_X` (ie: `oscalTypes_1_0_4`)
@@ -22,6 +23,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Breaking Types Changes
 #### oscal types versions: 1.0.4, 1.0.5, 1.0.6, 1.1.0, 1.1.1
+- update fields that are of format `date-time` in schema are now represented as `time.Time` in Types.
 
 - update `AssessmentPlan.TermsAndConditions` is now of type `AssessmentPlanTermsAndConditions` per the schema `title`
   - Renamed from `TermsAndConditions`

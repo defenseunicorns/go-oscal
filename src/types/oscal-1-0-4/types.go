@@ -15,6 +15,10 @@ Source: https://github.com/defenseunicorns/go-oscal
 */
 package oscalTypes_1_0_4
 
+import (
+	"time"
+)
+
 type OscalModels = OscalCompleteSchema
 type OscalCompleteSchema struct {
 	AssessmentPlan            AssessmentPlan            `json:"assessment-plan,omitempty" yaml:"assessment-plan,omitempty"`
@@ -133,13 +137,13 @@ type LocalDefinitions struct {
 
 type Metadata struct {
 	DocumentIds        []DocumentId       `json:"document-ids,omitempty" yaml:"document-ids,omitempty"`
-	LastModified       string             `json:"last-modified" yaml:"last-modified"`
+	LastModified       time.Time          `json:"last-modified" yaml:"last-modified"`
 	Links              []Link             `json:"links,omitempty" yaml:"links,omitempty"`
 	Locations          []Location         `json:"locations,omitempty" yaml:"locations,omitempty"`
 	OscalVersion       string             `json:"oscal-version" yaml:"oscal-version"`
 	Parties            []Party            `json:"parties,omitempty" yaml:"parties,omitempty"`
 	Props              []Property         `json:"props,omitempty" yaml:"props,omitempty"`
-	Published          string             `json:"published,omitempty" yaml:"published,omitempty"`
+	Published          time.Time          `json:"published,omitempty" yaml:"published,omitempty"`
 	Remarks            string             `json:"remarks,omitempty" yaml:"remarks,omitempty"`
 	ResponsibleParties []ResponsibleParty `json:"responsible-parties,omitempty" yaml:"responsible-parties,omitempty"`
 	Revisions          []Revision         `json:"revisions,omitempty" yaml:"revisions,omitempty"`
@@ -186,7 +190,7 @@ type Result struct {
 	AssessmentLog    AssessmentLog           `json:"assessment-log,omitempty" yaml:"assessment-log,omitempty"`
 	Attestations     []AttestationStatements `json:"attestations,omitempty" yaml:"attestations,omitempty"`
 	Description      string                  `json:"description" yaml:"description"`
-	End              string                  `json:"end,omitempty" yaml:"end,omitempty"`
+	End              time.Time               `json:"end,omitempty" yaml:"end,omitempty"`
 	Findings         []Finding               `json:"findings,omitempty" yaml:"findings,omitempty"`
 	Links            []Link                  `json:"links,omitempty" yaml:"links,omitempty"`
 	LocalDefinitions LocalDefinitions        `json:"local-definitions,omitempty" yaml:"local-definitions,omitempty"`
@@ -195,7 +199,7 @@ type Result struct {
 	Remarks          string                  `json:"remarks,omitempty" yaml:"remarks,omitempty"`
 	ReviewedControls ReviewedControls        `json:"reviewed-controls" yaml:"reviewed-controls"`
 	Risks            []Risk                  `json:"risks,omitempty" yaml:"risks,omitempty"`
-	Start            string                  `json:"start" yaml:"start"`
+	Start            time.Time               `json:"start" yaml:"start"`
 	Title            string                  `json:"title" yaml:"title"`
 	UUID             string                  `json:"uuid" yaml:"uuid"`
 }
@@ -274,9 +278,9 @@ type PlanOfActionAndMilestonesLocalDefinitions struct {
 }
 
 type Observation struct {
-	Collected        string             `json:"collected" yaml:"collected"`
+	Collected        time.Time          `json:"collected" yaml:"collected"`
 	Description      string             `json:"description" yaml:"description"`
-	Expires          string             `json:"expires,omitempty" yaml:"expires,omitempty"`
+	Expires          time.Time          `json:"expires,omitempty" yaml:"expires,omitempty"`
 	Links            []Link             `json:"links,omitempty" yaml:"links,omitempty"`
 	Methods          []string           `json:"methods" yaml:"methods"`
 	Origins          []Origin           `json:"origins,omitempty" yaml:"origins,omitempty"`
@@ -303,7 +307,7 @@ type PoamItem struct {
 
 type Risk struct {
 	Characterizations   []Characterization   `json:"characterizations,omitempty" yaml:"characterizations,omitempty"`
-	Deadline            string               `json:"deadline,omitempty" yaml:"deadline,omitempty"`
+	Deadline            time.Time            `json:"deadline,omitempty" yaml:"deadline,omitempty"`
 	Description         string               `json:"description" yaml:"description"`
 	Links               []Link               `json:"links,omitempty" yaml:"links,omitempty"`
 	MitigatingFactors   []MitigatingFactor   `json:"mitigating-factors,omitempty" yaml:"mitigating-factors,omitempty"`
@@ -529,11 +533,11 @@ type ResponsibleParty struct {
 }
 
 type Revision struct {
-	LastModified string     `json:"last-modified,omitempty" yaml:"last-modified,omitempty"`
+	LastModified time.Time  `json:"last-modified,omitempty" yaml:"last-modified,omitempty"`
 	Links        []Link     `json:"links,omitempty" yaml:"links,omitempty"`
 	OscalVersion string     `json:"oscal-version,omitempty" yaml:"oscal-version,omitempty"`
 	Props        []Property `json:"props,omitempty" yaml:"props,omitempty"`
-	Published    string     `json:"published,omitempty" yaml:"published,omitempty"`
+	Published    time.Time  `json:"published,omitempty" yaml:"published,omitempty"`
 	Remarks      string     `json:"remarks,omitempty" yaml:"remarks,omitempty"`
 	Title        string     `json:"title,omitempty" yaml:"title,omitempty"`
 	Version      string     `json:"version" yaml:"version"`
@@ -949,23 +953,23 @@ type FrequencyCondition struct {
 }
 
 type OnDateCondition struct {
-	Date string `json:"date" yaml:"date"`
+	Date time.Time `json:"date" yaml:"date"`
 }
 
 type OnDateRangeCondition struct {
-	End   string `json:"end" yaml:"end"`
-	Start string `json:"start" yaml:"start"`
+	End   time.Time `json:"end" yaml:"end"`
+	Start time.Time `json:"start" yaml:"start"`
 }
 
 type AssessmentLogEntry struct {
 	Description  string        `json:"description,omitempty" yaml:"description,omitempty"`
-	End          string        `json:"end,omitempty" yaml:"end,omitempty"`
+	End          time.Time     `json:"end,omitempty" yaml:"end,omitempty"`
 	Links        []Link        `json:"links,omitempty" yaml:"links,omitempty"`
 	LoggedBy     []LoggedBy    `json:"logged-by,omitempty" yaml:"logged-by,omitempty"`
 	Props        []Property    `json:"props,omitempty" yaml:"props,omitempty"`
 	RelatedTasks []RelatedTask `json:"related-tasks,omitempty" yaml:"related-tasks,omitempty"`
 	Remarks      string        `json:"remarks,omitempty" yaml:"remarks,omitempty"`
-	Start        string        `json:"start" yaml:"start"`
+	Start        time.Time     `json:"start" yaml:"start"`
 	Title        string        `json:"title,omitempty" yaml:"title,omitempty"`
 	UUID         string        `json:"uuid" yaml:"uuid"`
 }
@@ -1044,13 +1048,13 @@ type RequiredAsset struct {
 
 type RiskLogEntry struct {
 	Description      string                  `json:"description,omitempty" yaml:"description,omitempty"`
-	End              string                  `json:"end,omitempty" yaml:"end,omitempty"`
+	End              time.Time               `json:"end,omitempty" yaml:"end,omitempty"`
 	Links            []Link                  `json:"links,omitempty" yaml:"links,omitempty"`
 	LoggedBy         []LoggedBy              `json:"logged-by,omitempty" yaml:"logged-by,omitempty"`
 	Props            []Property              `json:"props,omitempty" yaml:"props,omitempty"`
 	RelatedResponses []RiskResponseReference `json:"related-responses,omitempty" yaml:"related-responses,omitempty"`
 	Remarks          string                  `json:"remarks,omitempty" yaml:"remarks,omitempty"`
-	Start            string                  `json:"start" yaml:"start"`
+	Start            time.Time               `json:"start" yaml:"start"`
 	StatusChange     string                  `json:"status-change,omitempty" yaml:"status-change,omitempty"`
 	Title            string                  `json:"title,omitempty" yaml:"title,omitempty"`
 	UUID             string                  `json:"uuid" yaml:"uuid"`

@@ -10,6 +10,12 @@ import (
 	"github.com/swaggest/jsonschema-go"
 )
 
+var AdditionalImports []string = []string{"time"}
+
+var CustomTypes map[string]string = map[string]string{
+	"date-time": "time.Time",
+}
+
 var RefsToIgnore map[string]bool = map[string]bool{
 	"#json-schema-directive": true,
 }
@@ -137,8 +143,37 @@ func getRefWithName(name string) string {
 	return "#/definitions/" + name
 }
 
+// hasCustomType returns true if the key is associated with a custom type
+func hasCustomType(t string) bool {
+	_, ok := CustomTypes[t]
+	return ok
+}
+
+// getCustomTypeKey returns the custom type key if the schema has a custom type
+func getCustomTypeKey(schema jsonschema.Schema) string {
+	// If the schema has a format, check if it's a custom type
+	if schema.Format != nil {
+		if _, ok := CustomTypes[*schema.Format]; ok {
+			return *schema.Format
+		}
+	}
+	return ""
+}
+
+// getCustomType returns the custom type given a custom type key
+func getCustomType(t string) string {
+	if importType, ok := CustomTypes[t]; ok {
+		return importType
+	}
+	return ""
+}
+
 // returns the json type of the schema
 func getJsonType(schema jsonschema.Schema) string {
+	// if the schema has a custom type, return the custom type
+	if importType := getCustomTypeKey(schema); importType != "" {
+		return importType
+	}
 	if schema.Type != nil {
 		return string(*schema.Type.SimpleTypes)
 	}
@@ -148,6 +183,10 @@ func getJsonType(schema jsonschema.Schema) string {
 // isPrimitiveJsonType returns true if the type is a primitive type
 func isPrimitiveJsonType(t string) bool {
 	lower := strings.ToLower(t)
+	// Handle custom types as primitive types
+	if hasCustomType(lower) {
+		return true
+	}
 	switch lower {
 	case "string":
 		return true
@@ -164,6 +203,12 @@ func isPrimitiveJsonType(t string) bool {
 // getGoType returns the Go type for a given JSON type
 func getGoType(t string) string {
 	lower := strings.ToLower(t)
+
+	// Return custom type if it exists
+	if hasCustomType(lower) {
+		return getCustomType(lower)
+
+	}
 	switch lower {
 	case "string":
 		return "string"
