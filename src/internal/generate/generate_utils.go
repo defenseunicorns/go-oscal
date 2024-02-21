@@ -10,7 +10,7 @@ import (
 	"github.com/swaggest/jsonschema-go"
 )
 
-var AdditionalImports []string = []string{"time"}
+var Imports []string = []string{"time"}
 
 var CustomTypes map[string]string = map[string]string{
 	"date-time": "time.Time",
@@ -402,4 +402,14 @@ func stringifyFirstChar(str string) string {
 	}
 
 	return intToWordMap[i] + "_" + str[1:]
+}
+
+// buildImportString returns a string of imports for the Go file
+func buildImportString() string {
+	imports := "import (\n"
+	for _, imp := range Imports {
+		imports += fmt.Sprintf("\t\"%s\"\n", imp)
+	}
+	imports += ")\n"
+	return imports
 }

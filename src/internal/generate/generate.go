@@ -64,11 +64,7 @@ func Generate(oscalSchema []byte, pkgName string, tags []string) (typeBytes []by
 	typeString += fmt.Sprintf("package %s\n\n", pkgName)
 
 	// Add additional imports
-	typeString += "import (\n"
-	for _, imp := range AdditionalImports {
-		typeString += fmt.Sprintf("\t\"%s\"\n", imp)
-	}
-	typeString += ")\n\n"
+	typeString += buildImportString()
 
 	// Add the struct definitions in order of creation.
 	for _, ref := range config.refQueue.History() {
