@@ -134,7 +134,7 @@ func TestFieldStability(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			oscalDoc := map[string]interface{}{}
+			oscalDoc := oscalTypes_1_1_1.OscalCompleteSchema{}
 			err = yaml.Unmarshal(bytes, &oscalDoc)
 			if err != nil {
 				t.Fatal(err)
@@ -146,7 +146,7 @@ func TestFieldStability(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			actual := oscalTypes_1_1_1.OscalCompleteSchema{}
+			actual := map[string]interface{}{}
 			expected := map[string]interface{}{}
 			err = yaml.Unmarshal(marshaled, &actual)
 			if err != nil {
