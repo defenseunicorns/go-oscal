@@ -12,6 +12,10 @@ import (
 )
 
 var (
+	keysToNotRecurse = map[string]bool{
+		"flat":        true,
+		"include-all": true,
+	}
 	rev4YamlPath  = "../../../testdata/generation/e2e/rev4/yaml/"
 	rev5YamlPath  = "../../../testdata/generation/e2e/rev5/yaml/"
 	oscal104Types = "../../types/oscal-1-0-4/types.go"
@@ -173,7 +177,9 @@ func ValidateKeys(model map[string]interface{}, typeString string, t *testing.T)
 
 		// If the model is a map find the next value
 		if rootAsMap, ok := value.(map[string]interface{}); ok {
-			ValidateKeys(rootAsMap, typeString, t)
+			if _, ok := keysToNotRecurse[key]; !ok {
+				ValidateKeys(rootAsMap, typeString, t)
+			}
 		}
 
 		// If the model is a rootAsSlice find the next value
