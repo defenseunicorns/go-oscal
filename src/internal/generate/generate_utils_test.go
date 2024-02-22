@@ -2,6 +2,8 @@ package generate
 
 import (
 	"testing"
+
+	"github.com/swaggest/jsonschema-go"
 )
 
 func TestBuildTagString(t *testing.T) {
@@ -121,7 +123,7 @@ func TestGetJsonType(t *testing.T) {
 
 		expected := "object"
 
-		actual := getJsonType(*schemaWithSimpleType)
+		actual := getJsonOrCustomType(*schemaWithSimpleType)
 
 		if actual != expected {
 			t.Errorf("expected %s, got %s", expected, actual)
@@ -133,7 +135,7 @@ func TestGetJsonType(t *testing.T) {
 		schemaWithNoSimpleType := schema.OneOf[0].TypeObject // This schema has no type
 		expected := ""
 
-		actual := getJsonType(*schemaWithNoSimpleType)
+		actual := getJsonOrCustomType(*schemaWithNoSimpleType)
 
 		if actual != expected {
 			t.Errorf("expected %s, got %s", expected, actual)
@@ -155,10 +157,12 @@ func TestIsPrimitiveJsonType(t *testing.T) {
 		{in: "number", out: true},
 		{in: "integer", out: true},
 		{in: "object", out: false},
+		{in: "array", out: false},
+		{in: "date-time", out: true},
 	}
 
 	for _, testCase := range testCases {
-		actual := isPrimitiveJsonType(testCase.in)
+		actual := isPrimitiveOrCustomJsonType(testCase.in)
 		expected := testCase.out
 		if expected != actual {
 			t.Errorf("error isPrimitiveJsonType(): expected: %t | got: %t", expected, actual)
@@ -181,6 +185,7 @@ func TestGetGoType(t *testing.T) {
 		{in: "integer", out: "int"},
 		{in: "array", out: "[]"},
 		{in: "object", out: ""},
+		{in: "date-time", out: "time.Time"},
 	}
 
 	for _, testCase := range testCases {
@@ -278,6 +283,29 @@ func TestFmtFieldName(t *testing.T) {
 		expected := testCase.out
 		if expected != actual {
 			t.Fatalf("error FmtFieldName(): expected: %s | got: %s", expected, actual)
+		}
+	}
+}
+
+func TestGetCustomTypeKey(t *testing.T) {
+	t.Parallel()
+
+	type TestCase struct {
+		in  string
+		out string
+	}
+
+	testCases := []TestCase{
+		{in: "uri", out: ""},
+		{in: "date-time", out: "date-time"},
+	}
+
+	for _, testCase := range testCases {
+		schema := jsonschema.Schema{Format: &testCase.in}
+		actual := getCustomTypeKey(schema)
+		expected := testCase.out
+		if expected != actual {
+			t.Fatalf("error getImportKey(): expected: %s | got: %s", expected, actual)
 		}
 	}
 }

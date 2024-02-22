@@ -59,8 +59,12 @@ func Generate(oscalSchema []byte, pkgName string, tags []string) (typeBytes []by
 
 	// Add header comment
 	typeString := fmt.Sprintf("%s\n", headerComment)
+
 	// Add the package name
 	typeString += fmt.Sprintf("package %s\n\n", pkgName)
+
+	// Add additional imports
+	typeString += buildImportString()
 
 	// Add the struct definitions in order of creation.
 	for _, ref := range config.refQueue.History() {
@@ -211,11 +215,11 @@ func (c *GeneratorConfig) buildTypeString(property jsonschema.Schema) (propType 
 	var possibleRefs []string
 
 	if property.Type != nil && property.Type.SimpleTypes != nil {
-		jsonType := string(*property.Type.SimpleTypes)
+		jsonType := getJsonOrCustomType(property)
 		// convert json type to go type
 		propType = getGoType(jsonType)
 		// if the type is not primitive, we need to add the name of the type
-		if !isPrimitiveJsonType(jsonType) {
+		if !isPrimitiveOrCustomJsonType(jsonType) {
 			name, err := c.findSubType(property)
 			if err != nil {
 				return "", err
@@ -266,7 +270,7 @@ func (c *GeneratorConfig) buildTypeString(property jsonschema.Schema) (propType 
 
 // findSubType finds the name of the type for the given schema.
 func (c *GeneratorConfig) findSubType(schema jsonschema.Schema) (name string, err error) {
-	simpleType := getJsonType(schema)
+	simpleType := getJsonOrCustomType(schema)
 	switch simpleType {
 	case "object":
 		// If the schema has a ref, we need to find the name of the ref.
@@ -311,7 +315,7 @@ func (c *GeneratorConfig) findSubType(schema jsonschema.Schema) (name string, er
 			err = fmt.Errorf("could not determine name for %v", schema)
 		}
 	default:
-		name = getJsonType(schema)
+		name = simpleType
 	}
 
 	return name, err
