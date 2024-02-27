@@ -22,6 +22,9 @@ var (
 	oscal111Types = "../../types/oscal-1-1-1/types.go"
 )
 
+// TestFedrampBaselineYamlFieldsInTypes tests that the fields in the yaml files are present in the types.go files
+// for the fedramp baseline schemas. While this test is not exhaustive,
+// it is a good way to capture any missing fields in the types.go files should they arise.
 func TestFedrampBaselineYamlFieldsInTypes(t *testing.T) {
 	t.Parallel()
 
@@ -79,6 +82,9 @@ func TestFedrampBaselineYamlFieldsInTypes(t *testing.T) {
 	})
 }
 
+// TestFieldStability tests that the fields in the yaml files are stable when marshaled and unmarshaled
+// for the fedramp baseline schemas.
+// This is important to ensure that the fields are not lost when marshaled and unmarshaled.
 func TestFieldStability(t *testing.T) {
 	t.Parallel()
 
