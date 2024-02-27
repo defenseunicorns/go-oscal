@@ -12,17 +12,12 @@ import (
 )
 
 const (
+	schemaPath            string = "../schemas/"
 	fieldsPresentFilePath string = "../../../testdata/fields-present.json"
 	fieldsMissingFilePath string = "../../../testdata/fields-missing.json"
-	oscal104FilePath      string = "../../internal/schemas/oscal_complete_schema-1-0-4.json"
-	oscal105FilePath      string = "../../internal/schemas/oscal_complete_schema-1-0-5.json"
-	oscal106FilePath      string = "../../internal/schemas/oscal_complete_schema-1-0-6.json"
-	oscal110FilePath      string = "../../internal/schemas/oscal_complete_schema-1-1-0.json"
-	oscal111FilePath      string = "../../internal/schemas/oscal_complete_schema-1-1-1.json"
 )
 
 var (
-	schemaPaths            = []string{oscal104FilePath, oscal105FilePath, oscal106FilePath, oscal110FilePath, oscal111FilePath}
 	schemaMutex            = sync.Mutex{}
 	schemaByteMap          = map[string][]byte{}
 	writeOutput            = true
@@ -35,23 +30,22 @@ func TestGenerate(t *testing.T) {
 
 	t.Run("CompleteSchema", func(t *testing.T) {
 
-		testCases := map[string][]byte{
-			"oscal-1-0-4": schemaByteMap[oscal104FilePath],
-			"oscal-1-0-5": schemaByteMap[oscal105FilePath],
-			"oscal-1-0-6": schemaByteMap[oscal106FilePath],
-			"oscal-1-1-0": schemaByteMap[oscal110FilePath],
-			"oscal-1-1-1": schemaByteMap[oscal111FilePath],
-		}
+		for path, schemaBytes := range schemaByteMap {
+			if !strings.Contains(path, "_complete_schema") {
+				continue
+			}
 
-		for path, schemaBytes := range testCases {
-			pkgName := strings.ReplaceAll(path, "-", "_")
+			pkgPath := strings.ReplaceAll(path, "_complete_schema", "")
+			pkgPath = strings.ReplaceAll(pkgPath, ".json", "")
+			pkgName := strings.ReplaceAll(pkgPath, "-", "_")
 			pkgName = strings.ReplaceAll(pkgName, "oscal", "oscalTypes")
+
 			bytes, err := Generate(schemaBytes, pkgName, []string{"json", "yaml"})
 			if err != nil {
 				t.Errorf("expected no error, got %v", err)
 			}
 			if writeOutput {
-				utils.WriteOutput(bytes, "../../types/"+path+"/types.go")
+				utils.WriteOutput(bytes, "../../types/"+pkgPath+"/types.go")
 			}
 		}
 	})
@@ -63,9 +57,8 @@ func TestGenerateDeterministic(t *testing.T) {
 	getSchemaByteMap(t)
 
 	var previousBytes []byte
-	testCases := [][]byte{schemaByteMap[oscal104FilePath], schemaByteMap[oscal105FilePath], schemaByteMap[oscal106FilePath], schemaByteMap[oscal110FilePath], schemaByteMap[oscal111FilePath]}
 
-	for _, schemaBytes := range testCases {
+	for _, schemaBytes := range schemaByteMap {
 		previousBytes = nil
 		for i := 0; i < deterministicTestCount; i++ {
 			bytes, err := Generate(schemaBytes, "oscalTypes", []string{"json", "yaml"})
@@ -87,10 +80,8 @@ func TestBuildStructs(t *testing.T) {
 	t.Parallel()
 	getSchemaByteMap(t)
 
-	schemas := []string{oscal104FilePath, oscal105FilePath, oscal106FilePath, oscal110FilePath, oscal111FilePath}
-
-	for _, path := range schemas {
-		schema, err := buildSchema(schemaByteMap[path])
+	for _, schemaBytes := range schemaByteMap {
+		schema, err := buildSchema(schemaBytes)
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
 		}
@@ -131,7 +122,7 @@ func TestBuildStructs(t *testing.T) {
 func TestBuildStructString(t *testing.T) {
 	t.Parallel()
 	getSchemaByteMap(t)
-	schema, err := buildSchema(schemaByteMap[oscal111FilePath])
+	schema, err := buildSchema(schemaByteMap["oscal_complete_schema-1-1-1.json"])
 	if err != nil {
 		t.Errorf("expected no error, got %v", err)
 	}
@@ -224,7 +215,7 @@ func TestGetTypeSuffix(t *testing.T) {
 	t.Parallel()
 	getSchemaByteMap(t)
 
-	schema, err := buildSchema(schemaByteMap[oscal111FilePath])
+	schema, err := buildSchema(schemaByteMap["oscal_complete_schema-1-1-1.json"])
 	if err != nil {
 		t.Errorf("expected no error, got %v", err)
 	}
@@ -289,7 +280,7 @@ func TestBuildTypeString(t *testing.T) {
 	t.Parallel()
 	getSchemaByteMap(t)
 
-	schema, err := buildSchema(schemaByteMap[oscal111FilePath])
+	schema, err := buildSchema(schemaByteMap["oscal_complete_schema-1-1-1.json"])
 	if err != nil {
 		t.Errorf("expected no error, got %v", err)
 	}
@@ -373,12 +364,20 @@ func getSchemaByteMap(t *testing.T) {
 	schemaMutex.Lock()
 	defer schemaMutex.Unlock()
 	if len(schemaByteMap) == 0 {
-		for _, path := range schemaPaths {
-			bytes, err := os.ReadFile(path)
-			if err != nil {
-				panic(err)
+		dir, err := os.ReadDir(schemaPath)
+		if err != nil {
+			panic(err)
+		}
+		for _, file := range dir {
+			path := file.Name()
+			if !strings.Contains(path, ".json") {
+				continue
 			}
-			schemaByteMap[path] = bytes
+			schemaBytes, err := os.ReadFile(schemaPath + path)
+			if err != nil {
+				t.Fatalf("expected no error, got %v", err)
+			}
+			schemaByteMap[path] = schemaBytes
 		}
 	}
 }
