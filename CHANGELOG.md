@@ -1,28 +1,34 @@
 # Change Log
+
 All notable changes to this project will be documented in this file.
- 
+
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
- 
+
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
-- `doctor` command to prep new oscal_complete_schema.json from [OSCAL Releases](https://github.com/usnistgov/OSCAL/releases/tag/v1.1.2) for use in the `validate` and `revise` commands. Behavior ported from [oscal-json-doctor](https://github.com/defenseunicorns/oscal-json-doctor) in order to keep all needed functionality within the go-oscal repo. 
+
+- `doctor` command to prep new oscal_complete_schema.json from [OSCAL Releases](https://github.com/usnistgov/OSCAL/releases/tag/v1.1.2) for use in the `validate` and `revise` commands. Behavior ported from [oscal-json-doctor](https://github.com/defenseunicorns/oscal-json-doctor) in order to keep all needed functionality within the go-oscal repo.
 - documentation for `generate` and `doctor` commands
 - documentation for upgrading to a new version of OSCAL (docs/upgrading-oscal-version.md)
-- Added support for custom types. 
+- Added support for custom types.
+- Added validation and type support for Oscal Complete Schema 1.1.2
 
 ### Changed
+
 - [breaking] Types now belong to unique packages in the format `oscalTypes_X_X_X` (ie: `oscalTypes_1_0_4`)
 - Now uses the schema information to generate types
 - update `OscalModels` is now an alias for `OscalCompleteSchema`
 - update makefile to include `upgrade`, `generate-latest-schema`, and `doctor-latest-schema` methods
 - remove make commands related to generating types for individual schemas in favor of using complete schemas only for consistency.
 - moved `src/pkg/validation/schema` to `src/internal/schemas`
-- renamed `src/internal/oscal` to `src/internal/generate` for consistency. 
+- renamed `src/internal/oscal` to `src/internal/generate` for consistency.
 
 ### Breaking Types Changes
+
 #### oscal types versions: 1.0.4, 1.0.5, 1.0.6, 1.1.0, 1.1.1
+
 - update fields that are of format `date-time` in schema are now represented as `time.Time` in Types.
 
 - update `AssessmentPlan.TermsAndConditions` is now of type `AssessmentPlanTermsAndConditions` per the schema `title`
@@ -34,7 +40,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - rename `LocalDefinitions1` to `LocalDefinitions`
   - fix `AssessmentPlan`, `AssessmentResults`, and `Results` now referencing the correct definition for their `LocalDefinitions` field. Previously were referencing the `PlanOfActionAndMilestonesLocalDefinitions` definition.
 
-- rename `Timing struct` to `EventTiming struct` per the schema `title`. 
+- rename `Timing struct` to `EventTiming struct` per the schema `title`.
   - update `Task.Timing` to be of type `EventTiming`
 
 - update `Capability.ControlImplementations` and `DefinedComponent.ControlImplementations` to be of type `[]ControlImplementationSet`
@@ -56,7 +62,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - update `SystemComponent.Status` is now of type `SystemComponentStatus`
   - create `SystemComponentStatus`
 
-- fix `IncludeAll struct` is now a type alias for `map[string]interface{}` in order to support marshaling and field access for what is an `anonymous` schema object 
+- fix `IncludeAll struct` is now a type alias for `map[string]interface{}` in order to support marshaling and field access for what is an `anonymous` schema object
 
 - rename `AtFrequency` to `FrequencyCondition` per schema title
 
@@ -86,10 +92,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - rename `AssemblyOscalProfileSelectControlById` to `SelectControlById`
   - fix `Import` and `InsertControls` `IncludeControls` and `ExcludeControls` now referencing correct definition
 
-- update `AssessedControls` fields `IncludeControls` and `ExcludeControls` to be of type `SelectControl` 
- - create `SelectControl struct` which has the definition previously assigned to `SelectControlById`
+- update `AssessedControls` fields `IncludeControls` and `ExcludeControls` to be of type `SelectControl`
+  
+  - create `SelectControl struct` which has the definition previously assigned to `SelectControlById`
 
-- fix `Flat struct` is now a type alias for `map[string]interface{}` in order to support marshaling and field access for what is an `anonymous` schema object 
+- fix `Flat struct` is now a type alias for `map[string]interface{}` in order to support marshaling and field access for what is an `anonymous` schema object
 
 - rename `AssemblyOscalProfileGroup` to `ControlGroup`
   - fix improper links to `Group` (should have been `AssemblyOscalProfileGroup` previously, now `ControlGroup`) in `CustomGrouping` (previously `Custom`) and `Merge` structs.
@@ -112,7 +119,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - update `Merge.Flat` to be of type `FlatWithoutGrouping`
   
 - rename `SelectControlById` to `AssessedControlSelectControlById`
-  - update `AssessedControls` fields `IncludeControls` and `ExcludeControls` to be of type `AssessedControlsSelectControlById` 
+  - update `AssessedControls` fields `IncludeControls` and `ExcludeControls` to be of type `AssessedControlsSelectControlById`
   
 - rename `AssemblyOscalProfileSelectControlById` to `SelectControlById`
   - fix `Import` and `InsertControls` `IncludeControls` and `ExcludeControls` now referencing correct definition
