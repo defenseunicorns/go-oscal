@@ -34,7 +34,7 @@ func TestGetRef(t *testing.T) {
 
 	t.Run("It returns the ref if it exists", func(t *testing.T) {
 		t.Parallel()
-		schema, err := buildSchema(schemaByteMap[oscal111FilePath])
+		schema, err := buildSchema(schemaByteMap["oscal_complete_schema-1-1-1.json"])
 		if err != nil {
 			t.Fatalf("error building schema: %s", err)
 		}
@@ -54,7 +54,7 @@ func TestGetRef(t *testing.T) {
 
 	t.Run("It returns the id if it exists", func(t *testing.T) {
 		t.Parallel()
-		schema, err := buildSchema(schemaByteMap[oscal111FilePath])
+		schema, err := buildSchema(schemaByteMap["oscal_complete_schema-1-1-1.json"])
 		if err != nil {
 			t.Fatalf("error building schema: %s", err)
 		}
@@ -73,7 +73,7 @@ func TestGetRef(t *testing.T) {
 
 	t.Run("It builds a ref with the title if no id and no ref exist", func(t *testing.T) {
 		t.Parallel()
-		schema, err := buildSchema(schemaByteMap[oscal111FilePath])
+		schema, err := buildSchema(schemaByteMap["oscal_complete_schema-1-1-1.json"])
 		if err != nil {
 			t.Fatalf("error building schema: %s", err)
 		}
@@ -92,7 +92,7 @@ func TestGetRef(t *testing.T) {
 
 	t.Run("It returns an error if no ref, id, or title exist", func(t *testing.T) {
 		t.Parallel()
-		schema, err := buildSchema(schemaByteMap[oscal111FilePath])
+		schema, err := buildSchema(schemaByteMap["oscal_complete_schema-1-1-1.json"])
 		if err != nil {
 			t.Fatalf("error building schema: %s", err)
 		}
@@ -112,7 +112,7 @@ func TestGetJsonType(t *testing.T) {
 	t.Parallel()
 	getSchemaByteMap(t)
 
-	schema, err := buildSchema(schemaByteMap[oscal111FilePath])
+	schema, err := buildSchema(schemaByteMap["oscal_complete_schema-1-1-1.json"])
 	if err != nil {
 		t.Fatalf("error building schema: %s", err)
 	}
@@ -225,7 +225,7 @@ func TestDefinitionMap(t *testing.T) {
 	t.Parallel()
 	getSchemaByteMap(t)
 
-	schema, err := buildSchema(schemaByteMap[oscal111FilePath])
+	schema, err := buildSchema(schemaByteMap["oscal_complete_schema-1-1-1.json"])
 	if err != nil {
 		t.Errorf("expected no error, got %v", err)
 	}
