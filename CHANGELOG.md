@@ -5,11 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased] - yyyy-mm-dd
+# [unreleased] - yyyy-mm-dd
+
+### Fix
+
+- utils/timestamp.GetTimeStamp now returns `time.Now()` as type `time.Time` in accordance with the changes to oscalTypes. 
+  - `time.Time` is marshalled and unmarshalled to rfc3339 by default in compliance with the oscal complete schema expected timestamp format. 
+
+# v0.2.0 - 2024-02-29
 
 ### Added
-
-- `doctor` command to prep new oscal_complete_schema.json from [OSCAL Releases](https://github.com/usnistgov/OSCAL/releases/tag/v1.1.2) for use in the `validate` and `revise` commands. Behavior ported from [oscal-json-doctor](https://github.com/defenseunicorns/oscal-json-doctor) in order to keep all needed functionality within the go-oscal repo.
+- OSCAL 1.1.2 types
+  - Validation and Revision now supported for OSCAL 1.1.2
+- `doctor` command to prep new oscal_complete_schema.json from [OSCAL Releases](https://github.com/usnistgov/OSCAL/releases/tag/v1.1.2) for use in the `validate` and `revise` commands. Behavior ported from [oscal-json-doctor](https://github.com/defenseunicorns/oscal-json-doctor) in order to keep all needed functionality within the go-oscal repo. Create to fix https://github.com/usnistgov/OSCAL/issues/1908 and https://github.com/usnistgov/OSCAL/issues/1908
 - documentation for `generate` and `doctor` commands
 - documentation for upgrading to a new version of OSCAL (docs/upgrading-oscal-version.md)
 - Added support for custom types.
