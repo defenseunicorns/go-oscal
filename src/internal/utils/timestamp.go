@@ -2,6 +2,7 @@ package utils
 
 import "time"
 
-func GetTimestamp() string {
-	return time.Now().Format(time.RFC3339)
+func GetTimestamp() time.Time {
+	// Defaults RFC3339 when marshalling and unmarshalling
+	return time.Now()
 }
