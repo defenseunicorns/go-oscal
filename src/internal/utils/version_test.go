@@ -1,6 +1,7 @@
 package utils_test
 
 import (
+	"os"
 	"strings"
 	"testing"
 
@@ -8,6 +9,7 @@ import (
 
 	"github.com/defenseunicorns/go-oscal/src/gooscaltest"
 	"github.com/defenseunicorns/go-oscal/src/internal/utils"
+	"gopkg.in/yaml.v3"
 )
 
 func TestVersionUtils(t *testing.T) {
@@ -212,4 +214,36 @@ func TestVersionUtils(t *testing.T) {
 			}
 		})
 	})
+}
+
+func TestGetLatestVersion(t *testing.T) {
+	t.Parallel()
+	latestVersionPath := "../../../update/oscal-version.yaml"
+
+	// Read the latest version from the file (updates from renovate PR when a new version of OSCAL is released)
+	bytes, err := os.ReadFile(latestVersionPath)
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+
+	// Unmarshal the latest version from the file
+	var updateVersion map[string]string
+	err = yaml.Unmarshal(bytes, &updateVersion)
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+	// Format the latest version
+	expected := utils.FormatOscalVersion(updateVersion["oscal"])
+
+	t.Run("returns the latest version", func(t *testing.T) {
+		t.Parallel()
+		latestVersion, err := utils.GetLatestVersion()
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+		if latestVersion != expected {
+			t.Errorf("expected %s, got %s", expected, latestVersion)
+		}
+	})
+
 }
