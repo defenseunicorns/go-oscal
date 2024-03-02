@@ -4,6 +4,8 @@ import (
 	"strings"
 	"testing"
 
+	"time"
+
 	"github.com/defenseunicorns/go-oscal/src/gooscaltest"
 	"github.com/defenseunicorns/go-oscal/src/internal/utils"
 )
@@ -177,11 +179,16 @@ func TestVersionUtils(t *testing.T) {
 
 		t.Run("updates the last modified field", func(t *testing.T) {
 			t.Parallel()
+
+			initTime, error := time.Parse(time.RFC3339, "2020-09-09T00:00:00Z")
+			if error != nil {
+				t.Errorf("expected no error, got %v", error)
+			}
 			metadata := map[string]interface{}{
-				"last-modified": "2020-09-09T00:00:00Z",
+				"last-modified": initTime,
 			}
 			utils.UpdateLastModified(metadata)
-			if metadata["last-modified"] == "2020-09-09T00:00:00Z" {
+			if metadata["last-modified"].(time.Time).Format(time.RFC3339) == initTime.Format(time.RFC3339) {
 				t.Errorf("expected last-modified to be updated")
 			}
 		})

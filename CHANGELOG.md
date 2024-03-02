@@ -4,7 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
- 
+
+# [unreleased] - yyyy-mm-dd
+
+### Fix
+
+- utils/timestamp.GetTimeStamp now returns `time.Now()` as type `time.Time` in accordance with the changes to oscalTypes. 
+  - `time.Time` is marshalled and unmarshalled to rfc3339 by default in compliance with the oscal complete schema expected timestamp format. 
+
 # v0.2.0 - 2024-02-29
 
 ### Added
