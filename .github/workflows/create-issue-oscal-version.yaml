@@ -25,7 +25,7 @@ jobs:
             // query existing issues with the same title
             const {
               data: { items: issues }
-            } = await octokit.search.issuesAndPullRequests({
+            } = await github.rest.search.issuesAndPullRequests({
               q: `repo:defenseunicorns/go-oscal is:issue is:open ${title} in:title`
             });
 
