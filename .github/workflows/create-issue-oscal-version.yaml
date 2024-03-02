@@ -26,20 +26,18 @@ jobs:
             const {
               data: { items: issues }
             } = await github.rest.search.issuesAndPullRequests({
-              q: `repo:defenseunicorns/go-oscal is:issue is:open ${title} in:title`
+              q: `${title} repo:defenseunicorns/go-oscal is:issue is:open in:title`
             });
 
-            // bail if the issue already exists
-            if (issues.length > 0) {
-              console.log('Issue already exists');
-              return;
+
+
+            // create the issue if it doesn't exist
+            if (issues.length === 0) {
+              github.rest.issues.create({
+                owner: 'defenseunicorns',
+                repo: 'go-oscal',
+                title: title,
+                body: body,
+                labels: ['enhancement']
+                });
             }
-
-            // create the issue
-            github.rest.issues.create({
-              owner: 'defenseunicorns',
-              repo: 'go-oscal',
-              title: title,
-              body: body,
-              labels: ['enhancement']
-            });
