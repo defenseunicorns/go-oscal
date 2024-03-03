@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 # [unreleased] - yyyy-mm-dd
 
+
+# v0.2.1 - 2024-03-01
+
 ### Fix
 
 - utils/timestamp.GetTimeStamp now returns `time.Now()` as type `time.Time` in accordance with the changes to oscalTypes. 
