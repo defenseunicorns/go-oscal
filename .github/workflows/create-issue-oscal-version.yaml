@@ -19,12 +19,25 @@ jobs:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
             const title = `PR #${context.payload.pull_request.number} OSCAL Version Update`;
-            const body = `A new OSCAL version has been released. Please review the changes https://github.com/usnistgov/OSCAL/releases`;
+            const body = `A new OSCAL version has been released. Please review the changes https://github.com/usnistgov/OSCAL/releases, and update the version in the repository. See [upgrading-oscal-version](https://github.com/defenseunicorns/go-oscal/blob/main/docs/upgrading-oscal-version.md). PR #${context.payload.pull_request.number}`;
             const projectID = '12';
-            github.rest.issues.create({
-              owner: 'defenseunicorns',
-              repo: 'go-oscal',
-              title: title,
-              body: body,
-              labels: ['enhancement']
+
+            // query existing issues with the same title
+            const {
+              data: { items: issues }
+            } = await github.rest.search.issuesAndPullRequests({
+              q: `${title} repo:defenseunicorns/go-oscal is:issue is:open in:title`
             });
+
+
+
+            // create the issue if it doesn't exist
+            if (issues.length === 0) {
+              github.rest.issues.create({
+                owner: 'defenseunicorns',
+                repo: 'go-oscal',
+                title: title,
+                body: body,
+                labels: ['enhancement']
+                });
+            }
