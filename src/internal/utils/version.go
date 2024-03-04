@@ -162,3 +162,20 @@ func ReplaceOscalVersionInMap(model map[string]interface{}, version string) (upg
 func UpdateLastModified(metadata map[string]interface{}) {
 	metadata["last-modified"] = GetTimestamp()
 }
+
+// VersionWarning returns an warning as an error if there are any known issues with the current version or it isn't the latest.
+func VersionWarning(version string) error {
+	latestVersion, err := GetLatestVersion()
+	if err != nil {
+		return err
+	}
+	switch version {
+	case "1.0.5":
+		return fmt.Errorf("WARNING: 1.0.5 has known issues. Please upgrade to version 1.0.6 or higher")
+	default:
+		if latestVersion != version {
+			return fmt.Errorf("WARNING: Currently using OSCAL version %s. The latest version is %s", version, latestVersion)
+		}
+	}
+	return nil
+}
