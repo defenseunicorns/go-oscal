@@ -166,11 +166,13 @@ func UpdateLastModified(metadata map[string]interface{}) {
 
 // VersionWarning prints a warning if the version is has known issues.
 func VersionWarning(version string) {
+	latestVersion, _ := GetLatestVersion()
 	switch version {
 	case "1.0.5":
 		log.Println("WARNING: 1.0.5 has known issues. Please upgrade to version 1.0.6 or higher.")
-		break
 	default:
-		return
+		if latestVersion != version {
+			log.Printf("WARNING: Currently using OSCAL version %s. Please upgrade to version %s", version, latestVersion)
+		}
 	}
 }

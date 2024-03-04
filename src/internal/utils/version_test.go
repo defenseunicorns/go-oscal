@@ -1,6 +1,7 @@
 package utils_test
 
 import (
+	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -200,6 +201,11 @@ func TestVersionUtils(t *testing.T) {
 		t.Parallel()
 		logBytes := gooscaltest.RedirectLog(t)
 
+		latestVersion, err := utils.GetLatestVersion()
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+
 		t.Run("prints a warning if the version is has known issues", func(t *testing.T) {
 			utils.VersionWarning("1.0.5")
 			if !strings.Contains(string(gooscaltest.ReadLog(t, logBytes)), "WARNING: 1.0.5 has known issues.") {
@@ -207,10 +213,17 @@ func TestVersionUtils(t *testing.T) {
 			}
 		})
 
-		t.Run("does not print a warning if the version is does not have known issues", func(t *testing.T) {
+		t.Run("prints a warning if not on the latest version", func(t *testing.T) {
 			utils.VersionWarning("1.0.6")
-			if strings.Contains(string(gooscaltest.ReadLog(t, logBytes)), "WARNING: 1.0.6 has known issues.") {
-				t.Errorf("expected warning not to be printed")
+			if !strings.Contains(string(gooscaltest.ReadLog(t, logBytes)), fmt.Sprintf("WARNING: A new version of the OSCAL schema is available. Please upgrade to version %s", latestVersion)) {
+				t.Errorf("expected warning to be printed")
+			}
+		})
+
+		t.Run("does not print a warning if on the latest version", func(t *testing.T) {
+			utils.VersionWarning(latestVersion)
+			if strings.Contains(string(gooscaltest.ReadLog(t, logBytes)), fmt.Sprintf("WARNING: A new version of the OSCAL schema is available. Please upgrade to version %s", latestVersion)) {
+				t.Errorf("expected no warning to be printed")
 			}
 		})
 	})
