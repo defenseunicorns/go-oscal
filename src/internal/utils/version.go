@@ -164,7 +164,7 @@ func UpdateLastModified(metadata map[string]interface{}) {
 	metadata["last-modified"] = GetTimestamp()
 }
 
-// VersionWarning prints a warning if the version is has known issues.
+// VersionWarning prints a warning if the version is has known issues or the version is not the latest.
 func VersionWarning(version string) {
 	latestVersion, _ := GetLatestVersion()
 	switch version {
