@@ -172,7 +172,7 @@ func VersionWarning(version string) {
 		log.Println("WARNING: 1.0.5 has known issues. Please upgrade to version 1.0.6 or higher.")
 	default:
 		if latestVersion != version {
-			log.Printf("WARNING: Currently using OSCAL version %s. Please upgrade to version %s", version, latestVersion)
+			log.Printf("WARNING: Currently using OSCAL version %s. The latest version is %s", version, latestVersion)
 		}
 	}
 }
