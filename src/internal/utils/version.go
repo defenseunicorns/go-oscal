@@ -3,7 +3,6 @@ package utils
 import (
 	"fmt"
 	"io/fs"
-	"log"
 	"os"
 	"reflect"
 	"regexp"
@@ -162,17 +161,4 @@ func ReplaceOscalVersionInMap(model map[string]interface{}, version string) (upg
 // UpdateLastModified updates the last-modified field in the metadata
 func UpdateLastModified(metadata map[string]interface{}) {
 	metadata["last-modified"] = GetTimestamp()
-}
-
-// VersionWarning prints a warning if the version is has known issues or the version is not the latest.
-func VersionWarning(version string) {
-	latestVersion, _ := GetLatestVersion()
-	switch version {
-	case "1.0.5":
-		log.Println("WARNING: 1.0.5 has known issues. Please upgrade to version 1.0.6 or higher.")
-	default:
-		if latestVersion != version {
-			log.Printf("WARNING: Currently using OSCAL version %s. The latest version is %s", version, latestVersion)
-		}
-	}
 }

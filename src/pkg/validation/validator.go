@@ -34,7 +34,6 @@ func NewValidator(oscalDoc utils.InterfaceOrBytes) (validator Validator, err err
 	if err != nil {
 		return validator, err
 	}
-	utils.VersionWarning(version)
 
 	return Validator{
 		jsonMap:       model,
@@ -56,7 +55,6 @@ func NewValidatorDesiredVersion(oscalDoc utils.InterfaceOrBytes, desiredVersion 
 	}
 
 	formattedVersion := utils.FormatOscalVersion(desiredVersion)
-	utils.VersionWarning(formattedVersion)
 
 	if err = utils.IsValidOscalVersion(formattedVersion); err != nil {
 		return validator, err
@@ -101,6 +99,21 @@ func (v *Validator) GetValidationResult() (ValidationResult, error) {
 		return v.validationResult, errors.New("validation has not been run")
 	}
 	return v.validationResult, nil
+}
+
+// IsLatestOscalVersion returns true if the model is the latest version of the OSCAL schema.
+func (v *Validator) IsLatestOscalVersion() (bool, error) {
+	latestVersion, err := utils.GetLatestVersion()
+	if err != nil {
+		return false, err
+	}
+
+	version, err := utils.GetOscalVersionFromMap(v.jsonMap)
+	if err != nil {
+		return false, err
+	}
+
+	return version == latestVersion, nil
 }
 
 // Validate validates the model against the schema.
