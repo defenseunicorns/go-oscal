@@ -10,9 +10,12 @@ import (
 	"github.com/defenseunicorns/go-oscal/src/internal/schemas"
 )
 
+const (
+	latestVersion = "1.1.2"
+)
+
 var (
 	versionRegexp = regexp.MustCompile(`^\d+([-\.]\d+){2}$`)
-	latestVersion = "1.1.2"
 )
 
 // IsValidOscalVersion returns true if the version is supported, false if not.
