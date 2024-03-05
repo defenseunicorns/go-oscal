@@ -197,10 +197,7 @@ func TestVersionUtils(t *testing.T) {
 	t.Run("VersionWarning", func(t *testing.T) {
 		t.Parallel()
 
-		latestVersion, err := utils.GetLatestVersion()
-		if err != nil {
-			t.Errorf("expected no error, got %v", err)
-		}
+		latestVersion := utils.GetLatestSupportedVersion()
 
 		t.Run("returns an error if the version is has known issues", func(t *testing.T) {
 			err := utils.VersionWarning("1.0.5")
@@ -225,6 +222,7 @@ func TestVersionUtils(t *testing.T) {
 	})
 }
 
+// Ensures continuity between the update/oscal-version.yaml file and the GetLatestSupportedVersion function
 func TestGetLatestVersion(t *testing.T) {
 	t.Parallel()
 	latestVersionPath := "../../../update/oscal-version.yaml"
@@ -246,10 +244,8 @@ func TestGetLatestVersion(t *testing.T) {
 
 	t.Run("returns the latest version", func(t *testing.T) {
 		t.Parallel()
-		latestVersion, err := utils.GetLatestVersion()
-		if err != nil {
-			t.Errorf("expected no error, got %v", err)
-		}
+		latestVersion := utils.GetLatestSupportedVersion()
+
 		if latestVersion != expected {
 			t.Errorf("expected %s, got %s", expected, latestVersion)
 		}

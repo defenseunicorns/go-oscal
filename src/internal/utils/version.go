@@ -2,11 +2,9 @@ package utils
 
 import (
 	"fmt"
-	"io/fs"
 	"os"
 	"reflect"
 	"regexp"
-	"strconv"
 	"strings"
 
 	"github.com/defenseunicorns/go-oscal/src/internal/schemas"
@@ -14,6 +12,7 @@ import (
 
 var (
 	versionRegexp = regexp.MustCompile(`^\d+([-\.]\d+){2}$`)
+	latestVersion = "1.1.2"
 )
 
 // IsValidOscalVersion returns true if the version is supported, false if not.
@@ -38,62 +37,9 @@ func validVersionFormat(version string) error {
 	return nil
 }
 
-// GetLatestVersion returns the latest version of the OSCAL schema from the schemas directory
-// Implemented to read and find the latest version of the OSCAL schema in order to allow for
-// New versions to be added without needing to update the code
-func GetLatestVersion() (latestVersion string, err error) {
-	// calcVersionVal is a helper function to calculate the version value
-	// by removing the dots and converting the version to an integer
-	calcVersionVal := func(version string) (int, error) {
-		split := strings.Split(version, ".")
-		joined := strings.Join(split, "")
-		return strconv.Atoi(joined)
-	}
-
-	// WalkDir walks the file tree rooted at schema.Schemas, calling walkFn for each file or directory in the tree, including root.
-	err = fs.WalkDir(schemas.Schemas, ".", func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if d.IsDir() {
-			return nil
-		}
-		if !strings.HasSuffix(path, ".json") {
-			return nil
-		}
-
-		// Extract the version from the path
-		version := strings.TrimPrefix(path, schemas.SCHEMA_PREFIX)
-		version = strings.TrimSuffix(version, ".json")
-		version = FormatOscalVersion(version)
-
-		// Check if the version is valid, if not, continue to next file
-		if err := validVersionFormat(version); err != nil {
-			return nil
-		}
-
-		// If latestVersion is empty, set it to the current version
-		if latestVersion == "" {
-			latestVersion = version
-		} else {
-			// Compare the current version with the latest version
-			latestVal, err := calcVersionVal(latestVersion)
-			if err != nil {
-				return err
-			}
-			versionVal, err := calcVersionVal(version)
-			if err != nil {
-				return err
-			}
-			// If the current version is greater than the latest version, set the latest version to the current version
-			if versionVal > latestVal {
-				latestVersion = version
-			}
-		}
-		return nil
-	})
-
-	return latestVersion, err
+// GetLatestSupportedVersion returns the latest version of the OSCAL schema supported by the go-oscal release
+func GetLatestSupportedVersion() string {
+	return latestVersion
 }
 
 // FormatOscalVersion takes a version string and returns a formatted version string
@@ -167,10 +113,6 @@ func UpdateLastModified(metadata map[string]interface{}) {
 
 // VersionWarning returns an warning as an error if there are any known issues with the current version or it isn't the latest.
 func VersionWarning(version string) error {
-	latestVersion, err := GetLatestVersion()
-	if err != nil {
-		return err
-	}
 	switch version {
 	case "1.0.5":
 		return fmt.Errorf("WARNING: 1.0.5 has known issues. Please upgrade to version 1.0.6 or higher")

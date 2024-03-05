@@ -103,10 +103,7 @@ func (v *Validator) GetValidationResult() (ValidationResult, error) {
 
 // IsLatestOscalVersion returns true if the model is the latest version of the OSCAL schema.
 func (v *Validator) IsLatestOscalVersion() (bool, error) {
-	latestVersion, err := utils.GetLatestVersion()
-	if err != nil {
-		return false, err
-	}
+	latestVersion := utils.GetLatestSupportedVersion()
 
 	version, err := utils.GetOscalVersionFromMap(v.jsonMap)
 	if err != nil {

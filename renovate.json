@@ -1,33 +1,62 @@
 {
-  "extends": ["config:recommended"],
-  "ignorePaths": ["**/adr/**", "**/docs/**", "**/test/**"],
+  "extends": [
+    "config:recommended"
+  ],
+  "ignorePaths": [
+    "**/adr/**",
+    "**/docs/**",
+    "**/test/**"
+  ],
   "timezone": "America/New_York",
-  "schedule": ["after 12pm every weekday", "before 11am every weekday"],
+  "schedule": [
+    "after 12pm every weekday",
+    "before 11am every weekday"
+  ],
   "dependencyDashboardTitle": "Renovate Dashboard 🤖",
   "packageRules": [
     {
-      "matchUpdateTypes": ["patch", "pin", "digest"],
+      "matchUpdateTypes": [
+        "patch",
+        "pin",
+        "digest"
+      ],
       "automerge": true,
       "automergeType": "pr"
     },
     {
-      "matchDepTypes": ["devDependencies"],
+      "matchDepTypes": [
+        "devDependencies"
+      ],
       "automerge": true,
       "automergeType": "pr"
     }
   ],
   "platformAutomerge": true,
   "platformCommit": true,
-  "postUpdateOptions": ["gomodTidy"],
+  "postUpdateOptions": [
+    "gomodTidy"
+  ],
   "commitBodyTable": true,
   "commitMessagePrefix": "deps",
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["^update/oscal-version\\.yaml$"],
-      "matchStrings": ["oscal: v(?<currentValue>\\d+\\.\\d+\\.\\d+)"],
+      "fileMatch": [
+        "^update/oscal-version\\.yaml$",
+        "^src/internal/utils/version\\.go$"
+      ],
+      "matchStrings": [
+        "oscal: v(?<currentValue>\\d+\\.\\d+\\.\\d+)",
+        "latestVersion = (?<currentValue>\\d+\\.\\d+\\.\\d+)"
+      ],
       "datasourceTemplate": "github-tags",
       "depNameTemplate": "usnistgov/OSCAL"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": [
+        "^src/internal/utils/version\\.go$"
+      ]
     }
   ]
 }

@@ -306,10 +306,7 @@ func TestValidator(t *testing.T) {
 	t.Run("IsLatestOscalVersion", func(t *testing.T) {
 		t.Parallel()
 
-		latestVersion, err := utils.GetLatestVersion()
-		if err != nil {
-			t.Errorf("expected no error, got %v", err)
-		}
+		latestVersion := utils.GetLatestSupportedVersion()
 
 		t.Run("returns false if the model is not the latest version of the OSCAL schema", func(t *testing.T) {
 			t.Parallel()
