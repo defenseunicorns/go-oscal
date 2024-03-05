@@ -39,6 +39,8 @@ func validVersionFormat(version string) error {
 }
 
 // GetLatestVersion returns the latest version of the OSCAL schema from the schemas directory
+// Implemented to read and find the latest version of the OSCAL schema in order to allow for
+// New versions to be added without needing to update the code
 func GetLatestVersion() (latestVersion string, err error) {
 	// calcVersionVal is a helper function to calculate the version value
 	// by removing the dots and converting the version to an integer
