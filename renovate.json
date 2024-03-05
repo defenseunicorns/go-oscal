@@ -47,7 +47,7 @@
       ],
       "matchStrings": [
         "oscal: v(?<currentValue>\\d+\\.\\d+\\.\\d+)",
-        "latestVersion = (?<currentValue>\\d+\\.\\d+\\.\\d+)"
+        "\\s*latestVersion = \"(?<currentValue>\\d+\\.\\d+\\.\\d+)\""
       ],
       "datasourceTemplate": "github-tags",
       "depNameTemplate": "usnistgov/OSCAL"
