@@ -1,14 +1,11 @@
 package utils_test
 
 import (
-	"fmt"
 	"os"
-	"strings"
 	"testing"
 
 	"time"
 
-	"github.com/defenseunicorns/go-oscal/src/gooscaltest"
 	"github.com/defenseunicorns/go-oscal/src/internal/utils"
 	"gopkg.in/yaml.v3"
 )
@@ -199,31 +196,30 @@ func TestVersionUtils(t *testing.T) {
 
 	t.Run("VersionWarning", func(t *testing.T) {
 		t.Parallel()
-		logBytes := gooscaltest.RedirectLog(t)
 
 		latestVersion, err := utils.GetLatestVersion()
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
 		}
 
-		t.Run("prints a warning if the version is has known issues", func(t *testing.T) {
-			utils.VersionWarning("1.0.5")
-			if !strings.Contains(string(gooscaltest.ReadLog(t, logBytes)), "WARNING: 1.0.5 has known issues.") {
-				t.Errorf("expected warning to be printed")
+		t.Run("returns an error if the version is has known issues", func(t *testing.T) {
+			err := utils.VersionWarning("1.0.5")
+			if err == nil {
+				t.Errorf("expected error, got %v", err)
 			}
 		})
 
-		t.Run("prints a warning if not on the latest version", func(t *testing.T) {
-			utils.VersionWarning("1.0.6")
-			if !strings.Contains(string(gooscaltest.ReadLog(t, logBytes)), fmt.Sprintf("WARNING: Currently using OSCAL version %s. The latest version is %s", "1.0.6", latestVersion)) {
-				t.Errorf("expected warning to be printed")
+		t.Run("returns an error if not on the latest version", func(t *testing.T) {
+			err := utils.VersionWarning("1.0.6")
+			if err == nil {
+				t.Errorf("expected error, got %v", err)
 			}
 		})
 
 		t.Run("does not print a warning if on the latest version", func(t *testing.T) {
-			utils.VersionWarning(latestVersion)
-			if strings.Contains(string(gooscaltest.ReadLog(t, logBytes)), fmt.Sprintf("WARNING: Currently using OSCAL version %s. The latest version is %s", latestVersion, latestVersion)) {
-				t.Errorf("expected no warning to be printed")
+			err := utils.VersionWarning(latestVersion)
+			if err != nil {
+				t.Errorf("expected no error, got %v", err)
 			}
 		})
 	})
