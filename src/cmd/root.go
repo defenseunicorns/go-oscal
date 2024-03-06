@@ -9,7 +9,7 @@ import (
 	"github.com/defenseunicorns/go-oscal/src/cmd/generate"
 	"github.com/defenseunicorns/go-oscal/src/cmd/revise"
 	"github.com/defenseunicorns/go-oscal/src/cmd/validate"
-	"github.com/defenseunicorns/go-oscal/src/internal/utils"
+	"github.com/defenseunicorns/go-oscal/src/internal/logging"
 	"github.com/spf13/cobra"
 )
 
@@ -25,7 +25,7 @@ var RootCmd = &cobra.Command{
 		log.SetOutput(os.Stderr)
 		log.SetPrefix("go-oscal: ")
 		if logFile != "" {
-			file, err := utils.OpenLogFile(logFile)
+			file, err := logging.OpenLogFile(logFile)
 			if err != nil {
 				log.Fatalf("failed to create log file: %s\n", err)
 			}

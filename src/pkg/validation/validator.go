@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/defenseunicorns/go-oscal/src/internal/schemas"
-	"github.com/defenseunicorns/go-oscal/src/internal/utils"
+	"github.com/defenseunicorns/go-oscal/src/pkg/utils"
 	"github.com/santhosh-tekuri/jsonschema/v5"
 )
 

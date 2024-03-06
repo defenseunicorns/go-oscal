@@ -7,8 +7,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/defenseunicorns/go-oscal/src/internal/utils"
 	"github.com/defenseunicorns/go-oscal/src/pkg/revision"
+	"github.com/defenseunicorns/go-oscal/src/pkg/utils"
 	"github.com/defenseunicorns/go-oscal/src/pkg/validation"
 	"github.com/spf13/cobra"
 )

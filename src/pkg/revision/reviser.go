@@ -3,7 +3,7 @@ package revision
 import (
 	"encoding/json"
 
-	"github.com/defenseunicorns/go-oscal/src/internal/utils"
+	"github.com/defenseunicorns/go-oscal/src/pkg/utils"
 	"github.com/defenseunicorns/go-oscal/src/pkg/validation"
 )
 

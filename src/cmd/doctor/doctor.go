@@ -6,7 +6,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/defenseunicorns/go-oscal/src/internal/utils"
+	doctorSchema "github.com/defenseunicorns/go-oscal/src/internal/doctor-schema"
+	"github.com/defenseunicorns/go-oscal/src/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -63,7 +64,7 @@ func DoctorCommand(inputfile string) (doctoredSchema []byte, err error) {
 		return doctoredSchema, err
 	}
 
-	err = utils.DoctorJSON(mapSchema, mapSchema, "")
+	err = doctorSchema.DoctorJSON(mapSchema, mapSchema, "")
 	if err != nil {
 		return doctoredSchema, err
 	}

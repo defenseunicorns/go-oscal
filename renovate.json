@@ -43,7 +43,7 @@
       "customType": "regex",
       "fileMatch": [
         "^update/oscal-version\\.yaml$",
-        "^src/internal/utils/version\\.go$"
+        "^src/pkg/utils/version\\.go$"
       ],
       "matchStrings": [
         "oscal: v(?<currentValue>\\d+\\.\\d+\\.\\d+)",
@@ -55,7 +55,7 @@
     {
       "customType": "regex",
       "fileMatch": [
-        "^src/internal/utils/version\\.go$"
+        "^src/pkg/utils/version\\.go$"
       ]
     }
   ]
