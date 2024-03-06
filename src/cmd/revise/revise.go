@@ -110,12 +110,18 @@ func Revise(opts *ReviseOptions) (reviser revision.Reviser, err error) {
 		return reviser, fmt.Errorf("Failed to create reviser: %s\n", err)
 	}
 
+	version := reviser.GetSchemaVersion()
+	err = utils.VersionWarning(version)
+	if err != nil {
+		log.Print(err)
+	}
+
 	reviser.SetDocumentPath(opts.InputFile)
 
 	// Run the upgrade
 	err = reviser.Revise()
 	if err != nil {
-		return reviser, fmt.Errorf("Failed to upgrade %s version %s: %s\n", reviser.GetModelType(), reviser.GetSchemaVersion(), err)
+		return reviser, fmt.Errorf("failed to upgrade %s version %s: %s", reviser.GetModelType(), reviser.GetSchemaVersion(), err)
 	}
 
 	return reviser, nil

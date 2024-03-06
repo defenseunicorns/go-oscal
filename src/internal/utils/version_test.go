@@ -1,13 +1,13 @@
 package utils_test
 
 import (
-	"strings"
+	"os"
 	"testing"
 
 	"time"
 
-	"github.com/defenseunicorns/go-oscal/src/gooscaltest"
 	"github.com/defenseunicorns/go-oscal/src/internal/utils"
+	"gopkg.in/yaml.v3"
 )
 
 func TestVersionUtils(t *testing.T) {
@@ -196,20 +196,59 @@ func TestVersionUtils(t *testing.T) {
 
 	t.Run("VersionWarning", func(t *testing.T) {
 		t.Parallel()
-		logBytes := gooscaltest.RedirectLog(t)
 
-		t.Run("prints a warning if the version is has known issues", func(t *testing.T) {
-			utils.VersionWarning("1.0.5")
-			if !strings.Contains(string(gooscaltest.ReadLog(t, logBytes)), "WARNING: 1.0.5 has known issues.") {
-				t.Errorf("expected warning to be printed")
+		latestVersion := utils.GetLatestSupportedVersion()
+
+		t.Run("returns an error if the version is has known issues", func(t *testing.T) {
+			err := utils.VersionWarning("1.0.5")
+			if err == nil {
+				t.Errorf("expected error, got %v", err)
 			}
 		})
 
-		t.Run("does not print a warning if the version is does not have known issues", func(t *testing.T) {
-			utils.VersionWarning("1.0.6")
-			if strings.Contains(string(gooscaltest.ReadLog(t, logBytes)), "WARNING: 1.0.6 has known issues.") {
-				t.Errorf("expected warning not to be printed")
+		t.Run("returns an error if not on the latest version", func(t *testing.T) {
+			err := utils.VersionWarning("1.0.6")
+			if err == nil {
+				t.Errorf("expected error, got %v", err)
+			}
+		})
+
+		t.Run("does not print a warning if on the latest version", func(t *testing.T) {
+			err := utils.VersionWarning(latestVersion)
+			if err != nil {
+				t.Errorf("expected no error, got %v", err)
 			}
 		})
 	})
+}
+
+// Ensures continuity between the update/oscal-version.yaml file and the GetLatestSupportedVersion function
+func TestGetLatestVersion(t *testing.T) {
+	t.Parallel()
+	latestVersionPath := "../../../update/oscal-version.yaml"
+
+	// Read the latest version from the file (updates from renovate PR when a new version of OSCAL is released)
+	bytes, err := os.ReadFile(latestVersionPath)
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+
+	// Unmarshal the latest version from the file
+	var updateVersion map[string]string
+	err = yaml.Unmarshal(bytes, &updateVersion)
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+	// Format the latest version
+	expected := utils.FormatOscalVersion(updateVersion["oscal"])
+
+	t.Run("returns the latest version", func(t *testing.T) {
+		t.Parallel()
+		latestVersion := utils.GetLatestSupportedVersion()
+
+		if latestVersion != expected {
+			t.Errorf("expected %s, got %s", expected, latestVersion)
+		}
+	})
+
 }

@@ -2,7 +2,6 @@ package utils
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"reflect"
 	"regexp"
@@ -11,14 +10,18 @@ import (
 	"github.com/defenseunicorns/go-oscal/src/internal/schemas"
 )
 
+const (
+	latestVersion = "1.1.2"
+)
+
 var (
 	versionRegexp = regexp.MustCompile(`^\d+([-\.]\d+){2}$`)
 )
 
 // IsValidOscalVersion returns true if the version is supported, false if not.
 func IsValidOscalVersion(version string) error {
-	if !versionRegexp.MatchString(version) {
-		return fmt.Errorf("version %s is not a valid version", version)
+	if err := validVersionFormat(version); err != nil {
+		return err
 	}
 
 	version = FormatOscalVersion(version)
@@ -28,6 +31,18 @@ func IsValidOscalVersion(version string) error {
 		return fmt.Errorf("version %s is not supported", version)
 	}
 	return nil
+}
+
+func validVersionFormat(version string) error {
+	if !versionRegexp.MatchString(version) {
+		return fmt.Errorf("version %s is not a valid version", version)
+	}
+	return nil
+}
+
+// GetLatestSupportedVersion returns the latest version of the OSCAL schema supported by the go-oscal release
+func GetLatestSupportedVersion() string {
+	return latestVersion
 }
 
 // FormatOscalVersion takes a version string and returns a formatted version string
@@ -99,13 +114,15 @@ func UpdateLastModified(metadata map[string]interface{}) {
 	metadata["last-modified"] = GetTimestamp()
 }
 
-// VersionWarning prints a warning if the version is has known issues.
-func VersionWarning(version string) {
+// VersionWarning returns an warning as an error if there are any known issues with the current version or it isn't the latest.
+func VersionWarning(version string) error {
 	switch version {
 	case "1.0.5":
-		log.Println("WARNING: 1.0.5 has known issues. Please upgrade to version 1.0.6 or higher.")
-		break
+		return fmt.Errorf("WARNING: 1.0.5 has known issues. Please upgrade to version 1.0.6 or higher")
 	default:
-		return
+		if latestVersion != version {
+			return fmt.Errorf("WARNING: Currently using OSCAL version %s. The latest version is %s", version, latestVersion)
+		}
 	}
+	return nil
 }

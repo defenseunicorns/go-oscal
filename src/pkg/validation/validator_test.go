@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/defenseunicorns/go-oscal/src/gooscaltest"
+	"github.com/defenseunicorns/go-oscal/src/internal/utils"
 	"gopkg.in/yaml.v3"
 )
 
@@ -299,6 +300,52 @@ func TestValidator(t *testing.T) {
 			_, err = validator.GetValidationResult()
 			if err == nil {
 				t.Errorf("expected error, got %v", err)
+			}
+		})
+	})
+	t.Run("IsLatestOscalVersion", func(t *testing.T) {
+		t.Parallel()
+
+		latestVersion := utils.GetLatestSupportedVersion()
+
+		t.Run("returns false if the model is not the latest version of the OSCAL schema", func(t *testing.T) {
+			t.Parallel()
+			validator, err := NewValidator(gooscaltest.ByteMap[gooscaltest.ValidComponentPath])
+			if err != nil {
+				t.Errorf("expected no error, got %v", err)
+			}
+			isLatest, err := validator.IsLatestOscalVersion()
+			if err != nil {
+				t.Errorf("expected no error, got %v", err)
+			}
+			if isLatest {
+				t.Errorf("expected false, got true")
+			}
+		})
+
+		t.Run("returns true if the model is the latest version of the OSCAL schema", func(t *testing.T) {
+			t.Parallel()
+			validator, err := NewValidator(gooscaltest.ByteMap[gooscaltest.ValidComponentPath])
+			if err != nil {
+				t.Errorf("expected no error, got %v", err)
+			}
+			jsonMap := validator.GetJsonModel()
+			jsonMap, err = utils.ReplaceOscalVersionInMap(jsonMap, latestVersion)
+			if err != nil {
+				t.Errorf("expected no error, got %v", err)
+			}
+
+			validator, err = NewValidator(jsonMap)
+			if err != nil {
+				t.Errorf("expected no error, got %v", err)
+			}
+
+			isLatest, err := validator.IsLatestOscalVersion()
+			if err != nil {
+				t.Errorf("expected no error, got %v", err)
+			}
+			if !isLatest {
+				t.Errorf("expected true, got false")
 			}
 		})
 	})
