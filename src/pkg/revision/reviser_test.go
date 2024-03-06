@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/defenseunicorns/go-oscal/src/gooscaltest"
-	"github.com/defenseunicorns/go-oscal/src/internal/utils"
 	revision "github.com/defenseunicorns/go-oscal/src/pkg/revision"
+	"github.com/defenseunicorns/go-oscal/src/pkg/utils"
 )
 
 func TestRevisor(t *testing.T) {

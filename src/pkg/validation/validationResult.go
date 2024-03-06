@@ -3,7 +3,7 @@ package validation
 import (
 	"time"
 
-	"github.com/defenseunicorns/go-oscal/src/internal/utils"
+	"github.com/defenseunicorns/go-oscal/src/pkg/utils"
 )
 
 type ValidationResult struct {

@@ -1,4 +1,4 @@
-package utils
+package doctorSchema
 
 import (
 	"fmt"

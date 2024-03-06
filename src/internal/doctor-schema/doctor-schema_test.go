@@ -1,10 +1,10 @@
-package utils_test
+package doctorSchema_test
 
 import (
 	"encoding/json"
 	"testing"
 
-	"github.com/defenseunicorns/go-oscal/src/internal/utils"
+	doctorSchema "github.com/defenseunicorns/go-oscal/src/internal/doctor-schema"
 )
 
 func TestDoctorJson(t *testing.T) {
@@ -36,7 +36,7 @@ func TestDoctorJson(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		utils.DoctorJSON(obj, nil, "")
+		doctorSchema.DoctorJSON(obj, nil, "")
 
 		if obj["definitions"].(map[string]interface{})["example"].(map[string]interface{})["$ref"] != nil {
 			t.Error("Expected $ref to be resolved")
@@ -49,7 +49,7 @@ func TestDoctorJson(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		utils.DoctorJSON(obj, nil, "")
+		doctorSchema.DoctorJSON(obj, nil, "")
 
 		if obj["definitions"].(map[string]interface{})["example"].(map[string]interface{})["description"] != "Example Description" {
 			t.Error("Expected description to be preserved")
@@ -62,7 +62,7 @@ func TestDoctorJson(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		utils.DoctorJSON(obj, nil, "")
+		doctorSchema.DoctorJSON(obj, nil, "")
 
 		if obj["definitions"].(map[string]interface{})["example"].(map[string]interface{})["properties"].(map[string]interface{})["prop1"].(map[string]interface{})["type"] != "string" {
 			t.Error("Expected properties to be merged")
@@ -76,7 +76,7 @@ func TestDoctorJson(t *testing.T) {
 			t.Fatal(err)
 		}
 		obj["definitions"].(map[string]interface{})["example"].(map[string]interface{})["$ref"] = "#/definitions/notFound"
-		err = utils.DoctorJSON(obj, nil, "")
+		err = doctorSchema.DoctorJSON(obj, nil, "")
 		if err == nil {
 			t.Error("Expected error, got nil")
 		}
@@ -89,7 +89,7 @@ func TestDoctorJson(t *testing.T) {
 			t.Fatal(err)
 		}
 		obj["definitions"].(map[string]interface{})["example"].(map[string]interface{})["$ref"] = "#/notDefinitions/notFound"
-		err = utils.DoctorJSON(obj, nil, "")
+		err = doctorSchema.DoctorJSON(obj, nil, "")
 		if err == nil {
 			t.Error("Expected error, got nil")
 		}

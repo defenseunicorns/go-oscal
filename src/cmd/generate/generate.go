@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/defenseunicorns/go-oscal/src/internal/generate"
-	"github.com/defenseunicorns/go-oscal/src/internal/utils"
+	"github.com/defenseunicorns/go-oscal/src/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
