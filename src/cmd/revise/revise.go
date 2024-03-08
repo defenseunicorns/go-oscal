@@ -34,6 +34,7 @@ var ReviseCmd = &cobra.Command{
 	Long:  "Revise a given model from one oscal version to the specified oscal version. The steps to revise are output to log, successful revision is output to stdout or the specified output file.",
 	// Example: convertHelp,
 	RunE: func(cmd *cobra.Command, componentDefinitionPaths []string) error {
+		// Default .json so the output can be printed to stdout in json format.
 		var OUTPUT_DEFAULT = ".json"
 
 		// If output file is not specified, set it to json, so it will not throw an error and can be printed to stdout
@@ -78,6 +79,8 @@ var ReviseCmd = &cobra.Command{
 	},
 }
 
+// RevisionCommand Runs the revision and returns the revision response
+// For Consumers, this method assumes no ReviseOptions defaults. All defaults are handled in the cobra command.
 func RevisionCommand(opts *ReviseOptions) (revisionResponse RevisionResponse, err error) {
 	// Validate inputfile was provided and that is json or yaml
 	if opts.InputFile == "" {
@@ -104,36 +107,40 @@ func RevisionCommand(opts *ReviseOptions) (revisionResponse RevisionResponse, er
 		return revisionResponse, fmt.Errorf("reading input file: %s", err)
 	}
 
-	// Create the reviser
+	// Create the reviser and set it in the response
 	reviser, err := revision.NewReviser(bytes, opts.Version)
 	if err != nil {
 		return revisionResponse, fmt.Errorf("failed to create reviser: %s", err)
 	}
 	revisionResponse.Reviser = reviser
 
+	// Get the schema version and set warnings if they exist
 	version := reviser.GetSchemaVersion()
 	err = utils.VersionWarning(version)
 	if err != nil {
 		revisionResponse.Warnings = append(revisionResponse.Warnings, err.Error())
 	}
 
+	// Set the document path
 	reviser.SetDocumentPath(opts.InputFile)
 
-	// Run the upgrade
+	// Run the revision
 	err = reviser.Revise()
 
+	// Get the validation result and set it in the response
 	validationResult, _ := reviser.GetValidationResult()
 	revisionResponse.Result = validationResult
 
+	// return the revision error if there was one
 	if err != nil {
 		return revisionResponse, fmt.Errorf("failed to upgrade %s version %s: %s", reviser.GetModelType(), reviser.GetSchemaVersion(), err)
 	}
 
+	// Get the upgraded bytes and set them in the response
 	revisedBytes, err := reviser.GetRevisedBytes(opts.OutputFile)
 	if err != nil {
 		return revisionResponse, fmt.Errorf("failed to get upgraded bytes: %s", err)
 	}
-
 	revisionResponse.RevisedBytes = revisedBytes
 
 	return revisionResponse, nil
