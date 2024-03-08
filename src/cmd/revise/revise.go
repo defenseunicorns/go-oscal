@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var opts = &revision.ReviseOptions{}
+var opts = &revision.RevisionOptions{}
 
 var ReviseCmd = &cobra.Command{
 	Use:   "revise",

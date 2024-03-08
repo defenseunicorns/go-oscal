@@ -16,7 +16,7 @@ type RevisionResponse struct {
 	RevisedBytes []byte
 }
 
-type ReviseOptions struct {
+type RevisionOptions struct {
 	InputFile        string // filepath json or yaml
 	OutputFile       string // filepath json or yaml
 	Version          string // OSCAL version X.X.X
@@ -25,7 +25,7 @@ type ReviseOptions struct {
 
 // RevisionCommand Runs the revision and returns the revision response
 // For Consumers, this method assumes no ReviseOptions defaults. All defaults are handled in the cobra command.
-func RevisionCommand(opts *ReviseOptions) (revisionResponse RevisionResponse, err error) {
+func RevisionCommand(opts *RevisionOptions) (revisionResponse RevisionResponse, err error) {
 	// Validate inputfile was provided and that is json or yaml
 	if err := utils.IsJsonOrYaml(opts.InputFile); err != nil {
 		return revisionResponse, fmt.Errorf("invalid input file: %s", err)

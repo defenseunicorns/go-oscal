@@ -1,22 +1,11 @@
 package validate
 
 import (
-	"errors"
-	"fmt"
 	"log"
-	"os"
-	"strings"
 
-	"github.com/defenseunicorns/go-oscal/src/pkg/utils"
 	"github.com/defenseunicorns/go-oscal/src/pkg/validation"
 	"github.com/spf13/cobra"
 )
-
-type ValidationResponse struct {
-	Validator validation.Validator
-	Result    validation.ValidationResult
-	Warnings  []string
-}
 
 var inputfile string
 var validationResultFile string
@@ -26,7 +15,8 @@ var ValidateCmd = &cobra.Command{
 	Short: "validate an oscal document",
 	Long:  "Validate an OSCAL document against the OSCAL schema version specified in the document.",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		validationResponse, validationErr := ValidateCommand(inputfile)
+		// Run the validation
+		validationResponse, validationErr := validation.ValidationCommand(inputfile)
 
 		// Write validation result if it was specified and exists before returning ValidateCommand error
 		if validationResultFile != "" {
@@ -50,57 +40,6 @@ var ValidateCmd = &cobra.Command{
 		log.Printf("Successfully validated %s is valid OSCAL version %s %s\n", inputfile, validationResponse.Validator.GetSchemaVersion(), validationResponse.Validator.GetModelType())
 		return nil
 	},
-}
-
-// ValidateCommand validates an OSCAL document
-// Returns a ValidationResponse and an error
-func ValidateCommand(inputFile string) (validationResponse ValidationResponse, err error) {
-	// Validate the input file
-	if inputFile == "" {
-		return validationResponse, errors.New("please specify an input file with the -f flag")
-	}
-
-	// Validate the input file is a json or yaml file
-	if !strings.HasSuffix(inputFile, "json") && !strings.HasSuffix(inputFile, "yaml") {
-		return validationResponse, errors.New("please specify a json or yaml file")
-	}
-
-	// Read the input file
-	bytes, err := os.ReadFile(inputFile)
-	if err != nil {
-		return validationResponse, fmt.Errorf("reading input file: %s", err)
-	}
-
-	// Create and set the validator in the validation response
-	validator, err := validation.NewValidator(bytes)
-	if err != nil {
-		return validationResponse, fmt.Errorf("failed to create validator: %s", err)
-	}
-	validationResponse.Validator = validator
-
-	// Get and set version warnings
-	version := validator.GetSchemaVersion()
-	err = utils.VersionWarning(version)
-	if err != nil {
-		validationResponse.Warnings = append(validationResponse.Warnings, err.Error())
-	}
-
-	// Set the document path
-	validator.SetDocumentPath(inputFile)
-
-	// Run the validation
-	validationError := validator.Validate()
-
-	// Write validation result if it was specified and exists before returning ValidateCommand error
-	validationResult, _ := validator.GetValidationResult()
-	validationResponse.Result = validationResult
-
-	// Handle the validation error
-	if validationError != nil {
-		return validationResponse, fmt.Errorf("failed to validate %s version %s: %s", validator.GetModelType(), validator.GetSchemaVersion(), err)
-	}
-
-	return validationResponse, nil
 }
 
 func init() {
