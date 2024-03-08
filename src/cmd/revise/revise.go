@@ -34,7 +34,7 @@ var ReviseCmd = &cobra.Command{
 	Long:  "Revise a given model from one oscal version to the specified oscal version. The steps to revise are output to log, successful revision is output to stdout or the specified output file.",
 	// Example: convertHelp,
 	RunE: func(cmd *cobra.Command, componentDefinitionPaths []string) error {
-		const OUTPUT_DEFAULT = "json"
+		var OUTPUT_DEFAULT = ".json"
 
 		// If output file is not specified, set it to json, so it will not throw an error and can be printed to stdout
 		if opts.OutputFile == "" {
