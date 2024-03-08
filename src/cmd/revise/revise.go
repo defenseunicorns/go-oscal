@@ -1,10 +1,8 @@
 package revise
 
 import (
-	"errors"
 	"fmt"
 	"log"
-	"os"
 
 	"github.com/defenseunicorns/go-oscal/src/pkg/revision"
 	"github.com/defenseunicorns/go-oscal/src/pkg/utils"
@@ -12,21 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type RevisionResponse struct {
-	Reviser      revision.Reviser
-	Result       validation.ValidationResult
-	Warnings     []string
-	RevisedBytes []byte
-}
-
-type ReviseOptions struct {
-	InputFile        string // short -f, long --file, required
-	OutputFile       string // short -o, long --output, default to stdout
-	Version          string // short -v, long --version, default to latest
-	ValidationResult string // short -r, long --result, default to stdout
-}
-
-var opts = &ReviseOptions{}
+var opts = &revision.ReviseOptions{}
 
 var ReviseCmd = &cobra.Command{
 	Use:   "revise",
@@ -42,7 +26,7 @@ var ReviseCmd = &cobra.Command{
 			opts.OutputFile = OUTPUT_DEFAULT
 		}
 
-		revisionResponse, revisionErr := RevisionCommand(opts)
+		revisionResponse, revisionErr := revision.RevisionCommand(opts)
 
 		if opts.ValidationResult != "" {
 			err := validation.WriteValidationResult(revisionResponse.Result, opts.ValidationResult)
@@ -77,73 +61,6 @@ var ReviseCmd = &cobra.Command{
 
 		return nil
 	},
-}
-
-// RevisionCommand Runs the revision and returns the revision response
-// For Consumers, this method assumes no ReviseOptions defaults. All defaults are handled in the cobra command.
-func RevisionCommand(opts *ReviseOptions) (revisionResponse RevisionResponse, err error) {
-	// Validate inputfile was provided and that is json or yaml
-	if opts.InputFile == "" {
-		return revisionResponse, errors.New("please specify an input file with the -f flag")
-	} else {
-		if err := utils.IsJsonOrYaml(opts.InputFile); err != nil {
-			return revisionResponse, fmt.Errorf("invalid input file: %s", err)
-		}
-	}
-
-	// If output file is not json or yaml, return an error
-	if err := utils.IsJsonOrYaml(opts.OutputFile); err != nil {
-		return revisionResponse, fmt.Errorf("invalid output file: %s", err)
-	}
-
-	// If version is not specified, return an error
-	if opts.Version == "" {
-		return revisionResponse, errors.New("please specify a version to convert to with the -v flag")
-	}
-
-	// Read the input file
-	bytes, err := os.ReadFile(opts.InputFile)
-	if err != nil {
-		return revisionResponse, fmt.Errorf("reading input file: %s", err)
-	}
-
-	// Create the reviser and set it in the response
-	reviser, err := revision.NewReviser(bytes, opts.Version)
-	if err != nil {
-		return revisionResponse, fmt.Errorf("failed to create reviser: %s", err)
-	}
-	revisionResponse.Reviser = reviser
-
-	// Get the schema version and set warnings if they exist
-	version := reviser.GetSchemaVersion()
-	err = utils.VersionWarning(version)
-	if err != nil {
-		revisionResponse.Warnings = append(revisionResponse.Warnings, err.Error())
-	}
-
-	// Set the document path
-	reviser.SetDocumentPath(opts.InputFile)
-
-	// Run the revision
-	err = reviser.Revise()
-
-	// Get the validation result and set it in the response
-	validationResult, _ := reviser.GetValidationResult()
-	revisionResponse.Result = validationResult
-
-	// return the revision error if there was one
-	if err != nil {
-		return revisionResponse, fmt.Errorf("failed to upgrade %s version %s: %s", reviser.GetModelType(), reviser.GetSchemaVersion(), err)
-	}
-
-	// Get the upgraded bytes and set them in the response
-	revisedBytes, err := reviser.GetRevisedBytes(opts.OutputFile)
-	if err != nil {
-		return revisionResponse, fmt.Errorf("failed to get upgraded bytes: %s", err)
-	}
-	revisionResponse.RevisedBytes = revisedBytes
-
-	return revisionResponse, nil
 }
 
 func init() {
