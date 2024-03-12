@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"gopkg.in/yaml.v3"
+	"github.com/goccy/go-yaml"
 )
 
 // InterfaceOrBytes is an interface{} or []byte for generic functions that can support either type
@@ -104,7 +104,7 @@ func convertInterfaceOrBytesToMap(incomingModel InterfaceOrBytes) (model map[str
 				return nil, err
 			}
 		}
-		// Unmarshal to map[string]interface{}
+
 		err = yaml.Unmarshal(ymlBytes, &model)
 		if err != nil {
 			return nil, err
@@ -120,10 +120,15 @@ func MarshalByExtension(model interface{}, outputFile string) (bytes []byte, err
 
 	switch ext {
 	case "json":
-		bytes, err = json.Marshal(model)
+		bytes, err = yaml.MarshalWithOptions(model)
 		if err != nil {
 			return nil, err
 		}
+		bytes, err = yaml.YAMLToJSON(bytes)
+		if err != nil {
+			return nil, err
+		}
+
 	case "yaml":
 		bytes, err = yaml.Marshal(model)
 		if err != nil {

@@ -7,8 +7,8 @@ import (
 
 	"github.com/defenseunicorns/go-oscal/src/gooscaltest"
 	"github.com/defenseunicorns/go-oscal/src/pkg/validation"
+	"github.com/goccy/go-yaml"
 	"github.com/santhosh-tekuri/jsonschema/v5"
-	"gopkg.in/yaml.v3"
 )
 
 func TestValidationError(t *testing.T) {

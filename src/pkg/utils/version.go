@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/defenseunicorns/go-oscal/src/internal/schemas"
+	"github.com/goccy/go-yaml"
 )
 
 const (
@@ -85,6 +86,33 @@ func GetOscalVersionFromMap(model map[string]interface{}) (version string, err e
 	}
 
 	return version, nil
+}
+
+func ReplaceKeyInMapSlice(mapSlice yaml.MapSlice, path []string, value interface{}) (yaml.MapSlice, error) {
+	if len(path) == 0 {
+		return mapSlice, fmt.Errorf("path cannot be empty")
+	}
+
+	key := path[0]
+	for i, item := range mapSlice {
+		if item.Key == key {
+			if len(path) == 1 {
+				mapSlice[i].Value = value
+				return mapSlice, nil
+			}
+
+			nextPath := path[1:]
+			nextValue, ok := item.Value.(yaml.MapSlice)
+			if !ok {
+				return mapSlice, fmt.Errorf("expected map, got %T", item.Value)
+			}
+
+			mapSlice[i].Value, _ = ReplaceKeyInMapSlice(nextValue, nextPath, value)
+			return mapSlice, nil
+		}
+	}
+
+	return mapSlice, fmt.Errorf("key %s not found", key)
 }
 
 // ReplaceOscalVersionInMap returns the model with the oscal version replaced

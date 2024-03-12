@@ -7,6 +7,7 @@ import (
 	"github.com/defenseunicorns/go-oscal/src/gooscaltest"
 	revision "github.com/defenseunicorns/go-oscal/src/pkg/revision"
 	"github.com/defenseunicorns/go-oscal/src/pkg/utils"
+	yaml "github.com/goccy/go-yaml"
 )
 
 func TestRevisor(t *testing.T) {
@@ -48,6 +49,9 @@ func TestRevisor(t *testing.T) {
 		t.Run("success", func(t *testing.T) {
 			t.Parallel()
 			reviser, err := revision.NewReviser(gooscaltest.ByteMap[gooscaltest.ValidComponentPath], "1.0.6")
+			if err != nil {
+				t.Errorf("expected no error, got %v", err)
+			}
 			err = reviser.Revise()
 			if err != nil {
 				t.Errorf("expected no error, got %v", err)
@@ -62,11 +66,22 @@ func TestRevisor(t *testing.T) {
 
 			t.Run("sets the upgradedJsonMap to the upgraded model version", func(t *testing.T) {
 				t.Parallel()
+				var actual string
 				expected := "1.0.6"
-				actual, err := utils.GetOscalVersionFromMap(reviser.GetRevisedJsonMap())
+				actualBytes, err := reviser.GetRevisedBytes(".yaml")
 				if err != nil {
 					t.Errorf("expected no error, got %v", err)
 				}
+				var unmarshalled map[string]interface{}
+				err = yaml.Unmarshal(actualBytes, &unmarshalled)
+				if err != nil {
+					t.Errorf("expected no error, got %v", err)
+				}
+				actual, err = utils.GetOscalVersionFromMap(unmarshalled)
+				if err != nil {
+					t.Errorf("expected no error, got %v", err)
+				}
+
 				if actual != expected {
 					t.Errorf("expected %s, got %s", expected, actual)
 				}
@@ -105,11 +120,11 @@ func TestRevisor(t *testing.T) {
 
 		t.Run("returns the upgraded model as json", func(t *testing.T) {
 			t.Parallel()
-			bytes, err := reviser.GetRevisedBytes("json")
+			bytes, err := reviser.GetRevisedBytes(".json")
 			if err != nil {
 				t.Errorf("expected no error, got %v", err)
 			}
-			if !strings.Contains(string(bytes), "\"oscal-version\":\"1.0.6\"") {
+			if !strings.Contains(string(bytes), "\"oscal-version\": \"1.0.6\"") {
 				t.Errorf("expected version 1.0.6, got %s", string(bytes))
 			}
 		})

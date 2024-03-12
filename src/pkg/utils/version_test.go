@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/defenseunicorns/go-oscal/src/pkg/utils"
-	"gopkg.in/yaml.v3"
+	"github.com/goccy/go-yaml"
 )
 
 func TestVersionUtils(t *testing.T) {
