@@ -7,6 +7,18 @@ import (
 	"strings"
 )
 
+// RemoveTrailingWhitespace removes trailing whitespace from each line in a byte array.
+// This is useful for removing trailing whitespace from a yaml file before it is marshalled into a struct.
+// Prevents strings from being collapsed into a single line by yaml parser.
+func RemoveTrailingWhitespace(bytes []byte) []byte {
+	str := string(bytes)
+	lines := strings.Split(str, "\n")
+	for i, l := range lines {
+		lines[i] = strings.TrimRight(l, " ")
+	}
+	return []byte(strings.Join(lines, "\n"))
+}
+
 // WriteOutput writes to the provided output file or to stdout by default.
 func WriteOutput(output []byte, outputFile string) (err error) {
 	if outputFile == "" {
