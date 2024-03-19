@@ -188,8 +188,6 @@ func (c *GeneratorConfig) buildStructString(def jsonschema.Schema) (structString
 		// Allows for the parent to be used in case of duplicate types
 		def.Properties[key].TypeObject.Parent = &def
 
-		pointerString := "*"
-
 		// Get the property schema
 		prop := def.Properties[key]
 		propSchema := prop.TypeObject
@@ -201,11 +199,7 @@ func (c *GeneratorConfig) buildStructString(def jsonschema.Schema) (structString
 			return structString, err
 		}
 
-		if required[key] {
-			pointerString = ""
-		}
-		propType = pointerString + propType
-
+		propType = addPointerIfOptional(required[key], propType)
 		propTags := buildTagString(c.tags, key, required[key])
 		structString += fmt.Sprintf("\t%s %s %s\n", propName, propType, propTags)
 	}

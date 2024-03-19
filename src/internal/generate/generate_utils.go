@@ -104,6 +104,14 @@ var intToWordMap = []string{
 	"nine",
 }
 
+// addPointerIfOptional adds a pointer to the type if the field is optional
+func addPointerIfOptional(required bool, t string) string {
+	if required {
+		return t
+	}
+	return "*" + t
+}
+
 // buildStructs builds the structs for each definition in the schema
 func buildTagString(tags []string, field string, required bool) string {
 	tagStrings := []string{}
