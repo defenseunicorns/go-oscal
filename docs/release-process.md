@@ -21,6 +21,7 @@ The most important prefixes you should have in mind are:
 ### How can I influence the version number for a release?
 
 PR titles should also follow this pattern and are linted using [commitlint](https://commitlint.js.org/). The PR title will determine the version bump. When a PR is merged (squashed) release-please will kick off a release PR. When that release PR is approved and merged, release-please will tag and kickoff a go-releaser release.
+* Pre-v1.0.0 release-please is configured to bump minors on breaking changes and patches otherwise. per [release-please-config](../release-please-config.json)
 
 ### How do I fix a release issue?
 
