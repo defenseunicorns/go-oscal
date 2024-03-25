@@ -1,18 +1,34 @@
-name: Publish Go-OSCAL Packages on Tag
-
-permissions:
-  contents: read
+name: Publish go-oscal 
 
 on:
   push:
-    tags:
-      - "v*"
+    branches:
+      - main
 
 jobs:
+  tag-new-version:
+    name: Tag New Version
+    permissions: 
+      contents: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release-flag.outputs.release_created }}
+    steps:
+      - name: Create release tag
+        id: tag
+        uses: google-github-actions/release-please-action@cc61a07e2da466bebbc19b3a7dd01d6aecb20d1e # v4
+        with:
+          release-type: "go"
+      - id: release-flag
+        run: echo "release_created=${{ steps.tag.outputs.release_created || false }}" >> $GITHUB_OUTPUT
+
   build:
     runs-on: ubuntu-latest
     permissions:
       packages: write
+    needs: tag-new-version
+    if: ${{ needs.tag-new-version.outputs.release_created == 'true'}}
     steps:
       # Checkout the repo and setup the tooling for this job
       - name: Checkout
