@@ -6,6 +6,30 @@ import (
 	"github.com/swaggest/jsonschema-go"
 )
 
+func TestAddPointerIfOptionalNonPrimitive(t *testing.T) {
+	t.Parallel()
+
+	type TestCase struct {
+		required bool
+		in       string
+		out      string
+	}
+
+	testCases := []TestCase{
+		{required: false, in: "", out: "*"},
+		{required: true, in: "", out: ""},
+		{required: false, in: "string", out: "string"},
+	}
+
+	for _, testCase := range testCases {
+		actual := addPointerIfOptionalNonPrimitive(testCase.required, testCase.in)
+		expected := testCase.out
+		if expected != actual {
+			t.Fatalf("error addPointerIfOptional(): expected: %s | got: %s", expected, actual)
+		}
+	}
+}
+
 func TestBuildTagString(t *testing.T) {
 	t.Parallel()
 

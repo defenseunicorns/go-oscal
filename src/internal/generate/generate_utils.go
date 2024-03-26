@@ -12,6 +12,13 @@ import (
 
 var Imports []string = []string{"time"}
 
+var GoPrimitive map[string]bool = map[string]bool{
+	"string":  true,
+	"bool":    true,
+	"float64": true,
+	"int":     true,
+}
+
 var PrimitiveAndCustomTypes map[string]string = map[string]string{
 	"string":    "string",
 	"boolean":   "bool",
@@ -102,6 +109,15 @@ var intToWordMap = []string{
 	"seven",
 	"eight",
 	"nine",
+}
+
+// addPointerIfOptionalNonPrimitive adds a pointer to the type if the field is optional
+func addPointerIfOptionalNonPrimitive(required bool, t string) string {
+
+	if required || GoPrimitive[t] {
+		return t
+	}
+	return "*" + t
 }
 
 // buildStructs builds the structs for each definition in the schema

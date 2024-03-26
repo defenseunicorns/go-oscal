@@ -198,6 +198,8 @@ func (c *GeneratorConfig) buildStructString(def jsonschema.Schema) (structString
 		if err != nil {
 			return structString, err
 		}
+
+		propType = addPointerIfOptionalNonPrimitive(required[key], propType)
 		propTags := buildTagString(c.tags, key, required[key])
 		structString += fmt.Sprintf("\t%s %s %s\n", propName, propType, propTags)
 	}
