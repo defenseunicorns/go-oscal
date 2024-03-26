@@ -1,4 +1,27 @@
 {
-    "bump-patch-for-minor-pre-major": true,
-    "bump-minor-pre-major": true
+    "packages": {
+        ".": {
+            "bump-minor-pre-major": true,
+            "bump-patch-for-minor-pre-major": true,
+            "release-type": "go",
+            "changelog-path": "CHANGELOG.md",
+            "changelog-sections": [
+                {
+                    "type": "feat",
+                    "section": "Features",
+                    "hidden": false
+                },
+                {
+                    "type": "fix",
+                    "section": "Bug Fixes",
+                    "hidden": false
+                },
+                {
+                    "type": "chore",
+                    "section": "Miscellaneous",
+                    "hidden": false
+                }
+            ]
+        }
+    }
 }
