@@ -47,6 +47,8 @@ func RevisionCommand(opts *RevisionOptions) (revisionResponse RevisionResponse, 
 		return revisionResponse, fmt.Errorf("reading input file: %s", err)
 	}
 
+	bytes = utils.RemoveTrailingWhitespace(bytes)
+
 	// Create the reviser and set it in the response
 	reviser, err := NewReviser(bytes, opts.Version)
 	if err != nil {
