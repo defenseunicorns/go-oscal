@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.0](https://github.com/defenseunicorns/go-oscal/compare/v0.2.5...v1.0.0) (2024-03-26)
+## [0.3.0](https://github.com/defenseunicorns/go-oscal/compare/v0.2.5...v0.3.0) (2024-03-26)
 
 
 ### ⚠ BREAKING CHANGES
