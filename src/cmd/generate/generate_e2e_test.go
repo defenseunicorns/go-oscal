@@ -1,6 +1,7 @@
 package generate_test
 
 import (
+	"encoding/json"
 	"os"
 	"reflect"
 	"strings"
@@ -17,7 +18,9 @@ var (
 		"include-all": true,
 	}
 	rev4YamlPath  = "../../../testdata/generation/e2e/rev4/yaml/"
+	rev4JsonPath  = "../../../testdata/generation/e2e/rev4/json/"
 	rev5YamlPath  = "../../../testdata/generation/e2e/rev5/yaml/"
+	rev5JsonPath  = "../../../testdata/generation/e2e/rev5/json/"
 	oscal104Types = "../../types/oscal-1-0-4/types.go"
 	oscal111Types = "../../types/oscal-1-1-1/types.go"
 )
@@ -175,6 +178,92 @@ func TestFieldStability(t *testing.T) {
 	})
 }
 
+func TestNoExtraJsonFields(t *testing.T) {
+	t.Parallel()
+
+	t.Run("Rev4", func(t *testing.T) {
+		t.Parallel()
+		dir, err := os.ReadDir(rev4JsonPath)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		for _, file := range dir {
+			bytes, err := os.ReadFile(rev4JsonPath + file.Name())
+			if err != nil {
+				t.Fatal(err)
+			}
+			oscalDoc := oscalTypes_1_0_4.OscalCompleteSchema{}
+			err = json.Unmarshal(bytes, &oscalDoc)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// Marshal the document back to yaml
+			marshaled, err := json.Marshal(oscalDoc)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			actual := map[string]interface{}{}
+			expected := map[string]interface{}{}
+			err = json.Unmarshal(marshaled, &actual)
+			if err != nil {
+				t.Fatal(err)
+			}
+			err = json.Unmarshal(bytes, &expected)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if !validateMapKeys(actual, expected) {
+				t.Error("expected marshaled json to be equal to the original json")
+			}
+		}
+	})
+	t.Run("Rev5", func(t *testing.T) {
+		t.Parallel()
+		dir, err := os.ReadDir(rev5JsonPath)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		for _, file := range dir {
+			bytes, err := os.ReadFile(rev5JsonPath + file.Name())
+			if err != nil {
+				t.Fatal(err)
+			}
+			oscalDoc := oscalTypes_1_1_1.OscalCompleteSchema{}
+			err = json.Unmarshal(bytes, &oscalDoc)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// Marshal the document back to yaml
+			marshaled, err := json.Marshal(oscalDoc)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			actual := map[string]interface{}{}
+			expected := map[string]interface{}{}
+			err = json.Unmarshal(marshaled, &actual)
+			if err != nil {
+				t.Fatal(err)
+			}
+			err = json.Unmarshal(bytes, &expected)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if !validateMapKeys(actual, expected) {
+				t.Error("expected marshaled json to be equal to the original json")
+			}
+		}
+	})
+
+}
+
 func ValidateKeys(model map[string]interface{}, typeString string, t *testing.T) {
 	for key, value := range model {
 		if !strings.Contains(typeString, "yaml:\""+key) {
@@ -197,4 +286,23 @@ func ValidateKeys(model map[string]interface{}, typeString string, t *testing.T)
 			}
 		}
 	}
+}
+
+func collectKeys(mapData map[string]interface{}, keys map[string]struct{}) {
+	for key, value := range mapData {
+		keys[key] = struct{}{}
+		if nestedMap, ok := value.(map[string]interface{}); ok {
+			collectKeys(nestedMap, keys)
+		}
+	}
+}
+
+func validateMapKeys(map1, map2 map[string]interface{}) bool {
+	keys1 := make(map[string]struct{})
+	keys2 := make(map[string]struct{})
+
+	collectKeys(map1, keys1)
+	collectKeys(map2, keys2)
+
+	return reflect.DeepEqual(keys1, keys2)
 }

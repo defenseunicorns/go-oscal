@@ -45,16 +45,16 @@ go get github.com/defenseunicorns/go-oscal
 oscalTypes_1_1_2 "github.com/defenseunicorns/go-oscal/src/types/oscal-1-1-2"
 
 result := oscalTypes_1_1_2.Result{
-  Findings: []oscalTypes_1_1_2.Finding{
-    {
-      Target: oscalTypes_1_1_2.FindingTarget{
-        TargetId: "ID-1",
-        Status: oscalTypes_1_1_2.ObjectiveStatus{
-          State: "satisfied",
+    Findings: &[]oscalTypes_1_1_2.Finding{
+        {
+            Target: oscalTypes_1_1_2.FindingTarget{
+                TargetId: "ID-1",
+                Status: oscalTypes_1_1_2.ObjectiveStatus{
+                    State: "satisfied",
+                },
+            },
         },
-      },
     },
-  },
 }
 ```
 ## Development
