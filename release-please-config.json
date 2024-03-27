@@ -4,6 +4,7 @@
             "bump-minor-pre-major": true,
             "bump-patch-for-minor-pre-major": true,
             "release-type": "go",
+            "draft": true,
             "changelog-path": "CHANGELOG.md",
             "changelog-sections": [
                 {
