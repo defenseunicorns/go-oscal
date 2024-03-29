@@ -7,6 +7,40 @@ import (
 	"github.com/defenseunicorns/go-oscal/src/pkg/utils"
 )
 
+func TestRemoveTrailingWhitespace(t *testing.T) {
+	t.Parallel()
+
+	t.Run("It removes trailing whitespace from each line in a byte array", func(t *testing.T) {
+		t.Parallel()
+		testBytes := []byte("test  \n  test  \n")
+		expected := "test\n  test\n"
+		result := string(utils.RemoveTrailingWhitespace(testBytes))
+		if result != expected {
+			t.Error("expected", expected, "got", result)
+		}
+	})
+
+	t.Run("It returns the same byte array if there is no trailing whitespace", func(t *testing.T) {
+		t.Parallel()
+		testBytes := []byte("test\n  test\n")
+		expected := "test\n  test\n"
+		result := string(utils.RemoveTrailingWhitespace(testBytes))
+		if result != expected {
+			t.Error("expected", expected, "got", result)
+		}
+	})
+
+	t.Run("It does not remove leading whitespace", func(t *testing.T) {
+		t.Parallel()
+		testBytes := []byte("  test\n  test\n")
+		expected := "  test\n  test\n"
+		result := string(utils.RemoveTrailingWhitespace(testBytes))
+		if result != expected {
+			t.Error("expected", expected, "got", result)
+		}
+	})
+}
+
 func TestFileUtils(t *testing.T) {
 	t.Parallel()
 
