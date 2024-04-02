@@ -1,10 +1,10 @@
-package utils_test
+package files_test
 
 import (
 	"os"
 	"testing"
 
-	"github.com/defenseunicorns/go-oscal/src/pkg/utils"
+	"github.com/defenseunicorns/go-oscal/src/pkg/files"
 )
 
 func TestRemoveTrailingWhitespace(t *testing.T) {
@@ -14,7 +14,7 @@ func TestRemoveTrailingWhitespace(t *testing.T) {
 		t.Parallel()
 		testBytes := []byte("test  \n  test  \n")
 		expected := "test\n  test\n"
-		result := string(utils.RemoveTrailingWhitespace(testBytes))
+		result := string(files.RemoveTrailingWhitespace(testBytes))
 		if result != expected {
 			t.Error("expected", expected, "got", result)
 		}
@@ -24,7 +24,7 @@ func TestRemoveTrailingWhitespace(t *testing.T) {
 		t.Parallel()
 		testBytes := []byte("test\n  test\n")
 		expected := "test\n  test\n"
-		result := string(utils.RemoveTrailingWhitespace(testBytes))
+		result := string(files.RemoveTrailingWhitespace(testBytes))
 		if result != expected {
 			t.Error("expected", expected, "got", result)
 		}
@@ -34,7 +34,7 @@ func TestRemoveTrailingWhitespace(t *testing.T) {
 		t.Parallel()
 		testBytes := []byte("  test\n  test\n")
 		expected := "  test\n  test\n"
-		result := string(utils.RemoveTrailingWhitespace(testBytes))
+		result := string(files.RemoveTrailingWhitespace(testBytes))
 		if result != expected {
 			t.Error("expected", expected, "got", result)
 		}
@@ -54,7 +54,7 @@ func TestFileUtils(t *testing.T) {
 
 		t.Run("It writes to the provided output file", func(t *testing.T) {
 			t.Parallel()
-			err := utils.WriteOutput([]byte(testOutput), tmpDir+testFile)
+			err := files.WriteOutput([]byte(testOutput), tmpDir+testFile)
 			if err != nil {
 				t.Error("expected no error, got", err)
 			}
@@ -70,7 +70,7 @@ func TestFileUtils(t *testing.T) {
 
 		t.Run("creates the file path if it doesn't exist", func(t *testing.T) {
 			t.Parallel()
-			err := utils.WriteOutput([]byte(testOutput), subdir+testFile)
+			err := files.WriteOutput([]byte(testOutput), subdir+testFile)
 			if err != nil {
 				t.Error("expected no error, got", err)
 			}
@@ -86,7 +86,7 @@ func TestFileUtils(t *testing.T) {
 
 		t.Run("returns an error if no output file is provided", func(t *testing.T) {
 			t.Parallel()
-			err := utils.WriteOutput([]byte(testOutput), "")
+			err := files.WriteOutput([]byte(testOutput), "")
 			if err == nil {
 				t.Error("expected an error, got", err)
 			}
@@ -100,7 +100,7 @@ func TestFileUtils(t *testing.T) {
 
 		t.Run("It creates the provided file path", func(t *testing.T) {
 			t.Parallel()
-			err := utils.CreateFileDirs(subdir + testFile)
+			err := files.CreateFileDirs(subdir + testFile)
 			if err != nil {
 				t.Error("expected no error, got", err)
 			}
@@ -112,7 +112,7 @@ func TestFileUtils(t *testing.T) {
 
 		t.Run("returns an error if no file path is provided", func(t *testing.T) {
 			t.Parallel()
-			err := utils.CreateFileDirs("")
+			err := files.CreateFileDirs("")
 			if err == nil {
 				t.Error("expected an error, got", err)
 			}
@@ -123,7 +123,7 @@ func TestFileUtils(t *testing.T) {
 		t.Parallel()
 		t.Run("returns nil if the file path ends with the .json extension", func(t *testing.T) {
 			t.Parallel()
-			err := utils.IsJsonOrYaml(tmpDir + "/test.json")
+			err := files.IsJsonOrYaml(tmpDir + "/test.json")
 			if err != nil {
 				t.Error("expected no error, got", err)
 			}
@@ -132,7 +132,7 @@ func TestFileUtils(t *testing.T) {
 
 		t.Run("returns nil if the file path ends with the .yaml extension", func(t *testing.T) {
 			t.Parallel()
-			err := utils.IsJsonOrYaml(tmpDir + "/test.yaml")
+			err := files.IsJsonOrYaml(tmpDir + "/test.yaml")
 			if err != nil {
 				t.Error("expected no error, got", err)
 			}
@@ -140,7 +140,7 @@ func TestFileUtils(t *testing.T) {
 
 		t.Run("returns an error if the file path does not end with the .json or .yaml extension", func(t *testing.T) {
 			t.Parallel()
-			err := utils.IsJsonOrYaml(tmpDir + "/test.txt")
+			err := files.IsJsonOrYaml(tmpDir + "/test.txt")
 			if err == nil {
 				t.Error("expected an error, got", err)
 			}
@@ -151,7 +151,7 @@ func TestFileUtils(t *testing.T) {
 		t.Parallel()
 		t.Run("returns nil if the file path ends with the .json extension", func(t *testing.T) {
 			t.Parallel()
-			err := utils.IsJson(tmpDir + "/test.json")
+			err := files.IsJson(tmpDir + "/test.json")
 			if err != nil {
 				t.Error("expected no error, got", err)
 			}
@@ -159,7 +159,7 @@ func TestFileUtils(t *testing.T) {
 
 		t.Run("returns an error if the file path does not end with the .json extension", func(t *testing.T) {
 			t.Parallel()
-			err := utils.IsJson(tmpDir + "/test.yaml")
+			err := files.IsJson(tmpDir + "/test.yaml")
 			if err == nil {
 				t.Error("expected an error, got", err)
 			}

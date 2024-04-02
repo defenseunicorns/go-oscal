@@ -3,6 +3,7 @@ package validation
 import (
 	"time"
 
+	"github.com/defenseunicorns/go-oscal/src/pkg/files"
 	"github.com/defenseunicorns/go-oscal/src/pkg/utils"
 )
 
@@ -45,5 +46,5 @@ func WriteValidationResult(validationResult ValidationResult, outputFile string)
 	if err != nil {
 		return err
 	}
-	return utils.WriteOutput(validationResultBytes, outputFile)
+	return files.WriteOutput(validationResultBytes, outputFile)
 }

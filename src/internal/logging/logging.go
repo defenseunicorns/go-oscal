@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/defenseunicorns/go-oscal/src/pkg/utils"
+	"github.com/defenseunicorns/go-oscal/src/pkg/files"
 )
 
 // OpenLogFile opens the provided input file or returns an error if the file does not exist.
 func OpenLogFile(path string) (file *os.File, err error) {
-	err = utils.CreateFileDirs(path)
+	err = files.CreateFileDirs(path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create log file path: %s", err)
 	}

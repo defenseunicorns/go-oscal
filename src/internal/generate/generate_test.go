@@ -7,7 +7,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/defenseunicorns/go-oscal/src/pkg/utils"
+	"github.com/defenseunicorns/go-oscal/src/pkg/files"
 	"github.com/swaggest/jsonschema-go"
 )
 
@@ -45,7 +45,7 @@ func TestGenerate(t *testing.T) {
 				t.Errorf("expected no error, got %v", err)
 			}
 			if writeOutput {
-				utils.WriteOutput(bytes, "../../types/"+pkgPath+"/types.go")
+				files.WriteOutput(bytes, "../../types/"+pkgPath+"/types.go")
 			}
 		}
 	})

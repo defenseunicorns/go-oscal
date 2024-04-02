@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/defenseunicorns/go-oscal/src/pkg/files"
 	"github.com/defenseunicorns/go-oscal/src/pkg/revision"
 	"github.com/defenseunicorns/go-oscal/src/pkg/utils"
 	"github.com/defenseunicorns/go-oscal/src/pkg/validation"
@@ -51,7 +52,7 @@ var ReviseCmd = &cobra.Command{
 		if opts.OutputFile == OUTPUT_DEFAULT {
 			log.Println(string(revisionResponse.RevisedBytes))
 		} else {
-			err := utils.WriteOutput(revisionResponse.RevisedBytes, opts.OutputFile)
+			err := files.WriteOutput(revisionResponse.RevisedBytes, opts.OutputFile)
 			if err != nil {
 				return fmt.Errorf("failed to write to output file: %s", err)
 			}

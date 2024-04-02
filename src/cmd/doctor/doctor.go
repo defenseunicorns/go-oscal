@@ -7,7 +7,7 @@ import (
 	"os"
 
 	doctorSchema "github.com/defenseunicorns/go-oscal/src/internal/doctor-schema"
-	"github.com/defenseunicorns/go-oscal/src/pkg/utils"
+	"github.com/defenseunicorns/go-oscal/src/pkg/files"
 	"github.com/spf13/cobra"
 )
 
@@ -33,7 +33,7 @@ var DoctorCmd = &cobra.Command{
 			return nil
 		} else {
 			// Write the doctor output to the specified file
-			writeErr := utils.WriteOutput(doctoredSchema, outputFile)
+			writeErr := files.WriteOutput(doctoredSchema, outputFile)
 			if writeErr != nil {
 				return fmt.Errorf("failed to write doctor output to file: %s", writeErr)
 			}
@@ -52,7 +52,7 @@ func DoctorCommand(inputfile string) (doctoredSchema []byte, err error) {
 		return doctoredSchema, err
 	}
 
-	err = utils.IsJson(inputfile)
+	err = files.IsJson(inputfile)
 	if err != nil {
 		return doctoredSchema, err
 	}

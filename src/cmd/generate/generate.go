@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/defenseunicorns/go-oscal/src/internal/generate"
+	"github.com/defenseunicorns/go-oscal/src/pkg/files"
 	"github.com/defenseunicorns/go-oscal/src/pkg/utils"
 
 	"github.com/spf13/cobra"
@@ -27,7 +28,7 @@ var GenerateCmd = &cobra.Command{
 		if opts.OutputFile == "" {
 			log.Println(string(output))
 		} else {
-			err = utils.WriteOutput(output, opts.OutputFile)
+			err = files.WriteOutput(output, opts.OutputFile)
 			if err != nil {
 				return fmt.Errorf("failed to write output to file: %s", err)
 			}

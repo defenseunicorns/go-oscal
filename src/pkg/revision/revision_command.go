@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/defenseunicorns/go-oscal/src/pkg/files"
 	"github.com/defenseunicorns/go-oscal/src/pkg/utils"
 	"github.com/defenseunicorns/go-oscal/src/pkg/validation"
 )
@@ -27,12 +28,12 @@ type RevisionOptions struct {
 // For Consumers, this method assumes no ReviseOptions defaults. All defaults are handled in the cobra command.
 func RevisionCommand(opts *RevisionOptions) (revisionResponse RevisionResponse, err error) {
 	// Validate inputfile was provided and that is json or yaml
-	if err := utils.IsJsonOrYaml(opts.InputFile); err != nil {
+	if err := files.IsJsonOrYaml(opts.InputFile); err != nil {
 		return revisionResponse, fmt.Errorf("invalid input file: %s", err)
 	}
 
 	// If output file is not json or yaml, return an error
-	if err := utils.IsJsonOrYaml(opts.OutputFile); err != nil {
+	if err := files.IsJsonOrYaml(opts.OutputFile); err != nil {
 		return revisionResponse, fmt.Errorf("invalid output file: %s", err)
 	}
 
@@ -47,7 +48,7 @@ func RevisionCommand(opts *RevisionOptions) (revisionResponse RevisionResponse, 
 		return revisionResponse, fmt.Errorf("reading input file: %s", err)
 	}
 
-	bytes = utils.RemoveTrailingWhitespace(bytes)
+	bytes = files.RemoveTrailingWhitespace(bytes)
 
 	// Create the reviser and set it in the response
 	reviser, err := NewReviser(bytes, opts.Version)
