@@ -47,4 +47,3 @@ release:
     name: go-oscal
   prerelease: auto
   mode: append
-  draft: true
