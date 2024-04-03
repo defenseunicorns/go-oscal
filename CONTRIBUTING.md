@@ -18,6 +18,7 @@ Thank you for your interest in contributing to go-oscal! We welcome all contribu
   - [Documentation](#documentation)
     - [Architecture Design Records (ADR)](#architecture-design-records-adr)
     - [How to use `adr-tools`](#how-to-use-adr-tools)
+  - [Maintainers](#maintainers)
   - [Contact](#contact)
 
 ## Code of Conduct
@@ -95,6 +96,10 @@ adr new -l "15:Amends:Amended by" Use store-bought butter for all waffle making
 # Get full help docs. There are all sorts of other helpful commands that help manage the decision log.
 adr help
 ```
+
+## Maintainers
+
+- [Updating Dependencies](./docs/dependency-updates.md)
 
 ## Contact
 
