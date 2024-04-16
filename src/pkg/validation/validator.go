@@ -7,7 +7,7 @@ import (
 
 	"github.com/defenseunicorns/go-oscal/src/internal/schemas"
 	"github.com/defenseunicorns/go-oscal/src/pkg/model"
-	"github.com/defenseunicorns/go-oscal/src/pkg/utils"
+	"github.com/defenseunicorns/go-oscal/src/pkg/versioning"
 	"github.com/santhosh-tekuri/jsonschema/v5"
 )
 
@@ -31,7 +31,7 @@ func NewValidator(oscalDoc model.InterfaceOrBytes) (validator Validator, err err
 		return validator, err
 	}
 
-	version, err := utils.GetOscalVersionFromMap(jsonMap)
+	version, err := versioning.GetOscalVersionFromMap(jsonMap)
 	if err != nil {
 		return validator, err
 	}
@@ -55,9 +55,9 @@ func NewValidatorDesiredVersion(oscalDoc model.InterfaceOrBytes, desiredVersion 
 		return validator, err
 	}
 
-	formattedVersion := utils.FormatOscalVersion(desiredVersion)
+	formattedVersion := versioning.FormatOscalVersion(desiredVersion)
 
-	if err = utils.IsValidOscalVersion(formattedVersion); err != nil {
+	if err = versioning.IsValidOscalVersion(formattedVersion); err != nil {
 		return validator, err
 	}
 
@@ -104,9 +104,9 @@ func (v *Validator) GetValidationResult() (ValidationResult, error) {
 
 // IsLatestOscalVersion returns true if the model is the latest version of the OSCAL schema.
 func (v *Validator) IsLatestOscalVersion() (bool, error) {
-	latestVersion := utils.GetLatestSupportedVersion()
+	latestVersion := versioning.GetLatestSupportedVersion()
 
-	version, err := utils.GetOscalVersionFromMap(v.jsonMap)
+	version, err := versioning.GetOscalVersionFromMap(v.jsonMap)
 	if err != nil {
 		return false, err
 	}

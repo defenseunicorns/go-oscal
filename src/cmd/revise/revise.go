@@ -6,8 +6,8 @@ import (
 
 	"github.com/defenseunicorns/go-oscal/src/pkg/files"
 	"github.com/defenseunicorns/go-oscal/src/pkg/revision"
-	"github.com/defenseunicorns/go-oscal/src/pkg/utils"
 	"github.com/defenseunicorns/go-oscal/src/pkg/validation"
+	"github.com/defenseunicorns/go-oscal/src/pkg/versioning"
 	"github.com/spf13/cobra"
 )
 
@@ -68,5 +68,5 @@ func init() {
 	ReviseCmd.Flags().StringVarP(&opts.InputFile, "file", "f", "", "input file to convert")
 	ReviseCmd.Flags().StringVarP(&opts.OutputFile, "output", "o", "", "output file to write to")
 	ReviseCmd.Flags().StringVarP(&opts.ValidationResult, "validation-result", "r", "", "validation result file to write to")
-	ReviseCmd.Flags().StringVarP(&opts.Version, "version", "v", utils.GetLatestSupportedVersion(), "version to convert to")
+	ReviseCmd.Flags().StringVarP(&opts.Version, "version", "v", versioning.GetLatestSupportedVersion(), "version to convert to")
 }

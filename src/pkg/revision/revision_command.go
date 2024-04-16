@@ -6,8 +6,8 @@ import (
 	"os"
 
 	"github.com/defenseunicorns/go-oscal/src/pkg/files"
-	"github.com/defenseunicorns/go-oscal/src/pkg/utils"
 	"github.com/defenseunicorns/go-oscal/src/pkg/validation"
+	"github.com/defenseunicorns/go-oscal/src/pkg/versioning"
 )
 
 type RevisionResponse struct {
@@ -59,7 +59,7 @@ func RevisionCommand(opts *RevisionOptions) (revisionResponse RevisionResponse, 
 
 	// Get the schema version and set warnings if they exist
 	version := reviser.GetSchemaVersion()
-	err = utils.VersionWarning(version)
+	err = versioning.VersionWarning(version)
 	if err != nil {
 		revisionResponse.Warnings = append(revisionResponse.Warnings, err.Error())
 	}

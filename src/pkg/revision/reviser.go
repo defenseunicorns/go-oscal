@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 
 	"github.com/defenseunicorns/go-oscal/src/pkg/model"
-	"github.com/defenseunicorns/go-oscal/src/pkg/utils"
 	"github.com/defenseunicorns/go-oscal/src/pkg/validation"
+	"github.com/defenseunicorns/go-oscal/src/pkg/versioning"
 )
 
 type Reviser struct {
@@ -22,7 +22,7 @@ func NewReviser(interfaceOrBytes model.InterfaceOrBytes, desiredVersion string) 
 		return upgrader, err
 	}
 
-	version, err := utils.GetOscalVersionFromMap(validator.GetJsonModel())
+	version, err := versioning.GetOscalVersionFromMap(validator.GetJsonModel())
 	if err != nil {
 		return upgrader, err
 	}
@@ -60,7 +60,7 @@ func (u *Reviser) Revise() (err error) {
 		return err
 	}
 
-	upgradedJsonMap, err = utils.ReplaceOscalVersionInMap(upgradedJsonMap, u.GetSchemaVersion())
+	upgradedJsonMap, err = versioning.ReplaceOscalVersionInMap(upgradedJsonMap, u.GetSchemaVersion())
 	if err != nil {
 		return err
 	}

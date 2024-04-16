@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/defenseunicorns/go-oscal/src/gooscaltest"
-	"github.com/defenseunicorns/go-oscal/src/pkg/utils"
+	"github.com/defenseunicorns/go-oscal/src/pkg/versioning"
 	"gopkg.in/yaml.v3"
 )
 
@@ -306,7 +306,7 @@ func TestValidator(t *testing.T) {
 	t.Run("IsLatestOscalVersion", func(t *testing.T) {
 		t.Parallel()
 
-		latestVersion := utils.GetLatestSupportedVersion()
+		latestVersion := versioning.GetLatestSupportedVersion()
 
 		t.Run("returns false if the model is not the latest version of the OSCAL schema", func(t *testing.T) {
 			t.Parallel()
@@ -330,7 +330,7 @@ func TestValidator(t *testing.T) {
 				t.Errorf("expected no error, got %v", err)
 			}
 			jsonMap := validator.GetJsonModel()
-			jsonMap, err = utils.ReplaceOscalVersionInMap(jsonMap, latestVersion)
+			jsonMap, err = versioning.ReplaceOscalVersionInMap(jsonMap, latestVersion)
 			if err != nil {
 				t.Errorf("expected no error, got %v", err)
 			}
