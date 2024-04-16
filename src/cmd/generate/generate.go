@@ -7,7 +7,7 @@ import (
 
 	"github.com/defenseunicorns/go-oscal/src/internal/generate"
 	"github.com/defenseunicorns/go-oscal/src/pkg/files"
-	"github.com/defenseunicorns/go-oscal/src/pkg/utils"
+	"github.com/defenseunicorns/go-oscal/src/pkg/tags"
 
 	"github.com/spf13/cobra"
 )
@@ -43,7 +43,7 @@ func GenerateCommand(flags generate.BaseFlags) (output []byte, err error) {
 		return
 	}
 
-	tagList, err := utils.FormatTags(flags.Tags)
+	tagList, err := tags.FormatTags(flags.Tags)
 	if err != nil {
 		return
 	}
