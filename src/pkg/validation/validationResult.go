@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/defenseunicorns/go-oscal/src/pkg/files"
+	"github.com/defenseunicorns/go-oscal/src/pkg/model"
 	"github.com/defenseunicorns/go-oscal/src/pkg/utils"
 )
 
@@ -42,7 +43,7 @@ func NewValidationResult(validator *Validator, errors []ValidatorError) Validati
 
 // WriteValidationResult writes a ValidationResult to a file
 func WriteValidationResult(validationResult ValidationResult, outputFile string) (err error) {
-	validationResultBytes, err := utils.MarshalByExtension(validationResult, outputFile)
+	validationResultBytes, err := model.MarshalByExtension(validationResult, outputFile)
 	if err != nil {
 		return err
 	}

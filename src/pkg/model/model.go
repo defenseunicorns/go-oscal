@@ -1,4 +1,4 @@
-package utils
+package model
 
 import (
 	"encoding/json"

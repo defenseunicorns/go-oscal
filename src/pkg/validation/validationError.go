@@ -3,7 +3,7 @@ package validation
 import (
 	"strings"
 
-	"github.com/defenseunicorns/go-oscal/src/pkg/utils"
+	"github.com/defenseunicorns/go-oscal/src/pkg/model"
 	"github.com/santhosh-tekuri/jsonschema/v5"
 )
 
@@ -27,7 +27,7 @@ func ExtractErrors(originalObject map[string]interface{}, validationError jsonsc
 		if len(validationErrors) > 0 && validationErrors[len(validationErrors)-1].InstanceLocation == basicError.InstanceLocation {
 			validationErrors[len(validationErrors)-1].Error += ", " + basicError.Error
 		} else {
-			failedValue := utils.FindValue(originalObject, strings.Split(basicError.InstanceLocation, "/")[1:])
+			failedValue := model.FindValue(originalObject, strings.Split(basicError.InstanceLocation, "/")[1:])
 			_, mapOk := failedValue.(map[string]interface{})
 			_, sliceOk := failedValue.([]interface{})
 			if mapOk || sliceOk {

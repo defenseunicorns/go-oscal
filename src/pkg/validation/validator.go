@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/defenseunicorns/go-oscal/src/internal/schemas"
+	"github.com/defenseunicorns/go-oscal/src/pkg/model"
 	"github.com/defenseunicorns/go-oscal/src/pkg/utils"
 	"github.com/santhosh-tekuri/jsonschema/v5"
 )
@@ -19,37 +20,37 @@ type Validator struct {
 }
 
 // NewValidator returns a validator with the models version of the schema.
-func NewValidator(oscalDoc utils.InterfaceOrBytes) (validator Validator, err error) {
-	model, err := utils.CoerceToJsonMap(oscalDoc)
+func NewValidator(oscalDoc model.InterfaceOrBytes) (validator Validator, err error) {
+	jsonMap, err := model.CoerceToJsonMap(oscalDoc)
 	if err != nil {
 		return validator, err
 	}
 
-	modelType, err := utils.GetModelType(model)
+	modelType, err := model.GetModelType(jsonMap)
 	if err != nil {
 		return validator, err
 	}
 
-	version, err := utils.GetOscalVersionFromMap(model)
+	version, err := utils.GetOscalVersionFromMap(jsonMap)
 	if err != nil {
 		return validator, err
 	}
 
 	return Validator{
-		jsonMap:       model,
+		jsonMap:       jsonMap,
 		schemaVersion: version,
 		modelType:     modelType,
 	}, nil
 }
 
 // NewValidatorDesiredVersion returns a validator with the desired version of the schema.
-func NewValidatorDesiredVersion(oscalDoc utils.InterfaceOrBytes, desiredVersion string) (validator Validator, err error) {
-	model, err := utils.CoerceToJsonMap(oscalDoc)
+func NewValidatorDesiredVersion(oscalDoc model.InterfaceOrBytes, desiredVersion string) (validator Validator, err error) {
+	jsonMap, err := model.CoerceToJsonMap(oscalDoc)
 	if err != nil {
 		return validator, err
 	}
 
-	modelType, err := utils.GetModelType(model)
+	modelType, err := model.GetModelType(jsonMap)
 	if err != nil {
 		return validator, err
 	}
@@ -61,7 +62,7 @@ func NewValidatorDesiredVersion(oscalDoc utils.InterfaceOrBytes, desiredVersion 
 	}
 
 	return Validator{
-		jsonMap:       model,
+		jsonMap:       jsonMap,
 		modelType:     modelType,
 		schemaVersion: formattedVersion,
 	}, nil
