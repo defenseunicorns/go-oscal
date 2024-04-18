@@ -51,12 +51,6 @@
       ],
       "datasourceTemplate": "github-tags",
       "depNameTemplate": "usnistgov/OSCAL"
-    },
-    {
-      "customType": "regex",
-      "fileMatch": [
-        "^src/pkg/utils/version\\.go$"
-      ]
     }
   ]
 }
