@@ -37,7 +37,7 @@
     "gomodTidy"
   ],
   "commitBodyTable": true,
-  "commitMessagePrefix": "deps",
+  "commitMessagePrefix": "deps:",
   "customManagers": [
     {
       "customType": "regex",
