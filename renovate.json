@@ -1,6 +1,8 @@
 {
   "extends": [
-    "config:recommended"
+    ":dependencyDashboard",
+    ":semanticCommits",
+    ":semanticCommitTypeAll(chore)"
   ],
   "ignorePaths": [
     "**/adr/**",
@@ -37,7 +39,6 @@
     "gomodTidy"
   ],
   "commitBodyTable": true,
-  "commitMessagePrefix": "deps",
   "customManagers": [
     {
       "customType": "regex",
