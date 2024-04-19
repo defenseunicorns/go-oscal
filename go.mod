@@ -1,11 +1,11 @@
 module github.com/defenseunicorns/go-oscal
 
-go 1.22.0
+go 1.22.2
 
 require (
 	github.com/google/uuid v1.6.0
 	github.com/spf13/cobra v1.8.0
-	github.com/swaggest/jsonschema-go v0.3.66
+	github.com/swaggest/jsonschema-go v0.3.70
 	gopkg.in/yaml.v3 v3.0.1
 )
 
