@@ -1,6 +1,6 @@
 module github.com/defenseunicorns/go-oscal
 
-go 1.22.2
+go 1.22.3
 
 require (
 	github.com/google/uuid v1.6.0
