@@ -1,5 +1,35 @@
 # Changelog
 
+## [0.4.0](https://github.com/defenseunicorns/go-oscal/compare/v0.3.2...v0.4.0) (2024-05-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* **utils:** #162 extract utils into individual packages ([#191](https://github.com/defenseunicorns/go-oscal/issues/191))
+
+### refactor
+
+* **utils:** [#162](https://github.com/defenseunicorns/go-oscal/issues/162) extract utils into individual packages ([#191](https://github.com/defenseunicorns/go-oscal/issues/191)) ([a0cf9ae](https://github.com/defenseunicorns/go-oscal/commit/a0cf9ae9e3e4c303279a3fdfe78063e50fa5f154))
+
+
+### Miscellaneous
+
+* **deps:** update actions/checkout action to v4.1.3 ([#205](https://github.com/defenseunicorns/go-oscal/issues/205)) ([4a33828](https://github.com/defenseunicorns/go-oscal/commit/4a33828eec01d8032a9cb914e4ff04826f8bcfd2))
+* **deps:** update actions/checkout action to v4.1.4 ([#209](https://github.com/defenseunicorns/go-oscal/issues/209)) ([01e92be](https://github.com/defenseunicorns/go-oscal/commit/01e92bee27828248a7ded3cbcb1f68efe69441a0))
+* **deps:** update actions/checkout action to v4.1.5 ([#214](https://github.com/defenseunicorns/go-oscal/issues/214)) ([33ee71a](https://github.com/defenseunicorns/go-oscal/commit/33ee71a7bb3a41b57089443f4cd61b199387b2a1))
+* **deps:** update actions/checkout action to v4.1.6 ([#223](https://github.com/defenseunicorns/go-oscal/issues/223)) ([d8c4c7e](https://github.com/defenseunicorns/go-oscal/commit/d8c4c7e7e14110d75e77649ad55c93d56266915b))
+* **deps:** update actions/download-artifact action to v4.1.7 ([#206](https://github.com/defenseunicorns/go-oscal/issues/206)) ([1453390](https://github.com/defenseunicorns/go-oscal/commit/1453390d673da0ac3a4635a5626ec8b8d6983293))
+* **deps:** update actions/setup-go action to v5.0.1 ([#212](https://github.com/defenseunicorns/go-oscal/issues/212)) ([f978b2d](https://github.com/defenseunicorns/go-oscal/commit/f978b2d5cc83a4505aa5291d492ea73039e548bf))
+* **deps:** update actions/upload-artifact action to v4.3.3 ([#207](https://github.com/defenseunicorns/go-oscal/issues/207)) ([b9093f7](https://github.com/defenseunicorns/go-oscal/commit/b9093f78477b196bd29e1d4621f0a7180fa7a9a7))
+* **deps:** update anchore/sbom-action action to v0.15.11 ([#211](https://github.com/defenseunicorns/go-oscal/issues/211)) ([aec5c41](https://github.com/defenseunicorns/go-oscal/commit/aec5c41def73b31a923968d72ffad035f406a811))
+* **deps:** update github/codeql-action action to v3.25.2 ([#208](https://github.com/defenseunicorns/go-oscal/issues/208)) ([412b27a](https://github.com/defenseunicorns/go-oscal/commit/412b27ac842d05c25b888e4767ffb7d9466946e3))
+* **deps:** update github/codeql-action action to v3.25.3 ([#210](https://github.com/defenseunicorns/go-oscal/issues/210)) ([b07d331](https://github.com/defenseunicorns/go-oscal/commit/b07d331e1744fa66dc17b1a7d0ed6b1475c58947))
+* **deps:** update github/codeql-action action to v3.25.4 ([#213](https://github.com/defenseunicorns/go-oscal/issues/213)) ([ad3cf0b](https://github.com/defenseunicorns/go-oscal/commit/ad3cf0b9f62b188ff1aef927e75935a49f54b4a3))
+* **deps:** update github/codeql-action action to v3.25.5 ([#218](https://github.com/defenseunicorns/go-oscal/issues/218)) ([b0fbd94](https://github.com/defenseunicorns/go-oscal/commit/b0fbd94452a75de2ac3300f039fa41613145b3e6))
+* **deps:** update googleapis/release-please-action digest to f3969c0 ([#222](https://github.com/defenseunicorns/go-oscal/issues/222)) ([8f8302e](https://github.com/defenseunicorns/go-oscal/commit/8f8302eab0710d7a6d6e6174bfcbd49f5dfb1c1b))
+* **deps:** update goreleaser/goreleaser-action action to v5.1.0 ([#216](https://github.com/defenseunicorns/go-oscal/issues/216)) ([03728e3](https://github.com/defenseunicorns/go-oscal/commit/03728e3e1625e4220c6e6b84e8b8ea398309090b))
+* **deps:** update ossf/scorecard-action action to v2.3.3 ([#215](https://github.com/defenseunicorns/go-oscal/issues/215)) ([33cbc44](https://github.com/defenseunicorns/go-oscal/commit/33cbc4452be5a73cc64e340b5b680add5aa75b99))
+
 ## [0.3.2](https://github.com/defenseunicorns/go-oscal/compare/v0.3.1...v0.3.2) (2024-04-19)
 
 
