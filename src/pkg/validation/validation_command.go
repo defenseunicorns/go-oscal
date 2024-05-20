@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/defenseunicorns/go-oscal/src/pkg/utils"
+	"github.com/defenseunicorns/go-oscal/src/pkg/versioning"
 )
 
 type ValidationResponse struct {
@@ -38,7 +38,7 @@ func ValidationCommand(inputFile string) (validationResponse ValidationResponse,
 
 	// Get and set version warnings
 	version := validator.GetSchemaVersion()
-	err = utils.VersionWarning(version)
+	err = versioning.VersionWarning(version)
 	if err != nil {
 		validationResponse.Warnings = append(validationResponse.Warnings, err.Error())
 	}

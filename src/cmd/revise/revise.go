@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/defenseunicorns/go-oscal/src/pkg/files"
 	"github.com/defenseunicorns/go-oscal/src/pkg/revision"
-	"github.com/defenseunicorns/go-oscal/src/pkg/utils"
 	"github.com/defenseunicorns/go-oscal/src/pkg/validation"
+	"github.com/defenseunicorns/go-oscal/src/pkg/versioning"
 	"github.com/spf13/cobra"
 )
 
@@ -51,7 +52,7 @@ var ReviseCmd = &cobra.Command{
 		if opts.OutputFile == OUTPUT_DEFAULT {
 			log.Println(string(revisionResponse.RevisedBytes))
 		} else {
-			err := utils.WriteOutput(revisionResponse.RevisedBytes, opts.OutputFile)
+			err := files.WriteOutput(revisionResponse.RevisedBytes, opts.OutputFile)
 			if err != nil {
 				return fmt.Errorf("failed to write to output file: %s", err)
 			}
@@ -67,5 +68,5 @@ func init() {
 	ReviseCmd.Flags().StringVarP(&opts.InputFile, "file", "f", "", "input file to convert")
 	ReviseCmd.Flags().StringVarP(&opts.OutputFile, "output", "o", "", "output file to write to")
 	ReviseCmd.Flags().StringVarP(&opts.ValidationResult, "validation-result", "r", "", "validation result file to write to")
-	ReviseCmd.Flags().StringVarP(&opts.Version, "version", "v", utils.GetLatestSupportedVersion(), "version to convert to")
+	ReviseCmd.Flags().StringVarP(&opts.Version, "version", "v", versioning.GetLatestSupportedVersion(), "version to convert to")
 }

@@ -1,4 +1,4 @@
-package utils
+package versioning
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/defenseunicorns/go-oscal/src/internal/schemas"
 )
@@ -112,6 +113,12 @@ func ReplaceOscalVersionInMap(model map[string]interface{}, version string) (upg
 // UpdateLastModified updates the last-modified field in the metadata
 func UpdateLastModified(metadata map[string]interface{}) {
 	metadata["last-modified"] = GetTimestamp()
+}
+
+// GetTimestamp returns the current time
+func GetTimestamp() time.Time {
+	// Defaults RFC3339 when marshalling and unmarshalling
+	return time.Now()
 }
 
 // VersionWarning returns an warning as an error if there are any known issues with the current version or it isn't the latest.

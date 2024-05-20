@@ -6,7 +6,7 @@ import (
 
 	"github.com/defenseunicorns/go-oscal/src/gooscaltest"
 	revision "github.com/defenseunicorns/go-oscal/src/pkg/revision"
-	"github.com/defenseunicorns/go-oscal/src/pkg/utils"
+	"github.com/defenseunicorns/go-oscal/src/pkg/versioning"
 )
 
 func TestRevisor(t *testing.T) {
@@ -63,7 +63,7 @@ func TestRevisor(t *testing.T) {
 			t.Run("sets the upgradedJsonMap to the upgraded model version", func(t *testing.T) {
 				t.Parallel()
 				expected := "1.0.6"
-				actual, err := utils.GetOscalVersionFromMap(reviser.GetRevisedJsonMap())
+				actual, err := versioning.GetOscalVersionFromMap(reviser.GetRevisedJsonMap())
 				if err != nil {
 					t.Errorf("expected no error, got %v", err)
 				}
@@ -74,7 +74,7 @@ func TestRevisor(t *testing.T) {
 
 			t.Run("maintains the original version", func(t *testing.T) {
 				expected := "1.0.4"
-				actual, err := utils.GetOscalVersionFromMap(reviser.GetJsonModel())
+				actual, err := versioning.GetOscalVersionFromMap(reviser.GetJsonModel())
 				if err != nil {
 					t.Errorf("expected no error, got %v", err)
 				}

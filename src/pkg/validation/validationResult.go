@@ -3,7 +3,9 @@ package validation
 import (
 	"time"
 
-	"github.com/defenseunicorns/go-oscal/src/pkg/utils"
+	"github.com/defenseunicorns/go-oscal/src/pkg/files"
+	"github.com/defenseunicorns/go-oscal/src/pkg/model"
+	"github.com/defenseunicorns/go-oscal/src/pkg/versioning"
 )
 
 type ValidationResult struct {
@@ -22,7 +24,7 @@ type ValidationResultMetadata struct {
 
 // NewValidationResult creates a new ValidationResult from a Validator and a slice of ValidatorErrors
 func NewValidationResult(validator *Validator, errors []ValidatorError) ValidationResult {
-	documentVersion, err := utils.GetOscalVersionFromMap(validator.GetJsonModel())
+	documentVersion, err := versioning.GetOscalVersionFromMap(validator.GetJsonModel())
 	if err != nil {
 		documentVersion = ""
 	}
@@ -41,9 +43,9 @@ func NewValidationResult(validator *Validator, errors []ValidatorError) Validati
 
 // WriteValidationResult writes a ValidationResult to a file
 func WriteValidationResult(validationResult ValidationResult, outputFile string) (err error) {
-	validationResultBytes, err := utils.MarshalByExtension(validationResult, outputFile)
+	validationResultBytes, err := model.MarshalByExtension(validationResult, outputFile)
 	if err != nil {
 		return err
 	}
-	return utils.WriteOutput(validationResultBytes, outputFile)
+	return files.WriteOutput(validationResultBytes, outputFile)
 }

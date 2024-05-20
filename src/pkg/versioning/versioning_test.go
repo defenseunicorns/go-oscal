@@ -1,4 +1,4 @@
-package utils_test
+package versioning_test
 
 import (
 	"os"
@@ -6,7 +6,7 @@ import (
 
 	"time"
 
-	"github.com/defenseunicorns/go-oscal/src/pkg/utils"
+	"github.com/defenseunicorns/go-oscal/src/pkg/versioning"
 	"gopkg.in/yaml.v3"
 )
 
@@ -22,7 +22,7 @@ func TestVersionUtils(t *testing.T) {
 
 		t.Run("returns nil when a valid version is passed", func(t *testing.T) {
 			t.Parallel()
-			err := utils.IsValidOscalVersion(validVersion)
+			err := versioning.IsValidOscalVersion(validVersion)
 			if err != nil {
 				t.Errorf("expected no error, got %v", err)
 			}
@@ -30,7 +30,7 @@ func TestVersionUtils(t *testing.T) {
 
 		t.Run("returns error when an unsupported version is passed", func(t *testing.T) {
 			t.Parallel()
-			err := utils.IsValidOscalVersion(unsupportedVersion)
+			err := versioning.IsValidOscalVersion(unsupportedVersion)
 			if err == nil {
 				t.Errorf("expected error, got %v", err)
 			}
@@ -38,7 +38,7 @@ func TestVersionUtils(t *testing.T) {
 
 		t.Run("returns error when an invalid version is passed", func(t *testing.T) {
 			t.Parallel()
-			err := utils.IsValidOscalVersion(invalidVersion)
+			err := versioning.IsValidOscalVersion(invalidVersion)
 			if err == nil {
 				t.Errorf("expected error, got %v", err)
 			}
@@ -55,7 +55,7 @@ func TestVersionUtils(t *testing.T) {
 
 		t.Run("returns formatted version when a valid version is passed", func(t *testing.T) {
 			t.Parallel()
-			formattedVersion := utils.FormatOscalVersion(validVersion)
+			formattedVersion := versioning.FormatOscalVersion(validVersion)
 			if formattedVersion != validVersion {
 				t.Errorf("expected %s, got %s", validVersion, formattedVersion)
 			}
@@ -63,7 +63,7 @@ func TestVersionUtils(t *testing.T) {
 
 		t.Run("returns formatted version when a valid version prefixed with 'v' is passed", func(t *testing.T) {
 			t.Parallel()
-			formattedVersion := utils.FormatOscalVersion(vPrefixed)
+			formattedVersion := versioning.FormatOscalVersion(vPrefixed)
 			if formattedVersion != validVersion {
 				t.Errorf("expected %s, got %s", validVersion, formattedVersion)
 			}
@@ -71,7 +71,7 @@ func TestVersionUtils(t *testing.T) {
 
 		t.Run("returns formatted version when a valid version prefixed with 'V' is passed", func(t *testing.T) {
 			t.Parallel()
-			formattedVersion := utils.FormatOscalVersion(capVPrefixed)
+			formattedVersion := versioning.FormatOscalVersion(capVPrefixed)
 			if formattedVersion != validVersion {
 				t.Errorf("expected %s, got %s", validVersion, formattedVersion)
 			}
@@ -79,7 +79,7 @@ func TestVersionUtils(t *testing.T) {
 
 		t.Run("returns formatted version when a valid version with dashes is passed", func(t *testing.T) {
 			t.Parallel()
-			formattedVersion := utils.FormatOscalVersion(dashedVersion)
+			formattedVersion := versioning.FormatOscalVersion(dashedVersion)
 			if formattedVersion != validVersion {
 				t.Errorf("expected %s, got %s", validVersion, formattedVersion)
 			}
@@ -112,7 +112,7 @@ func TestVersionUtils(t *testing.T) {
 
 		t.Run("returns the oscal version given a model.", func(t *testing.T) {
 			t.Parallel()
-			version, err := utils.GetOscalVersionFromMap(validModel)
+			version, err := versioning.GetOscalVersionFromMap(validModel)
 			if err != nil {
 				t.Errorf("expected no error, got %v", err)
 			}
@@ -123,7 +123,7 @@ func TestVersionUtils(t *testing.T) {
 
 		t.Run("throws error when version is not found", func(t *testing.T) {
 			t.Parallel()
-			_, err := utils.GetOscalVersionFromMap(invalidOscalModel)
+			_, err := versioning.GetOscalVersionFromMap(invalidOscalModel)
 			if err == nil {
 				t.Errorf("expected error, got %v", err)
 			}
@@ -131,7 +131,7 @@ func TestVersionUtils(t *testing.T) {
 
 		t.Run("throws error for empty version", func(t *testing.T) {
 			t.Parallel()
-			_, err := utils.GetOscalVersionFromMap(noOscalVersionModel)
+			_, err := versioning.GetOscalVersionFromMap(noOscalVersionModel)
 			if err == nil {
 				t.Errorf("expected error, got %v", err)
 			}
@@ -151,11 +151,11 @@ func TestVersionUtils(t *testing.T) {
 					},
 				},
 			}
-			model, err := utils.ReplaceOscalVersionInMap(upgradeModel, upgradeVersion)
+			model, err := versioning.ReplaceOscalVersionInMap(upgradeModel, upgradeVersion)
 			if err != nil {
 				t.Errorf("expected no error, got %v", err)
 			}
-			version, err := utils.GetOscalVersionFromMap(model)
+			version, err := versioning.GetOscalVersionFromMap(model)
 			if err != nil {
 				t.Errorf("expected no error, got %v", err)
 			}
@@ -166,7 +166,7 @@ func TestVersionUtils(t *testing.T) {
 
 		t.Run("throws error when version is not found", func(t *testing.T) {
 			t.Parallel()
-			_, err := utils.ReplaceOscalVersionInMap(invalidOscalModel, validVersion)
+			_, err := versioning.ReplaceOscalVersionInMap(invalidOscalModel, validVersion)
 			if err == nil {
 				t.Errorf("expected error, got %v", err)
 			}
@@ -187,7 +187,7 @@ func TestVersionUtils(t *testing.T) {
 			metadata := map[string]interface{}{
 				"last-modified": initTime,
 			}
-			utils.UpdateLastModified(metadata)
+			versioning.UpdateLastModified(metadata)
 			if metadata["last-modified"].(time.Time).Format(time.RFC3339) == initTime.Format(time.RFC3339) {
 				t.Errorf("expected last-modified to be updated")
 			}
@@ -197,24 +197,24 @@ func TestVersionUtils(t *testing.T) {
 	t.Run("VersionWarning", func(t *testing.T) {
 		t.Parallel()
 
-		latestVersion := utils.GetLatestSupportedVersion()
+		latestVersion := versioning.GetLatestSupportedVersion()
 
 		t.Run("returns an error if the version is has known issues", func(t *testing.T) {
-			err := utils.VersionWarning("1.0.5")
+			err := versioning.VersionWarning("1.0.5")
 			if err == nil {
 				t.Errorf("expected error, got %v", err)
 			}
 		})
 
 		t.Run("returns an error if not on the latest version", func(t *testing.T) {
-			err := utils.VersionWarning("1.0.6")
+			err := versioning.VersionWarning("1.0.6")
 			if err == nil {
 				t.Errorf("expected error, got %v", err)
 			}
 		})
 
 		t.Run("does not print a warning if on the latest version", func(t *testing.T) {
-			err := utils.VersionWarning(latestVersion)
+			err := versioning.VersionWarning(latestVersion)
 			if err != nil {
 				t.Errorf("expected no error, got %v", err)
 			}
@@ -240,11 +240,11 @@ func TestGetLatestVersion(t *testing.T) {
 		t.Errorf("expected no error, got %v", err)
 	}
 	// Format the latest version
-	expected := utils.FormatOscalVersion(updateVersion["oscal"])
+	expected := versioning.FormatOscalVersion(updateVersion["oscal"])
 
 	t.Run("returns the latest version", func(t *testing.T) {
 		t.Parallel()
-		latestVersion := utils.GetLatestSupportedVersion()
+		latestVersion := versioning.GetLatestSupportedVersion()
 
 		if latestVersion != expected {
 			t.Errorf("expected %s, got %s", expected, latestVersion)

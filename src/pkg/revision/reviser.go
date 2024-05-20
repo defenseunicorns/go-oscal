@@ -3,8 +3,9 @@ package revision
 import (
 	"encoding/json"
 
-	"github.com/defenseunicorns/go-oscal/src/pkg/utils"
+	"github.com/defenseunicorns/go-oscal/src/pkg/model"
 	"github.com/defenseunicorns/go-oscal/src/pkg/validation"
+	"github.com/defenseunicorns/go-oscal/src/pkg/versioning"
 )
 
 type Reviser struct {
@@ -15,13 +16,13 @@ type Reviser struct {
 }
 
 // NewReviser returns an upgrader with a validator created from the desired version.
-func NewReviser(model utils.InterfaceOrBytes, desiredVersion string) (upgrader Reviser, err error) {
-	validator, err := validation.NewValidatorDesiredVersion(model, desiredVersion)
+func NewReviser(interfaceOrBytes model.InterfaceOrBytes, desiredVersion string) (upgrader Reviser, err error) {
+	validator, err := validation.NewValidatorDesiredVersion(interfaceOrBytes, desiredVersion)
 	if err != nil {
 		return upgrader, err
 	}
 
-	version, err := utils.GetOscalVersionFromMap(validator.GetJsonModel())
+	version, err := versioning.GetOscalVersionFromMap(validator.GetJsonModel())
 	if err != nil {
 		return upgrader, err
 	}
@@ -54,12 +55,12 @@ func (u *Reviser) Revise() (err error) {
 		return err
 	}
 
-	upgradedJsonMap, err := utils.CoerceToJsonMap(originalBytes)
+	upgradedJsonMap, err := model.CoerceToJsonMap(originalBytes)
 	if err != nil {
 		return err
 	}
 
-	upgradedJsonMap, err = utils.ReplaceOscalVersionInMap(upgradedJsonMap, u.GetSchemaVersion())
+	upgradedJsonMap, err = versioning.ReplaceOscalVersionInMap(upgradedJsonMap, u.GetSchemaVersion())
 	if err != nil {
 		return err
 	}
@@ -71,5 +72,5 @@ func (u *Reviser) Revise() (err error) {
 
 // GetRevisedBytes returns the upgraded model as bytes, marshalled to the desired extension.
 func (u *Reviser) GetRevisedBytes(ext string) (bytes []byte, err error) {
-	return utils.MarshalByExtension(u.upgradedJsonMap, ext)
+	return model.MarshalByExtension(u.upgradedJsonMap, ext)
 }
