@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.4.1](https://github.com/defenseunicorns/go-oscal/compare/v0.4.0...v0.4.1) (2024-05-23)
+
+
+### Miscellaneous
+
+* **deps:** update anchore/sbom-action action to v0.16.0 ([#229](https://github.com/defenseunicorns/go-oscal/issues/229)) ([0c00239](https://github.com/defenseunicorns/go-oscal/commit/0c002395f54fbf7a01f96de197e6006b86ce3152))
+* **deps:** update github/codeql-action action to v3.25.6 ([#228](https://github.com/defenseunicorns/go-oscal/issues/228)) ([d95a749](https://github.com/defenseunicorns/go-oscal/commit/d95a749a904a565a28243dc5183938d40424d6fe))
+* **deps:** update go version to 1.22.3 ([#226](https://github.com/defenseunicorns/go-oscal/issues/226)) ([ad903f8](https://github.com/defenseunicorns/go-oscal/commit/ad903f8a726be8d253ba321cea26b33992a3f29c))
+
 ## [0.4.0](https://github.com/defenseunicorns/go-oscal/compare/v0.3.2...v0.4.0) (2024-05-20)
 
 
