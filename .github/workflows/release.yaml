@@ -6,13 +6,15 @@ on:
       - main
 
 permissions: 
-  contents: write
-  pull-requests: write
-  
+  contents: read
+
 jobs:
   tag-new-version:
     name: Tag New Version
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - name: Create release tag
         id: tag
