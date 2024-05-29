@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"go/format"
 	"reflect"
-	"slices"
+	// "slices"
 
 	"github.com/swaggest/jsonschema-go"
 )
@@ -163,8 +163,8 @@ func (c *GeneratorConfig) buildStructString(def jsonschema.Schema) (structString
 			keys = append(keys, key)
 		}
 	}
-	// Sort the keys alphabetically
-	slices.Sort(keys)
+	// Sort the keys alphabetically to
+	// slices.Sort(keys)
 
 	// If there are no properties, return a map[string]interface{} type
 	if len(keys) == 0 {
