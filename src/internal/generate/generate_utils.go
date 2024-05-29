@@ -43,6 +43,28 @@ var Aliases map[string][]string = map[string][]string{
 	"OscalCompleteSchema": {"OscalModels"},
 }
 
+// Uses camel case for key and dash case for values
+// Key originates from the findSubType function where as the use of keys requires dash case
+var OrderedKeyMap map[string][]string = map[string][]string{
+	"OscalCompleteSchema": {
+		"catalog",
+		"profile",
+		"component-definition",
+		"system-security-plan",
+		"assessment-plan",
+		"assessment-results",
+		"plan-of-action-and-milestones",
+	},
+	"ComponentDefinition": {
+		"uuid",
+		"metadata",
+		"import-component-definitions",
+		"components",
+		"capabilities",
+		"back-matter",
+	},
+}
+
 const headerComment string = `/*
 	This file was auto-generated with go-oscal.
 

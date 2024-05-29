@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"go/format"
 	"reflect"
-	// "slices"
+	"slices"
 
 	"github.com/swaggest/jsonschema-go"
 )
@@ -158,13 +158,31 @@ func (c *GeneratorConfig) buildStructString(def jsonschema.Schema) (structString
 
 	// create a slice of the keys in the properties map
 	var keys []string
-	for key := range def.Properties {
-		if !KeysToIgnore[key] {
-			keys = append(keys, key)
+	if item, ok := OrderedKeyMap[name]; ok {
+
+		for _, key := range item {
+			if !KeysToIgnore[key] {
+				keys = append(keys, key)
+			}
 		}
+		// build this slice for comparison to track potential drift
+		var tempKeys []string
+		for key := range def.Properties {
+			if !KeysToIgnore[key] {
+				tempKeys = append(tempKeys, key)
+			}
+		}
+		if !sortCompare(keys, tempKeys) {
+			return structString, fmt.Errorf("%s has drifted from ordered key map", name)
+		}
+	} else {
+		for key := range def.Properties {
+			if !KeysToIgnore[key] {
+				keys = append(keys, key)
+			}
+		}
+		slices.Sort(keys)
 	}
-	// Sort the keys alphabetically to
-	// slices.Sort(keys)
 
 	// If there are no properties, return a map[string]interface{} type
 	if len(keys) == 0 {
@@ -181,7 +199,6 @@ func (c *GeneratorConfig) buildStructString(def jsonschema.Schema) (structString
 
 	// Add top level struct definition
 	structString += fmt.Sprintf("type %s struct {\n", name)
-
 	// Add the properties to the struct string
 	for _, key := range keys {
 		// Set the parent of the property schema to the definition
@@ -205,9 +222,6 @@ func (c *GeneratorConfig) buildStructString(def jsonschema.Schema) (structString
 	}
 	// Close the struct
 	structString += "}"
-	if err != nil {
-		return structString, err
-	}
 
 	return structString, err
 }
@@ -353,4 +367,24 @@ func (c *GeneratorConfig) handleDuplicates(ref string, name string, schema jsons
 		}
 	}
 	return ref, name
+}
+
+func sortCompare(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+
+	// Create a copy of a so as to not modify a
+	var c []string
+	copy(a, c)
+
+	slices.Sort(c)
+	slices.Sort(b)
+
+	for i, v := range c {
+		if v != b[i] {
+			return false
+		}
+	}
+	return true
 }
