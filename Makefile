@@ -14,7 +14,7 @@ OSCAL_LATEST ?= 1-1-2
 # This should be replaced with the path to the latest oscal complete json schema associated with OSCAL_LATEST.
 UNDOCTORED_SCHEMA ?= testdata/doctor/oscal_complete_schema-1-1-1.json
 OSCAL_LATEST_SCHEMA := src/internal/schemas/oscal_complete_schema-$(OSCAL_LATEST).json
-OSCAL_LATEST_OUTPUT := src/types/oscal-$(OSCAL_LATEST)/
+OSCAL_LATEST_OUTPUT := src/types/oscal-$(OSCAL_LATEST)
 OSCAL_LATEST_PACKAGE := oscalTypes_$(subst -,_,$(OSCAL_LATEST))
 
 # Git vars
