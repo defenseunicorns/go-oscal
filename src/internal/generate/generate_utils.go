@@ -3,6 +3,7 @@ package generate
 import (
 	"fmt"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"unicode"
@@ -55,6 +56,12 @@ var OrderedKeyMap map[string][]string = map[string][]string{
 		"assessment-results",
 		"plan-of-action-and-milestones",
 	},
+	"Catalog":                   {},
+	"Profile":                   {},
+	"SystemSecurityPlan":        {},
+	"AssessmentPlan":            {},
+	"AssessmentResults":         {},
+	"PlanOfActionAndMilestones": {},
 	"ComponentDefinition": {
 		"uuid",
 		"metadata",
@@ -417,4 +424,24 @@ func buildImportString() string {
 	}
 	imports += ")\n"
 	return imports
+}
+
+func sortCompare(a, b []string) error {
+	if len(a) != len(b) {
+		return fmt.Errorf("slices are not the same length \n\tWant: %v \n\tGot: %v", a, b)
+	}
+
+	// Create a copy of a so as to not modify a
+	var c []string
+	copy(a, c)
+
+	slices.Sort(c)
+	slices.Sort(b)
+
+	for i, v := range c {
+		if v != b[i] {
+			return fmt.Errorf("slices are not the same \n\tWant: %v \n\tGot: %v", a, b)
+		}
+	}
+	return nil
 }

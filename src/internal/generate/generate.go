@@ -172,9 +172,11 @@ func (c *GeneratorConfig) buildStructString(def jsonschema.Schema) (structString
 				tempKeys = append(tempKeys, key)
 			}
 		}
-		if !sortCompare(keys, tempKeys) {
-			return structString, fmt.Errorf("%s has drifted from ordered key map", name)
+		err = sortCompare(keys, tempKeys)
+		if err != nil {
+			return structString, err
 		}
+
 	} else {
 		for key := range def.Properties {
 			if !KeysToIgnore[key] {
@@ -367,24 +369,4 @@ func (c *GeneratorConfig) handleDuplicates(ref string, name string, schema jsons
 		}
 	}
 	return ref, name
-}
-
-func sortCompare(a, b []string) bool {
-	if len(a) != len(b) {
-		return false
-	}
-
-	// Create a copy of a so as to not modify a
-	var c []string
-	copy(a, c)
-
-	slices.Sort(c)
-	slices.Sort(b)
-
-	for i, v := range c {
-		if v != b[i] {
-			return false
-		}
-	}
-	return true
 }
