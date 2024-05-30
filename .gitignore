@@ -3,3 +3,4 @@ go-oscal
 testlog
 test_out
 node_modules
+commitlint_config/node_modules
