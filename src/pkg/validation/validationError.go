@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/defenseunicorns/go-oscal/src/pkg/model"
-	"github.com/santhosh-tekuri/jsonschema/v5"
+	"github.com/santhosh-tekuri/jsonschema/v6"
 )
 
 // Extension of the jsonschema.BasicError struct to include the failed value
