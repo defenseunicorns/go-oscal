@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.4.2](https://github.com/defenseunicorns/go-oscal/compare/v0.4.1...v0.4.2) (2024-06-06)
+
+
+### Bug Fixes
+
+* **commitlint:** [#242](https://github.com/defenseunicorns/go-oscal/issues/242) fix pinned dependencies ([#243](https://github.com/defenseunicorns/go-oscal/issues/243)) ([9b77990](https://github.com/defenseunicorns/go-oscal/commit/9b779909d87cdc507d367961a28f4f38c143a1e7))
+* **commitlint:** set to ci and see if that effects the pinned dep ([#245](https://github.com/defenseunicorns/go-oscal/issues/245)) ([4844328](https://github.com/defenseunicorns/go-oscal/commit/4844328a3241bc0c463122b54c01b857e700c6ca))
+
+
+### Miscellaneous
+
+* **actions:** fix code scanning alerts ([#232](https://github.com/defenseunicorns/go-oscal/issues/232)) ([6b94a90](https://github.com/defenseunicorns/go-oscal/commit/6b94a9098f062b51a74477501f4ba5f4e430b164))
+* **deps:** update github/codeql-action action to v3.25.7 ([#244](https://github.com/defenseunicorns/go-oscal/issues/244)) ([a49ede0](https://github.com/defenseunicorns/go-oscal/commit/a49ede08aaac118c4060cb5ea2323748cb94540d))
+* **deps:** update github/codeql-action action to v3.25.8 ([#247](https://github.com/defenseunicorns/go-oscal/issues/247)) ([5fce8ec](https://github.com/defenseunicorns/go-oscal/commit/5fce8ec71aaaee59a4f46261ba7dfd14743882d8))
+* **deps:** update goreleaser/goreleaser-action action to v6 ([#249](https://github.com/defenseunicorns/go-oscal/issues/249)) ([9886d60](https://github.com/defenseunicorns/go-oscal/commit/9886d6024d88bae2f5968f8ac978a006b46a1513))
+* **deps:** update module github.com/santhosh-tekuri/jsonschema/v5 to v6 ([#248](https://github.com/defenseunicorns/go-oscal/issues/248)) ([456d3a8](https://github.com/defenseunicorns/go-oscal/commit/456d3a870b587a1c59ffdb0d578e154de23a00ed))
+
 ## [0.4.1](https://github.com/defenseunicorns/go-oscal/compare/v0.4.0...v0.4.1) (2024-05-23)
 
 
