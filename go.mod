@@ -5,8 +5,7 @@ go 1.22.3
 require (
 	github.com/google/uuid v1.6.0
 	github.com/santhosh-tekuri/jsonschema/v5 v5.3.1
-	github.com/santhosh-tekuri/jsonschema/v6 v6.0.0
-	github.com/spf13/cobra v1.8.0
+	github.com/spf13/cobra v1.8.1
 	github.com/swaggest/jsonschema-go v0.3.70
 	gopkg.in/yaml.v3 v3.0.1
 )
