@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.4.3](https://github.com/defenseunicorns/go-oscal/compare/v0.4.2...v0.4.3) (2024-06-17)
+
+
+### Features
+
+* **validate:** support for writing multiple validation results ([#261](https://github.com/defenseunicorns/go-oscal/issues/261)) ([e760ba6](https://github.com/defenseunicorns/go-oscal/commit/e760ba6baec1dff6a3645ed33126859a8c90f867))
+
+
+### Bug Fixes
+
+* **go-releaser:** replace deprecated commands with updated commands ([#256](https://github.com/defenseunicorns/go-oscal/issues/256)) ([38e2365](https://github.com/defenseunicorns/go-oscal/commit/38e23654659e87f8d5afae4023aaa57d23ab80cf))
+* **validation:** validation.ExtractErrors now properly handles empty top level ([#263](https://github.com/defenseunicorns/go-oscal/issues/263)) ([2e17507](https://github.com/defenseunicorns/go-oscal/commit/2e17507d1e8b57e8faf2a0093cce7492579bfd95))
+
+
+### Miscellaneous
+
+* **deps:** update actions/checkout action to v4.1.7 ([#259](https://github.com/defenseunicorns/go-oscal/issues/259)) ([08973c9](https://github.com/defenseunicorns/go-oscal/commit/08973c964152b0818c32554f741ed5ebde5faf92))
+* **deps:** update googleapis/release-please-action digest to 7987652 ([#257](https://github.com/defenseunicorns/go-oscal/issues/257)) ([71db26b](https://github.com/defenseunicorns/go-oscal/commit/71db26b5b56be2c6e8609a4584728359d1276135))
+* **deps:** update module github.com/santhosh-tekuri/jsonschema/v5 to v6 ([#251](https://github.com/defenseunicorns/go-oscal/issues/251)) ([a26a473](https://github.com/defenseunicorns/go-oscal/commit/a26a473b438b5bcfeceef3d4c39fe0bee2b853a0))
+* **deps:** update module github.com/spf13/cobra to v1.8.1 ([#264](https://github.com/defenseunicorns/go-oscal/issues/264)) ([b05ed96](https://github.com/defenseunicorns/go-oscal/commit/b05ed96813fe321dc264e56f3155c9cdf373899f))
+
 ## [0.4.2](https://github.com/defenseunicorns/go-oscal/compare/v0.4.1...v0.4.2) (2024-06-06)
 
 
