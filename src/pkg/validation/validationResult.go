@@ -49,3 +49,14 @@ func WriteValidationResult(validationResult ValidationResult, outputFile string)
 	}
 	return files.WriteOutput(validationResultBytes, outputFile)
 }
+
+func WriteValidationResults(validationResults []ValidationResult, outputFile string) (err error) {
+	resultMap := map[string][]ValidationResult{
+		"results": validationResults,
+	}
+	validationResultBytes, err := model.MarshalByExtension(resultMap, outputFile)
+	if err != nil {
+		return err
+	}
+	return files.WriteOutput(validationResultBytes, outputFile)
+}
