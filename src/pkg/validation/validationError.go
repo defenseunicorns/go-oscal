@@ -21,7 +21,7 @@ type ValidatorError struct {
 // The jsonschema.Basic contains the errors from the validation
 func ExtractErrors(originalObject map[string]interface{}, validationError jsonschema.Basic) (validationErrors []ValidatorError) {
 	for _, basicError := range validationError.Errors {
-		if basicError.InstanceLocation == "" || basicError.Error == "" || strings.HasPrefix(basicError.Error, "doesn't validate with") {
+		if !strings.HasPrefix(basicError.Error, "missing properties:") && (basicError.InstanceLocation == "" || basicError.Error == "" || strings.HasPrefix(basicError.Error, "doesn't validate with")) {
 			continue
 		}
 		if len(validationErrors) > 0 && validationErrors[len(validationErrors)-1].InstanceLocation == basicError.InstanceLocation {
