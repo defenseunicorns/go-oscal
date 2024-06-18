@@ -1,7 +1,6 @@
 package validation
 
 import (
-	"encoding/json"
 	"errors"
 	"strings"
 
@@ -131,18 +130,17 @@ func (v *Validator) Validate() error {
 
 	err = sch.Validate(v.jsonMap)
 	if err != nil {
-		// If the error is not a validation error, return the error
+		// If the error is not a `ValidationError`, return the error
 		validationErr, ok := err.(*jsonschema.ValidationError)
 		if !ok {
 			return err
 		}
 
 		// Extract the specific errors from the schema error
-		// Return the errors as a string
 		basicErrors := ExtractErrors(v.jsonMap, validationErr.BasicOutput())
+		// Set the validation result
 		v.validationResult = NewValidationResult(v, basicErrors)
-		formattedErrors, _ := json.MarshalIndent(basicErrors, "", "  ")
-		return errors.New(string(formattedErrors))
+		return err
 	}
 
 	v.validationResult = NewValidationResult(v, []ValidatorError{})

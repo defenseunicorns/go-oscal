@@ -10,11 +10,16 @@ import (
 // Extension of the jsonschema.BasicError struct to include the failed value
 // if the failed value is a map or slice, it will be omitted
 type ValidatorError struct {
-	KeywordLocation         string      `json:"keywordLocation" yaml:"keywordLocation"`
-	AbsoluteKeywordLocation string      `json:"absoluteKeywordLocation" yaml:"absoluteKeywordLocation"`
-	InstanceLocation        string      `json:"instanceLocation" yaml:"instanceLocation"`
-	Error                   string      `json:"error" yaml:"error"`
-	FailedValue             interface{} `json:"failedValue,omitempty" yaml:"failedValue,omitempty"`
+	// KeywordLocation is the location of the keyword in the schema for failing value
+	KeywordLocation string `json:"keywordLocation" yaml:"keywordLocation"`
+	// AbsoluteKeywordLocation is the absolute location of the keyword in the schema for failing value
+	AbsoluteKeywordLocation string `json:"absoluteKeywordLocation" yaml:"absoluteKeywordLocation"`
+	// InstanceLocation is the location of the instance in the document
+	InstanceLocation string `json:"instanceLocation" yaml:"instanceLocation"`
+	// Error is the error message
+	Error string `json:"error" yaml:"error"`
+	// FailedValue is the value of the key that failed validation
+	FailedValue interface{} `json:"failedValue,omitempty" yaml:"failedValue,omitempty"`
 }
 
 // Creates a []ValidatorError from a jsonschema.Basic

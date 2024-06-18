@@ -7,12 +7,17 @@ import (
 	"strings"
 
 	"github.com/defenseunicorns/go-oscal/src/pkg/versioning"
+	"github.com/santhosh-tekuri/jsonschema/v5"
 )
 
 type ValidationResponse struct {
 	Validator Validator
-	Result    ValidationResult
-	Warnings  []string
+	// Parsed validation result
+	Result ValidationResult
+	// Non-failing go-oscal warnings (ie: deprecated fields, newer schema versions, etc)
+	Warnings []string
+	// Unparsed Failing validation errors from the jsonschema library
+	JsonSchemaError *jsonschema.ValidationError
 }
 
 // ValidationCommand validates an OSCAL document
@@ -36,26 +41,34 @@ func ValidationCommand(inputFile string) (validationResponse ValidationResponse,
 	}
 	validationResponse.Validator = validator
 
-	// Get and set version warnings
+	// Set the document path
+	validator.SetDocumentPath(inputFile)
+
+	// Run the validation
+	err = validator.Validate()
+	if err != nil {
+		validationError, ok := err.(*jsonschema.ValidationError)
+		// If the error is not a validation error, return the error
+		if !ok {
+			return validationResponse, err
+		}
+		// Set the jsonschema error in the validation response
+		validationResponse.JsonSchemaError = validationError
+	}
+
+	// Get and set version warnings if upgrade available
 	version := validator.GetSchemaVersion()
 	err = versioning.VersionWarning(version)
 	if err != nil {
 		validationResponse.Warnings = append(validationResponse.Warnings, err.Error())
 	}
 
-	// Set the document path
-	validator.SetDocumentPath(inputFile)
-
-	// Run the validation
-	validationError := validator.Validate()
-
-	// Write validation result if it was specified and exists before returning ValidateCommand error
-	validationResult, _ := validator.GetValidationResult()
-	validationResponse.Result = validationResult
-
-	// Handle the validation error
-	if validationError != nil {
-		return validationResponse, fmt.Errorf("failed to validate %s version %s: %s", validator.GetModelType(), validator.GetSchemaVersion(), err)
+	// Get the validation result
+	validationResponse.Result, err = validator.GetValidationResult()
+	// If there is an error, return it, but there shouldn't be an error
+	// Referenced in [#268](https://github.com/defenseunicorns/go-oscal/issues/268)
+	if err != nil {
+		return validationResponse, fmt.Errorf("shouldn't error,check the GetValidationResult method for more information: %s", err)
 	}
 
 	return validationResponse, nil
