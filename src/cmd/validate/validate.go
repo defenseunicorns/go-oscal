@@ -1,6 +1,7 @@
 package validate
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 
@@ -38,7 +39,11 @@ var ValidateCmd = &cobra.Command{
 
 		// Return any validation errors
 		if validationResponse.JsonSchemaError != nil {
-			return fmt.Errorf("invalid OSCAL document: %s", validationResponse.JsonSchemaError)
+			jsonResult, err := json.MarshalIndent(validationResponse.Result, "", "  ")
+			if err != nil {
+				return fmt.Errorf("failed to format validation result as JSON: %v", err)
+			}
+			return fmt.Errorf("invalid OSCAL document, results: %s", string(jsonResult))
 		}
 
 		// No errors, log success
