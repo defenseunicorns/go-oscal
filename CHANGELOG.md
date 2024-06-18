@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.5.0](https://github.com/defenseunicorns/go-oscal/compare/v0.4.3...v0.5.0) (2024-06-18)
+
+
+### ⚠ BREAKING CHANGES
+
+* **validation:** #266 validation.ValidationCommand no longer returns error if validation was run ([#267](https://github.com/defenseunicorns/go-oscal/issues/267))
+
+### Bug Fixes
+
+* **validation:** [#266](https://github.com/defenseunicorns/go-oscal/issues/266) validation.ValidationCommand no longer returns error if validation was run ([#267](https://github.com/defenseunicorns/go-oscal/issues/267)) ([3264df9](https://github.com/defenseunicorns/go-oscal/commit/3264df9c539ae92a2044fb54138199c6cc77f7c8))
+
+
+### Miscellaneous
+
+* **deps:** update github/codeql-action action to v3.25.10 ([#258](https://github.com/defenseunicorns/go-oscal/issues/258)) ([004addd](https://github.com/defenseunicorns/go-oscal/commit/004addd22026d4cba26a0eb1dabc09698d412ef3))
+
 ## [0.4.3](https://github.com/defenseunicorns/go-oscal/compare/v0.4.2...v0.4.3) (2024-06-17)
 
 
