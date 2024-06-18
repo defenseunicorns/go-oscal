@@ -63,8 +63,13 @@ func ValidationCommand(inputFile string) (validationResponse ValidationResponse,
 		validationResponse.Warnings = append(validationResponse.Warnings, err.Error())
 	}
 
-	// Set the response result, ignore error since we know validate has been run
-	validationResponse.Result, _ = validator.GetValidationResult()
+	// Get the validation result
+	validationResponse.Result, err = validator.GetValidationResult()
+	// If there is an error, return it, but there shouldn't be an error
+	// Referenced in [#268](https://github.com/defenseunicorns/go-oscal/issues/268)
+	if err != nil {
+		return validationResponse, fmt.Errorf("shouldn't error,check the GetValidationResult method for more information: %s", err)
+	}
 
 	return validationResponse, nil
 }
