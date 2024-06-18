@@ -1,6 +1,7 @@
 package validate
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/defenseunicorns/go-oscal/src/pkg/validation"
@@ -16,7 +17,11 @@ var ValidateCmd = &cobra.Command{
 	Long:  "Validate an OSCAL document against the OSCAL schema version specified in the document.",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Run the validation
-		validationResponse, validationErr := validation.ValidationCommand(inputfile)
+		validationResponse, err := validation.ValidationCommand(inputfile)
+		// Return any non-validation errors if they exist
+		if err != nil {
+			return err
+		}
 
 		// Write validation result if it was specified and exists before returning ValidateCommand error
 		if validationResultFile != "" {
@@ -25,15 +30,15 @@ var ValidateCmd = &cobra.Command{
 				log.Printf("Failed to write validation result to %s: %s\n", validationResultFile, err)
 			}
 		}
-		// Return the error from the validation if there was one
-		if validationErr != nil {
-			return validationErr
+
+		// Log any go-oscal related warnings (ie version warnings)
+		for _, warning := range validationResponse.Warnings {
+			log.Print(warning)
 		}
 
-		if len(validationResponse.Warnings) > 0 {
-			for _, warning := range validationResponse.Warnings {
-				log.Print(warning)
-			}
+		// Return any validation errors
+		if validationResponse.JsonSchemaError != nil {
+			return fmt.Errorf("invalid OSCAL document: %s", validationResponse.JsonSchemaError)
 		}
 
 		// No errors, log success
