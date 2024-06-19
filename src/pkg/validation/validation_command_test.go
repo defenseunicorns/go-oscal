@@ -64,3 +64,71 @@ func TestValidationCommand(t *testing.T) {
 		}
 	})
 }
+func TestValidationCommandMulti(t *testing.T) {
+	t.Parallel()
+
+	t.Run("returns an error if no input file is provided", func(t *testing.T) {
+		_, err := validation.ValidationCommandMulti("")
+		if err == nil {
+			t.Error("expected an error, got nil")
+		}
+	})
+
+	t.Run("returns an error if the input file is not a json or yaml file", func(t *testing.T) {
+		_, err := validation.ValidationCommandMulti("test.txt")
+		if err == nil {
+			t.Error("expected an error, got nil")
+		}
+	})
+
+	t.Run("returns an error if the input file is not a valid oscal document", func(t *testing.T) {
+		_, err := validation.ValidationCommandMulti("test.json")
+		if err == nil {
+			t.Error("expected an error, got nil")
+		}
+	})
+
+	t.Run("returns a warning if the oscal version is not the latest", func(t *testing.T) {
+		validationResponses, err := validation.ValidationCommandMulti(gooscaltest.ValidComponentPath)
+		if err != nil {
+			t.Error("expected an error, got nil")
+		}
+
+		if len(validationResponses[0].Warnings) == 0 {
+			t.Error("expected a warning, got none")
+		}
+	})
+
+	t.Run("returns a validation response if the input file is valid", func(t *testing.T) {
+		validationResponses, err := validation.ValidationCommandMulti(gooscaltest.ValidComponentPath)
+		if err != nil {
+			t.Errorf("expected no error, got %s", err)
+		}
+
+		if validationResponses[0].Result.Valid != true {
+			t.Error("expected a valid result, got invalid")
+		}
+	})
+
+	t.Run("returns no error and validation result if the input file fails validation", func(t *testing.T) {
+		validationResponses, err := validation.ValidationCommandMulti(gooscaltest.InvalidCatalogPath)
+		if err != nil {
+			t.Errorf("expected no error, got %s", err)
+		}
+
+		if validationResponses[0].Result.Valid != false {
+			t.Error("expected an invalid result, got valid")
+		}
+	})
+
+	t.Run("returns a validation response for each model type", func(t *testing.T) {
+		validationResponses, err := validation.ValidationCommandMulti(gooscaltest.MultipleDocPath)
+		if err != nil {
+			t.Errorf("expected no error, got %s", err)
+		}
+
+		if len(validationResponses) < 2 {
+			t.Errorf("expected at least 2 validation responses, got %d", len(validationResponses))
+		}
+	})
+}
