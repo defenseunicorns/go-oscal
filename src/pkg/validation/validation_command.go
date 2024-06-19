@@ -29,6 +29,47 @@ func ValidationCommand(inputFile string) (validationResponse ValidationResponse,
 	return ValidationCommandWithModel(inputFile, bytes)
 }
 
+// ValidationCommandMulti validates an OSCAL document with multiple models ie (Catalog, Component, Profile, System)
+// Ignores "oneOf" constraint for oscalTypes_X_X_X.OscalCompleteSchema
+// Does not handle yaml delimited files
+// Returns a ValidationResponse and an error
+func ValidationCommandMulti(inputFile string) (responses []ValidationResponse, err error) {
+	// Read the input file
+	bytes, err := files.ReadOscalFile(inputFile)
+	if err != nil {
+		return responses, err
+	}
+
+	// Coerce the bytes to a json map
+	jsonModel, err := model.CoerceToJsonMap(bytes)
+	if err != nil {
+		return responses, err
+	}
+
+	// Generate the models
+	models, err := model.GenModels(jsonModel)
+	if err != nil {
+		return responses, err
+	}
+
+	// Validate each model
+	for _, m := range models {
+		// get the key (model type), at this point is the only one
+		modelType, _ := model.GetModelType(m)
+
+		// TODO: get input on path format (current: multiple_model.json#component-definition)
+		pathWithType := fmt.Sprintf("%s#%s", inputFile, modelType)
+		validationResponse, err := ValidationCommandWithModel(pathWithType, m)
+		// TODO: should we bail on non-validation errors?
+		if err != nil {
+			return responses, err
+		}
+		responses = append(responses, validationResponse)
+	}
+
+	return responses, nil
+}
+
 // ValidationCommandWithModel validates an OSCAL document with a file path and a InterfaceOrBytes
 // Returns a ValidationResponse and an error
 func ValidationCommandWithModel(inputFile string, jsonModel model.InterfaceOrBytes) (validationResponse ValidationResponse, err error) {
