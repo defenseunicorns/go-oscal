@@ -1,11 +1,10 @@
 package validation
 
 import (
-	"errors"
 	"fmt"
-	"os"
-	"strings"
 
+	"github.com/defenseunicorns/go-oscal/src/pkg/files"
+	"github.com/defenseunicorns/go-oscal/src/pkg/model"
 	"github.com/defenseunicorns/go-oscal/src/pkg/versioning"
 	"github.com/santhosh-tekuri/jsonschema/v5"
 )
@@ -23,19 +22,18 @@ type ValidationResponse struct {
 // ValidationCommand validates an OSCAL document
 // Returns a ValidationResponse and an error
 func ValidationCommand(inputFile string) (validationResponse ValidationResponse, err error) {
-	// Validate the input file is a json or yaml file
-	if !strings.HasSuffix(inputFile, "json") && !strings.HasSuffix(inputFile, "yaml") {
-		return validationResponse, errors.New("please specify a json or yaml file")
-	}
-
-	// Read the input file
-	bytes, err := os.ReadFile(inputFile)
+	bytes, err := files.ReadOscalFile(inputFile)
 	if err != nil {
-		return validationResponse, fmt.Errorf("reading input file: %s", err)
+		return validationResponse, err
 	}
+	return ValidationCommandWithModel(inputFile, bytes)
+}
 
+// ValidationCommandWithModel validates an OSCAL document with a file path and a InterfaceOrBytes
+// Returns a ValidationResponse and an error
+func ValidationCommandWithModel(inputFile string, jsonModel model.InterfaceOrBytes) (validationResponse ValidationResponse, err error) {
 	// Create and set the validator in the validation response
-	validator, err := NewValidator(bytes)
+	validator, err := NewValidator(jsonModel)
 	if err != nil {
 		return validationResponse, fmt.Errorf("failed to create validator: %s", err)
 	}
@@ -70,6 +68,5 @@ func ValidationCommand(inputFile string) (validationResponse ValidationResponse,
 	if err != nil {
 		return validationResponse, fmt.Errorf("shouldn't error,check the GetValidationResult method for more information: %s", err)
 	}
-
 	return validationResponse, nil
 }

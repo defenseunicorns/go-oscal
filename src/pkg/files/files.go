@@ -72,9 +72,24 @@ func IsJsonOrYaml(path string) (err error) {
 	return nil
 }
 
+// IsJson returns error if the file is not a json file.
 func IsJson(path string) (err error) {
 	if !strings.HasSuffix(path, ".json") {
 		return errors.New("please specify a json file")
 	}
 	return nil
+}
+
+// ReadOscalFile reads an OSCAL file and returns the bytes
+func ReadOscalFile(inputFile string) (bytes []byte, err error) {
+	// Validate the input file is a json or yaml file
+	if !strings.HasSuffix(inputFile, "json") && !strings.HasSuffix(inputFile, "yaml") {
+		return bytes, errors.New("please specify a json or yaml file")
+	}
+	// Read the input file
+	bytes, err = os.ReadFile(inputFile)
+	if err != nil {
+		return nil, fmt.Errorf("reading input file: %s", err)
+	}
+	return bytes, nil
 }
