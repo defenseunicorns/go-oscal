@@ -53,10 +53,10 @@ func TestValidationCommand(t *testing.T) {
 		}
 	})
 
-	t.Run("returns an error and validation result if the input file fails validation", func(t *testing.T) {
+	t.Run("returns no error and validation result if the input file fails validation", func(t *testing.T) {
 		validationResponse, err := validation.ValidationCommand(gooscaltest.InvalidCatalogPath)
-		if err == nil {
-			t.Error("expected an error, got nil")
+		if err != nil {
+			t.Errorf("expected no error, got %s", err)
 		}
 
 		if validationResponse.Result.Valid != false {

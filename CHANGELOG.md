@@ -1,5 +1,59 @@
 # Changelog
 
+## [0.5.0](https://github.com/defenseunicorns/go-oscal/compare/v0.4.3...v0.5.0) (2024-06-18)
+
+
+### ⚠ BREAKING CHANGES
+
+* **validation:** #266 validation.ValidationCommand no longer returns error if validation was run ([#267](https://github.com/defenseunicorns/go-oscal/issues/267))
+
+### Bug Fixes
+
+* **validation:** [#266](https://github.com/defenseunicorns/go-oscal/issues/266) validation.ValidationCommand no longer returns error if validation was run ([#267](https://github.com/defenseunicorns/go-oscal/issues/267)) ([3264df9](https://github.com/defenseunicorns/go-oscal/commit/3264df9c539ae92a2044fb54138199c6cc77f7c8))
+
+
+### Miscellaneous
+
+* **deps:** update github/codeql-action action to v3.25.10 ([#258](https://github.com/defenseunicorns/go-oscal/issues/258)) ([004addd](https://github.com/defenseunicorns/go-oscal/commit/004addd22026d4cba26a0eb1dabc09698d412ef3))
+
+## [0.4.3](https://github.com/defenseunicorns/go-oscal/compare/v0.4.2...v0.4.3) (2024-06-17)
+
+
+### Features
+
+* **validate:** support for writing multiple validation results ([#261](https://github.com/defenseunicorns/go-oscal/issues/261)) ([e760ba6](https://github.com/defenseunicorns/go-oscal/commit/e760ba6baec1dff6a3645ed33126859a8c90f867))
+
+
+### Bug Fixes
+
+* **go-releaser:** replace deprecated commands with updated commands ([#256](https://github.com/defenseunicorns/go-oscal/issues/256)) ([38e2365](https://github.com/defenseunicorns/go-oscal/commit/38e23654659e87f8d5afae4023aaa57d23ab80cf))
+* **validation:** validation.ExtractErrors now properly handles empty top level ([#263](https://github.com/defenseunicorns/go-oscal/issues/263)) ([2e17507](https://github.com/defenseunicorns/go-oscal/commit/2e17507d1e8b57e8faf2a0093cce7492579bfd95))
+
+
+### Miscellaneous
+
+* **deps:** update actions/checkout action to v4.1.7 ([#259](https://github.com/defenseunicorns/go-oscal/issues/259)) ([08973c9](https://github.com/defenseunicorns/go-oscal/commit/08973c964152b0818c32554f741ed5ebde5faf92))
+* **deps:** update googleapis/release-please-action digest to 7987652 ([#257](https://github.com/defenseunicorns/go-oscal/issues/257)) ([71db26b](https://github.com/defenseunicorns/go-oscal/commit/71db26b5b56be2c6e8609a4584728359d1276135))
+* **deps:** update module github.com/santhosh-tekuri/jsonschema/v5 to v6 ([#251](https://github.com/defenseunicorns/go-oscal/issues/251)) ([a26a473](https://github.com/defenseunicorns/go-oscal/commit/a26a473b438b5bcfeceef3d4c39fe0bee2b853a0))
+* **deps:** update module github.com/spf13/cobra to v1.8.1 ([#264](https://github.com/defenseunicorns/go-oscal/issues/264)) ([b05ed96](https://github.com/defenseunicorns/go-oscal/commit/b05ed96813fe321dc264e56f3155c9cdf373899f))
+
+## [0.4.2](https://github.com/defenseunicorns/go-oscal/compare/v0.4.1...v0.4.2) (2024-06-06)
+
+
+### Bug Fixes
+
+* **commitlint:** [#242](https://github.com/defenseunicorns/go-oscal/issues/242) fix pinned dependencies ([#243](https://github.com/defenseunicorns/go-oscal/issues/243)) ([9b77990](https://github.com/defenseunicorns/go-oscal/commit/9b779909d87cdc507d367961a28f4f38c143a1e7))
+* **commitlint:** set to ci and see if that effects the pinned dep ([#245](https://github.com/defenseunicorns/go-oscal/issues/245)) ([4844328](https://github.com/defenseunicorns/go-oscal/commit/4844328a3241bc0c463122b54c01b857e700c6ca))
+
+
+### Miscellaneous
+
+* **actions:** fix code scanning alerts ([#232](https://github.com/defenseunicorns/go-oscal/issues/232)) ([6b94a90](https://github.com/defenseunicorns/go-oscal/commit/6b94a9098f062b51a74477501f4ba5f4e430b164))
+* **deps:** update github/codeql-action action to v3.25.7 ([#244](https://github.com/defenseunicorns/go-oscal/issues/244)) ([a49ede0](https://github.com/defenseunicorns/go-oscal/commit/a49ede08aaac118c4060cb5ea2323748cb94540d))
+* **deps:** update github/codeql-action action to v3.25.8 ([#247](https://github.com/defenseunicorns/go-oscal/issues/247)) ([5fce8ec](https://github.com/defenseunicorns/go-oscal/commit/5fce8ec71aaaee59a4f46261ba7dfd14743882d8))
+* **deps:** update goreleaser/goreleaser-action action to v6 ([#249](https://github.com/defenseunicorns/go-oscal/issues/249)) ([9886d60](https://github.com/defenseunicorns/go-oscal/commit/9886d6024d88bae2f5968f8ac978a006b46a1513))
+* **deps:** update module github.com/santhosh-tekuri/jsonschema/v5 to v6 ([#248](https://github.com/defenseunicorns/go-oscal/issues/248)) ([456d3a8](https://github.com/defenseunicorns/go-oscal/commit/456d3a870b587a1c59ffdb0d578e154de23a00ed))
+
 ## [0.4.1](https://github.com/defenseunicorns/go-oscal/compare/v0.4.0...v0.4.1) (2024-05-23)
 
 

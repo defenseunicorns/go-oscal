@@ -12,20 +12,24 @@ permissions:
 jobs:
   title_check:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: commitlint
 
     steps:
       - name: Checkout
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
 
+
       - name: Install commitlint
-        run: npm install --save-dev @commitlint/config-conventional@19.2.2 @commitlint/cli@19.3.0
+        run: npm ci --only=dev
 
       - name: Lint PR title
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
-        run: echo "$PR_TITLE" | npx commitlint
+        run: echo "$PR_TITLE" | npx commitlint 
