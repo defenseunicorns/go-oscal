@@ -162,20 +162,22 @@ func (c *GeneratorConfig) buildStructString(def jsonschema.Schema) (structString
 
 		for _, key := range item {
 			if !KeysToIgnore[key] {
-				keys = append(keys, key)
+				if def.Properties[key].TypeObject != nil {
+					keys = append(keys, key)
+				}
 			}
 		}
-		// build this slice for comparison to track potential drift
-		var tempKeys []string
-		for key := range def.Properties {
-			if !KeysToIgnore[key] {
-				tempKeys = append(tempKeys, key)
-			}
-		}
-		err = sortCompare(keys, tempKeys)
-		if err != nil {
-			return structString, err
-		}
+		// // build this slice for comparison to track potential drift
+		// var tempKeys []string
+		// for key := range def.Properties {
+		// 	if !KeysToIgnore[key] {
+		// 		tempKeys = append(tempKeys, key)
+		// 	}
+		// }
+		// err = sortCompare(keys, tempKeys)
+		// if err != nil {
+		// 	return structString, err
+		// }
 
 	} else {
 		for key := range def.Properties {
