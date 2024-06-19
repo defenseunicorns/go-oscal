@@ -72,8 +72,8 @@ func GetModelType(model map[string]interface{}) (modelType string, err error) {
 	if len(model) != 1 {
 		return "", fmt.Errorf("expected model to have 1 key, got %d", len(model))
 	}
-	for key := range model {
-		modelType = key
+	for modelType = range model {
+		break
 	}
 	return modelType, nil
 }
