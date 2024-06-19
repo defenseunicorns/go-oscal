@@ -55,6 +55,17 @@ func FindValue(model map[string]interface{}, keys []string) interface{} {
 	return find(model, keys)
 }
 
+// GenModels takes a model and returns a slice of models
+// This is used to get all the models given oscal complete schema that violates oneOf
+func GenModels(model map[string]interface{}) (models []map[string]interface{}, err error) {
+	for key, value := range model {
+		newModel := make(map[string]interface{})
+		newModel[key] = value
+		models = append(models, newModel)
+	}
+	return models, nil
+}
+
 // GetModelType returns the type of the model if the model is valid
 // returns error if more than one model is found or no models are found (consistent with OSCAL spec)
 func GetModelType(model map[string]interface{}) (modelType string, err error) {

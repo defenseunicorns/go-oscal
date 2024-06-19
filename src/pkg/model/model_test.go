@@ -179,4 +179,33 @@ func TestModelUtils(t *testing.T) {
 
 	})
 
+	t.Run("GenModels", func(t *testing.T) {
+		t.Parallel()
+		models, err := model.GenModels(validModel)
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+		if len(models) != 1 {
+			t.Errorf("expected 1 model, got %d", len(models))
+		}
+	})
+
+	t.Run("GenModels multi models", func(t *testing.T) {
+		t.Parallel()
+		gooscaltest.GetByteMap(t)
+
+		bytes := gooscaltest.ByteMap[gooscaltest.MultipleDocPath]
+		oscalModel, err := model.CoerceToJsonMap(bytes)
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+		models, err := model.GenModels(oscalModel)
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+		if len(models) != 2 {
+			t.Errorf("expected 2 models, got %d", len(models))
+		}
+	})
+
 }
