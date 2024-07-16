@@ -1,13 +1,14 @@
 package validation
 
 import (
+	"encoding/json"
 	"errors"
-	"strings"
 
 	"github.com/defenseunicorns/go-oscal/src/internal/schemas"
+	"github.com/defenseunicorns/go-oscal/src/pkg/files"
 	"github.com/defenseunicorns/go-oscal/src/pkg/model"
 	"github.com/defenseunicorns/go-oscal/src/pkg/versioning"
-	"github.com/santhosh-tekuri/jsonschema/v5"
+	"github.com/santhosh-tekuri/jsonschema/v6"
 )
 
 type Validator struct {
@@ -115,15 +116,9 @@ func (v *Validator) IsLatestOscalVersion() (bool, error) {
 
 // Validate validates the model against the schema.
 func (v *Validator) Validate() error {
-	// Build the schema file-path
-	schemaPath := schemas.SCHEMA_PREFIX + strings.ReplaceAll(v.schemaVersion, ".", "-") + ".json"
-
-	schemaBytes, err := schemas.Schemas.ReadFile(schemaPath)
-	if err != nil {
-		return err
-	}
-
-	sch, err := jsonschema.CompileString(v.schemaVersion, string(schemaBytes))
+	compiler := jsonschema.NewCompiler()
+	compiler.UseLoader(schemas.NewSchemaLoader())
+	sch, err := compiler.Compile(v.schemaVersion)
 	if err != nil {
 		return err
 	}
@@ -136,8 +131,11 @@ func (v *Validator) Validate() error {
 			return err
 		}
 
+		jsonBytes, err := json.Marshal(validationErr)
+		files.WriteOutput(jsonBytes, "../../../testdata/validation/basic-error-v6.json")
+
 		// Extract the specific errors from the schema error
-		basicErrors := ExtractErrors(v.jsonMap, validationErr.BasicOutput())
+		basicErrors := ExtractErrors(v.jsonMap, *validationErr)
 		// Set the validation result
 		v.validationResult = NewValidationResult(v, basicErrors)
 		return err

@@ -1,6 +1,6 @@
 {
     "valid": false,
-    "errors": [
+    "causes": [
         {
             "keywordLocation": "/oneOf/0/properties/catalog/$ref/properties/metadata/$ref/properties/links/items/$ref/properties/rel/pattern",
             "absoluteKeywordLocation": "http://csrc.nist.gov/ns/oscal/1.0/1.0.4/oscal-complete-schema.json#/definitions/oscal-complete-oscal-metadata:link/properties/rel/pattern",

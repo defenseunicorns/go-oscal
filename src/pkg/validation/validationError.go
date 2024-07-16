@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/defenseunicorns/go-oscal/src/pkg/model"
-	"github.com/santhosh-tekuri/jsonschema/v5"
+	"github.com/santhosh-tekuri/jsonschema/v6"
 )
 
 // Extension of the jsonschema.BasicError struct to include the failed value
@@ -24,15 +24,18 @@ type ValidatorError struct {
 
 // Creates a []ValidatorError from a jsonschema.Basic
 // The jsonschema.Basic contains the errors from the validation
-func ExtractErrors(originalObject map[string]interface{}, validationError jsonschema.Basic) (validationErrors []ValidatorError) {
-	for _, basicError := range validationError.Errors {
-		if !strings.HasPrefix(basicError.Error, "missing properties:") && (basicError.InstanceLocation == "" || basicError.Error == "" || strings.HasPrefix(basicError.Error, "doesn't validate with")) {
+func ExtractErrors(originalObject map[string]interface{}, validationError jsonschema.ValidationError) (validationErrors []ValidatorError) {
+	for _, cause := range validationError.Causes {
+		basicOutput := cause.BasicOutput()
+		basicError := cause.Error()
+
+		if !strings.HasPrefix(basicError, "missing properties:") && (basicError == "" || strings.HasPrefix(basicError, "doesn't validate with")) {
 			continue
 		}
-		if len(validationErrors) > 0 && validationErrors[len(validationErrors)-1].InstanceLocation == basicError.InstanceLocation {
-			validationErrors[len(validationErrors)-1].Error += ", " + basicError.Error
+		if len(validationErrors) > 0 && validationErrors[len(validationErrors)-1].InstanceLocation == basicOutput.InstanceLocation {
+			validationErrors[len(validationErrors)-1].Error += ", " + basicError
 		} else {
-			failedValue := model.FindValue(originalObject, strings.Split(basicError.InstanceLocation, "/")[1:])
+			failedValue := model.FindValue(originalObject, strings.Split(basicOutput.InstanceLocation, "/")[1:])
 			_, mapOk := failedValue.(map[string]interface{})
 			_, sliceOk := failedValue.([]interface{})
 			if mapOk || sliceOk {
@@ -40,10 +43,10 @@ func ExtractErrors(originalObject map[string]interface{}, validationError jsonsc
 			}
 			// Create a ValidatorError from the jsonschema.BasicError
 			validationError := ValidatorError{
-				KeywordLocation:         basicError.KeywordLocation,
-				AbsoluteKeywordLocation: basicError.AbsoluteKeywordLocation,
-				InstanceLocation:        basicError.InstanceLocation,
-				Error:                   basicError.Error,
+				KeywordLocation:         basicOutput.KeywordLocation,
+				AbsoluteKeywordLocation: basicOutput.AbsoluteKeywordLocation,
+				InstanceLocation:        basicOutput.InstanceLocation,
+				Error:                   basicError,
 				FailedValue:             failedValue,
 			}
 			validationErrors = append(validationErrors, validationError)

@@ -7,7 +7,7 @@ import (
 
 	"github.com/defenseunicorns/go-oscal/src/gooscaltest"
 	"github.com/defenseunicorns/go-oscal/src/pkg/validation"
-	"github.com/santhosh-tekuri/jsonschema/v5"
+	"github.com/santhosh-tekuri/jsonschema/v6"
 	"gopkg.in/yaml.v3"
 )
 
@@ -15,7 +15,7 @@ func TestValidationError(t *testing.T) {
 	t.Run("ValidationErrors", func(t *testing.T) {
 		t.Parallel()
 		var catalog map[string]interface{}
-		var basic jsonschema.Basic
+		var validationErr jsonschema.ValidationError
 		// Read Catalog and basic errors.
 		originalDocBytes, err := os.ReadFile(gooscaltest.InvalidCatalogPath)
 		if err != nil {
@@ -29,7 +29,7 @@ func TestValidationError(t *testing.T) {
 		if err := yaml.Unmarshal(originalDocBytes, &catalog); err != nil {
 			t.Fatal(err)
 		}
-		if err := json.Unmarshal(errorsBytes, &basic); err != nil {
+		if err := json.Unmarshal(errorsBytes, &validationErr); err != nil {
 			t.Fatal(err)
 		}
 
@@ -37,7 +37,7 @@ func TestValidationError(t *testing.T) {
 
 			t.Run("returns an array of Validator errors given the original document and basic errors", func(t *testing.T) {
 				t.Parallel()
-				validatorErrors := validation.ExtractErrors(catalog, basic)
+				validatorErrors := validation.ExtractErrors(catalog, validationErr)
 				if len(validatorErrors) == 0 {
 					t.Errorf("expected validator errors, got nil")
 				}
@@ -45,7 +45,7 @@ func TestValidationError(t *testing.T) {
 
 			t.Run("filters out errors with empty InstanceLocations", func(t *testing.T) {
 				t.Parallel()
-				validatorErrors := validation.ExtractErrors(catalog, basic)
+				validatorErrors := validation.ExtractErrors(catalog, validationErr)
 				if validatorErrors[0].InstanceLocation == "" {
 					t.Error("expected first Basic.Error to be filtered")
 				}
@@ -53,23 +53,23 @@ func TestValidationError(t *testing.T) {
 
 			t.Run("filters out empty errors", func(t *testing.T) {
 				t.Parallel()
-				validatorErrors := validation.ExtractErrors(catalog, basic)
-				if validatorErrors[0].Error == basic.Errors[0].Error {
+				validatorErrors := validation.ExtractErrors(catalog, validationErr)
+				if validatorErrors[0].Error == validationErr.Causes[0].Error() {
 					t.Error("expected second Basic.Error to be filtered")
 				}
 			})
 
 			t.Run("filters out errors starting with 'doesn't validate with' as these are not specific to the value and therefore not useful", func(t *testing.T) {
 				t.Parallel()
-				validatorErrors := validation.ExtractErrors(catalog, basic)
-				if validatorErrors[0].Error == basic.Errors[0].Error {
+				validatorErrors := validation.ExtractErrors(catalog, validationErr)
+				if validatorErrors[0].Error == validationErr.Causes[0].Error() {
 					t.Error("expected third Basic.Error to be filtered")
 				}
 			})
 
 			t.Run("returns FailedValue if not a map or a slice", func(t *testing.T) {
 				t.Parallel()
-				validationErrors := validation.ExtractErrors(catalog, basic)
+				validationErrors := validation.ExtractErrors(catalog, validationErr)
 				if validationErrors[2].FailedValue != "invalid-uuid" {
 					t.Errorf("expected string, got %v", validationErrors[2].FailedValue)
 				}
@@ -77,7 +77,7 @@ func TestValidationError(t *testing.T) {
 
 			t.Run("returns nil if the FailedValue is a map[string]interface{}", func(t *testing.T) {
 				t.Parallel()
-				validationErrors := validation.ExtractErrors(catalog, basic)
+				validationErrors := validation.ExtractErrors(catalog, validationErr)
 				if validationErrors[0].FailedValue != nil {
 					t.Errorf("expected nil, got %v", validationErrors[0].FailedValue)
 				}
@@ -85,7 +85,7 @@ func TestValidationError(t *testing.T) {
 
 			t.Run("returns nil if the FailedValue is a []interface{}", func(t *testing.T) {
 				t.Parallel()
-				validationErrors := validation.ExtractErrors(catalog, basic)
+				validationErrors := validation.ExtractErrors(catalog, validationErr)
 				if validationErrors[3].FailedValue != nil {
 					t.Errorf("expected nil, got %v", validationErrors[3].FailedValue)
 				}
