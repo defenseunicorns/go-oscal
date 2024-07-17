@@ -1,11 +1,9 @@
 package validation
 
 import (
-	"encoding/json"
 	"errors"
 
 	"github.com/defenseunicorns/go-oscal/src/internal/schemas"
-	"github.com/defenseunicorns/go-oscal/src/pkg/files"
 	"github.com/defenseunicorns/go-oscal/src/pkg/model"
 	"github.com/defenseunicorns/go-oscal/src/pkg/versioning"
 	"github.com/santhosh-tekuri/jsonschema/v6"
@@ -130,11 +128,10 @@ func (v *Validator) Validate() error {
 			return err
 		}
 
-		jsonBytes, err := json.Marshal(validationErr)
-		files.WriteOutput(jsonBytes, "../../../testdata/validation/basic-error-v6.json")
+		basics := validationErr.DetailedOutput()
 
 		// Extract the specific errors from the schema error
-		basicErrors := ExtractErrors(v.jsonMap, *validationErr)
+		basicErrors := ExtractErrors(v.jsonMap, *basics)
 		// Set the validation result
 		v.validationResult = NewValidationResult(v, basicErrors)
 		return err

@@ -26,7 +26,9 @@ var (
 	ValidPlanOfActionAndMilestones  = "../../../testdata/validation/plan-of-action-and-milestones.json"
 	ValidAsessmentPlan              = "../../../testdata/validation/assessment-plan.json"
 	MultipleDocPath                 = "../../../testdata/validation/multiple.yaml"
-	BasicErrorPathJson              = "../../../testdata/validation/basic-error.json"
+	BasicErrorPathJson              = "../../../testdata/validation/basic-error-v6.json"
+	DetailedErrorPathJson           = "../../../testdata/validation/detailed-error-v6.json"
+	ValidatorErrorPathJson          = "../../../testdata/validation/validator-error-v6.json"
 	writers                         = []io.Writer{}
 
 	pathSlice = []string{ValidComponentPath, NoVersionComponentPath, InvalidVersionComponentPath, UnsupportedVersionComponentPath, ValidAssessmentResultPath, ValidCatalogPath, ValidCatalogJsonPath, InvalidCatalogPath, ValidProfilePath, ValidSSP, MultipleDocPath, ValidPlanOfActionAndMilestones, ValidAsessmentPlan}

@@ -24,18 +24,35 @@ type ValidatorError struct {
 
 // Creates a []ValidatorError from a jsonschema.Basic
 // The jsonschema.Basic contains the errors from the validation
-func ExtractErrors(originalObject map[string]interface{}, validationError jsonschema.ValidationError) (validationErrors []ValidatorError) {
-	for _, cause := range validationError.Causes {
-		basicOutput := cause.BasicOutput()
-		basicError := cause.Error()
+func ExtractErrors(originalObject map[string]interface{}, validationError jsonschema.OutputUnit) (validationErrors []ValidatorError) {
+	// Flatten the output unit to get all the errors
+	flattenedErrors := Flatten(&validationError)
 
+	for _, cause := range flattenedErrors {
+		// Skip nil errors and empty errors (nested)
+		if cause == nil || cause.Error == nil {
+			continue
+		}
+
+		// Create the error string
+		errorBytes, err := cause.Error.MarshalJSON()
+		if err != nil {
+			continue
+		}
+		basicError := string(errorBytes)
+
+		// Skip empty errors and errors starting with "missing properties:" and "doesn't validate with"
 		if !strings.HasPrefix(basicError, "missing properties:") && (basicError == "" || strings.HasPrefix(basicError, "doesn't validate with")) {
 			continue
 		}
-		if len(validationErrors) > 0 && validationErrors[len(validationErrors)-1].InstanceLocation == basicOutput.InstanceLocation {
+
+		// Append the error to the last error if it has the same instance location
+		if len(validationErrors) > 0 && validationErrors[len(validationErrors)-1].InstanceLocation == cause.InstanceLocation {
 			validationErrors[len(validationErrors)-1].Error += ", " + basicError
 		} else {
-			failedValue := model.FindValue(originalObject, strings.Split(basicOutput.InstanceLocation, "/")[1:])
+			// Get the failed value
+			failedValue := model.FindValue(originalObject, strings.Split(cause.InstanceLocation, "/")[:1])
+			// Skip if the failed value is a map or slice
 			_, mapOk := failedValue.(map[string]interface{})
 			_, sliceOk := failedValue.([]interface{})
 			if mapOk || sliceOk {
@@ -43,9 +60,9 @@ func ExtractErrors(originalObject map[string]interface{}, validationError jsonsc
 			}
 			// Create a ValidatorError from the jsonschema.BasicError
 			validationError := ValidatorError{
-				KeywordLocation:         basicOutput.KeywordLocation,
-				AbsoluteKeywordLocation: basicOutput.AbsoluteKeywordLocation,
-				InstanceLocation:        basicOutput.InstanceLocation,
+				KeywordLocation:         cause.KeywordLocation,
+				AbsoluteKeywordLocation: cause.AbsoluteKeywordLocation,
+				InstanceLocation:        cause.InstanceLocation,
 				Error:                   basicError,
 				FailedValue:             failedValue,
 			}
@@ -53,5 +70,23 @@ func ExtractErrors(originalObject map[string]interface{}, validationError jsonsc
 		}
 	}
 	return validationErrors
+}
 
+// Flatten function to collect all OutputUnits into a slice
+func Flatten(outputUnit *jsonschema.OutputUnit) []*jsonschema.OutputUnit {
+	var result []*jsonschema.OutputUnit
+	var flattenHelper func(*jsonschema.OutputUnit)
+
+	flattenHelper = func(unit *jsonschema.OutputUnit) {
+		if unit == nil {
+			return
+		}
+		result = append(result, unit)
+		for _, child := range unit.Errors {
+			flattenHelper(&child)
+		}
+	}
+
+	flattenHelper(outputUnit)
+	return result
 }
