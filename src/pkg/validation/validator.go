@@ -116,9 +116,8 @@ func (v *Validator) IsLatestOscalVersion() (bool, error) {
 
 // Validate validates the model against the schema.
 func (v *Validator) Validate() error {
-	compiler := jsonschema.NewCompiler()
-	compiler.UseLoader(schemas.NewSchemaLoader())
-	sch, err := compiler.Compile(v.schemaVersion)
+	// Create a new compiler
+	sch, err := schemas.GetOscalSchema(v.schemaVersion)
 	if err != nil {
 		return err
 	}

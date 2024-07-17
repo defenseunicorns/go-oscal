@@ -1,9 +1,9 @@
 package schemas
 
 import (
+	"bytes"
 	"embed"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/santhosh-tekuri/jsonschema/v6"
@@ -14,68 +14,30 @@ var Schemas embed.FS
 
 const (
 	SCHEMA_PREFIX = "oscal_complete_schema-"
+	SCHEMA_PATH   = "https://raw.githubusercontent.com/defenseunicorns/go-oscal/main/src/internal/schemas/"
 )
 
-type TempFile struct {
-	Path    string
-	Cleanup func()
-}
-
-// CreateTempFile creates a temporary file for the given schema and returns the file path and a cleanup function.
-func CreateTempFile(schemaVersion string) (*TempFile, error) {
-	schemaName := SCHEMA_PREFIX + strings.ReplaceAll(schemaVersion, ".", "-")
-	schemaPath := schemaName + ".json"
-	data, err := Schemas.ReadFile(schemaPath)
+func GetOscalMapFromVersion(version string) (any, error) {
+	schemaName := SCHEMA_PREFIX + strings.ReplaceAll(version, ".", "-")
+	data, err := Schemas.ReadFile(schemaName + ".json")
 	if err != nil {
 		return nil, fmt.Errorf("failed to find schema: %w", err)
 	}
+	return jsonschema.UnmarshalJSON(bytes.NewReader(data))
+}
 
-	tempFile, err := os.CreateTemp("", schemaName+"-*.json")
+func CreateSchemaPath(schemaVersion string) string {
+	schemaName := SCHEMA_PATH + "/" + SCHEMA_PREFIX + strings.ReplaceAll(schemaVersion, ".", "-")
+	return schemaName + ".json"
+}
+
+func GetOscalSchema(version string) (*jsonschema.Schema, error) {
+	compiler := jsonschema.NewCompiler()
+	path := CreateSchemaPath(version)
+	schemaMap, err := GetOscalMapFromVersion(version)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create temp file: %w", err)
+		return nil, fmt.Errorf("failed to get schema map: %w", err)
 	}
-
-	if _, err := tempFile.Write(data); err != nil {
-		tempFile.Close()
-		os.Remove(tempFile.Name())
-		return nil, fmt.Errorf("failed to write to temp file: %w", err)
-	}
-
-	cleanup := func() {
-		tempFile.Close()
-		os.Remove(tempFile.Name())
-	}
-
-	return &TempFile{
-		Path:    tempFile.Name(),
-		Cleanup: cleanup,
-	}, nil
-}
-
-type SchemaLoader struct {
-	fs embed.FS
-}
-
-// NewSchemaLoader creates a new schema loader from the default schema file.
-func NewSchemaLoader() *SchemaLoader {
-	return SchemaLoaderFromEmbedFS(Schemas)
-}
-
-// SchemaLoaderFromEmbedFS creates a new schema loader from an embed.FS.
-func SchemaLoaderFromEmbedFS(fs embed.FS) *SchemaLoader {
-	return &SchemaLoader{
-		fs: fs,
-	}
-}
-
-func (s *SchemaLoader) Load(url string) (any, error) {
-	urlParts := strings.Split(url, "/")
-	schemaVersion := urlParts[len(urlParts)-1]
-	schemaName := SCHEMA_PREFIX + strings.ReplaceAll(schemaVersion, ".", "-")
-	schemaPath := schemaName + ".json"
-	data, err := s.fs.Open(schemaPath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to find schema: %w", err)
-	}
-	return jsonschema.UnmarshalJSON(data)
+	compiler.AddResource(path, schemaMap)
+	return compiler.Compile(path)
 }
