@@ -28,7 +28,8 @@ type ValidationParams struct {
 	SchemaVersion string `json:"schema-version,omitempty" yaml:"schema-version,omitempty"`
 }
 
-func ValidateModelAgainstSchema(params *ValidationParams) (*ValidationResult, error) {
+// ValidateFromParams validates a model against a schema using the given `ValidationParams`
+func ValidateFromParams(params *ValidationParams) (*ValidationResult, error) {
 	validationResult := handleRequirements(params)
 	if !validationResult.Valid {
 		return validationResult, GetNonSchemaError(validationResult)
@@ -111,6 +112,7 @@ func NewValidationResultFromParams(params *ValidationParams, valErrs []Validator
 	}
 }
 
+// NewValidationResultMetadataFromParams creates a new validation result metadata from the params
 func NewValidationResultMetadataFromParams(params *ValidationParams) ValidationResultMetadata {
 	if params == nil {
 		return ValidationResultMetadata{}

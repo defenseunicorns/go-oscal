@@ -139,7 +139,7 @@ func (v *Validator) Validate() error {
 	if err != nil {
 		return err
 	}
-	validationResult, err := ValidateModelAgainstSchema(params)
+	validationResult, err := ValidateFromParams(params)
 	v.validationResult = *validationResult
 	return err
 }
