@@ -6,7 +6,6 @@ import (
 	"github.com/defenseunicorns/go-oscal/src/internal/schemas"
 	"github.com/defenseunicorns/go-oscal/src/pkg/model"
 	"github.com/defenseunicorns/go-oscal/src/pkg/versioning"
-	"github.com/santhosh-tekuri/jsonschema/v6"
 )
 
 type Validator struct {
@@ -66,6 +65,28 @@ func NewValidatorDesiredVersion(oscalDoc model.InterfaceOrBytes, desiredVersion 
 	}, nil
 }
 
+// GetValidationParams returns the validation params for the validator.
+func (v *Validator) GetValidationParams() (*ValidationParams, error) {
+	modelVersion, err := versioning.GetOscalVersionFromMap(v.jsonMap)
+	if err != nil {
+		modelVersion = ""
+	}
+	schemaModel, err := schemas.GetOscalMapFromVersion(v.schemaVersion)
+	if err != nil {
+		return nil, err
+	}
+
+	return &ValidationParams{
+		ModelType:     v.modelType,
+		ModelPath:     v.documentPath,
+		ModelVersion:  modelVersion,
+		ModelData:     v.jsonMap,
+		SchemaVersion: v.schemaVersion,
+		SchemaPath:    schemas.CreateSchemaPath(v.schemaVersion),
+		SchemaData:    schemaModel.(map[string]interface{}),
+	}, nil
+}
+
 // SetDocumentPath sets the path of the document being validated.
 func (v *Validator) SetDocumentPath(documentPath string) {
 	v.documentPath = documentPath
@@ -114,27 +135,11 @@ func (v *Validator) IsLatestOscalVersion() (bool, error) {
 
 // Validate validates the model against the schema.
 func (v *Validator) Validate() error {
-	// Create a new compiler
-	sch, err := schemas.GetOscalSchema(v.schemaVersion)
+	params, err := v.GetValidationParams()
 	if err != nil {
 		return err
 	}
-
-	err = sch.Validate(v.jsonMap)
-	if err != nil {
-		// If the error is not a `ValidationError`, return the error
-		validationErr, ok := err.(*jsonschema.ValidationError)
-		if !ok {
-			return err
-		}
-
-		// Extract the specific errors from the schema error
-		detailedErrors := ExtractErrors(v.jsonMap, validationErr.DetailedOutput())
-		// Set the validation result
-		v.validationResult = NewValidationResult(v, detailedErrors)
-		return err
-	}
-
-	v.validationResult = NewValidationResult(v, []ValidatorError{})
-	return nil
+	validationResult, err := ValidateModelAgainstSchema(params)
+	v.validationResult = *validationResult
+	return err
 }

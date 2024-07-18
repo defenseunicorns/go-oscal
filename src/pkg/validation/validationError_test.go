@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/defenseunicorns/go-oscal/src/gooscaltest"
-	"github.com/defenseunicorns/go-oscal/src/internal/schemas"
 	"github.com/defenseunicorns/go-oscal/src/pkg/validation"
 	"github.com/santhosh-tekuri/jsonschema/v6"
 	"gopkg.in/yaml.v3"
@@ -29,7 +28,7 @@ func TestExtractErrors(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	sch, err := schemas.GetOscalSchema(validator.GetSchemaVersion())
+	sch, err := gooscaltest.GetOscalSchema(validator.GetSchemaVersion())
 	if err != nil {
 		t.Fatal(err)
 	}
