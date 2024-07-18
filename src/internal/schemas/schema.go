@@ -14,7 +14,7 @@ var Schemas embed.FS
 
 const (
 	SCHEMA_PREFIX = "oscal_complete_schema-"
-	SCHEMA_PATH   = "https://raw.githubusercontent.com/defenseunicorns/go-oscal/main/src/internal/schemas/"
+	SCHEMA_PATH   = "https://github.com/defenseunicorns/go-oscal/tree/main/src/internal/schemas"
 )
 
 // GetOscalMapFromVersion returns the OSCAL schema map for a given version
