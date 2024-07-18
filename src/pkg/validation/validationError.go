@@ -1,6 +1,7 @@
 package validation
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/defenseunicorns/go-oscal/src/pkg/model"
@@ -24,34 +25,44 @@ type ValidatorError struct {
 
 // Creates a []ValidatorError from a jsonschema.Basic
 // The jsonschema.Basic contains the errors from the validation
-func ExtractErrors(originalObject map[string]interface{}, validationError jsonschema.OutputUnit) (validationErrors []ValidatorError) {
-	// Flatten the output unit to get all the errors
-	flattenedErrors := Flatten(&validationError)
+func ExtractErrors(originalObject map[string]interface{}, detailedOutputUnit *jsonschema.OutputUnit) (validationErrors []ValidatorError) {
+	if detailedOutputUnit == nil {
+		return
+	}
 
-	for _, cause := range flattenedErrors {
-		// Skip nil errors and empty errors (nested)
-		if cause == nil || cause.Error == nil {
+	topLevelErrors := make(map[string]*ValidatorError)
+	flattenedErrors := Flatten(detailedOutputUnit)
+
+	for _, schErr := range flattenedErrors {
+		if schErr == nil || schErr.Error == nil {
 			continue
 		}
+		var errorString string
 
 		// Create the error string
-		errorBytes, err := cause.Error.MarshalJSON()
+		errorBytes, err := schErr.Error.MarshalJSON()
 		if err != nil {
-			continue
-		}
-		basicError := string(errorBytes)
-
-		// Skip empty errors and errors starting with "missing properties:" and "doesn't validate with"
-		if !strings.HasPrefix(basicError, "missing properties:") && (basicError == "" || strings.HasPrefix(basicError, "doesn't validate with")) {
-			continue
+			errorString = fmt.Sprintf("error marshalling error: %v", err)
+		} else {
+			errorString = string(errorBytes)
 		}
 
-		// Append the error to the last error if it has the same instance location
-		if len(validationErrors) > 0 && validationErrors[len(validationErrors)-1].InstanceLocation == cause.InstanceLocation {
-			validationErrors[len(validationErrors)-1].Error += ", " + basicError
+		// If the error is a top-level error, add it to the topLevelErrors map
+		if schErr.InstanceLocation == "" {
+			existing, ok := topLevelErrors[schErr.KeywordLocation]
+			if !ok {
+				topLevelErrors[schErr.KeywordLocation] = &ValidatorError{
+					KeywordLocation:         schErr.KeywordLocation,
+					AbsoluteKeywordLocation: schErr.AbsoluteKeywordLocation,
+					InstanceLocation:        schErr.InstanceLocation,
+					Error:                   errorString,
+				}
+			} else {
+				existing.Error += ", " + errorString
+			}
 		} else {
 			// Get the failed value
-			failedValue := model.FindValue(originalObject, strings.Split(cause.InstanceLocation, "/")[:1])
+			failedValue := model.FindValue(originalObject, strings.Split(schErr.InstanceLocation, "/")[1:])
 			// Skip if the failed value is a map or slice
 			_, mapOk := failedValue.(map[string]interface{})
 			_, sliceOk := failedValue.([]interface{})
@@ -60,13 +71,20 @@ func ExtractErrors(originalObject map[string]interface{}, validationError jsonsc
 			}
 			// Create a ValidatorError from the jsonschema.BasicError
 			validationError := ValidatorError{
-				KeywordLocation:         cause.KeywordLocation,
-				AbsoluteKeywordLocation: cause.AbsoluteKeywordLocation,
-				InstanceLocation:        cause.InstanceLocation,
-				Error:                   basicError,
+				KeywordLocation:         schErr.KeywordLocation,
+				AbsoluteKeywordLocation: schErr.AbsoluteKeywordLocation,
+				InstanceLocation:        schErr.InstanceLocation,
+				Error:                   errorString,
 				FailedValue:             failedValue,
 			}
 			validationErrors = append(validationErrors, validationError)
+		}
+	}
+
+	// Append the top level errors if there are no instance errors
+	if len(validationErrors) == 0 {
+		for _, value := range topLevelErrors {
+			validationErrors = append(validationErrors, *value)
 		}
 	}
 	return validationErrors

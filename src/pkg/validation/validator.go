@@ -128,12 +128,10 @@ func (v *Validator) Validate() error {
 			return err
 		}
 
-		basics := validationErr.DetailedOutput()
-
 		// Extract the specific errors from the schema error
-		basicErrors := ExtractErrors(v.jsonMap, *basics)
+		detailedErrors := ExtractErrors(v.jsonMap, validationErr.DetailedOutput())
 		// Set the validation result
-		v.validationResult = NewValidationResult(v, basicErrors)
+		v.validationResult = NewValidationResult(v, detailedErrors)
 		return err
 	}
 
