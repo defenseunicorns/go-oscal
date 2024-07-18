@@ -23,8 +23,8 @@ type ValidatorError struct {
 	FailedValue interface{} `json:"failedValue,omitempty" yaml:"failedValue,omitempty"`
 }
 
-// Creates a []ValidatorError from a jsonschema.Basic
-// The jsonschema.Basic contains the errors from the validation
+// Creates a []ValidatorError from a jsonschema.OutputUnit
+// The jsonschema.OutputUnit contains the errors from the validation
 func ExtractErrors(originalObject map[string]interface{}, detailedOutputUnit *jsonschema.OutputUnit) (validationErrors []ValidatorError) {
 	if detailedOutputUnit == nil {
 		return
