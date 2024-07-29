@@ -44,7 +44,7 @@ var ReviseCmd = &cobra.Command{
 		// Log any warnings
 		if len(revisionResponse.Warnings) > 0 {
 			for _, warning := range revisionResponse.Warnings {
-				log.Print(warning)
+				log.Println(warning)
 			}
 		}
 
