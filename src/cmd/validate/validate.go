@@ -34,7 +34,7 @@ var ValidateCmd = &cobra.Command{
 
 		// Log any go-oscal related warnings (ie version warnings)
 		for _, warning := range validationResponse.Warnings {
-			log.Print(warning)
+			log.Println(warning)
 		}
 
 		// Return any validation errors
