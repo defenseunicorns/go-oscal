@@ -80,4 +80,5 @@ func DoctorCommand(inputfile string) (doctoredSchema []byte, err error) {
 func init() {
 	DoctorCmd.Flags().StringVarP(&inputFile, "input-file", "f", "", "the path to a oscal json schema file")
 	DoctorCmd.Flags().StringVarP(&outputFile, "output-file", "o", "", "the path to write the doctored oscal json schema file")
+	DoctorCmd.MarkFlagRequired("input-file")
 }

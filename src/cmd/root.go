@@ -48,8 +48,10 @@ func Execute() {
 		doctor.DoctorCmd,
 	}
 
-	RootCmd.AddCommand(commands...)
-	if err := RootCmd.Execute(); err != nil {
-		log.Fatal(err)
+	for _, command := range commands {
+		command.SilenceUsage = true
 	}
+
+	RootCmd.AddCommand(commands...)
+	RootCmd.Execute()
 }
