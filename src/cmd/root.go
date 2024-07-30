@@ -32,6 +32,9 @@ var RootCmd = &cobra.Command{
 			}
 			log.SetOutput(io.MultiWriter(os.Stderr, file))
 		}
+
+		// Silence the usage message for subcommands, in order to obtain clean output.
+		cmd.SilenceUsage = true
 	},
 }
 
@@ -47,10 +50,6 @@ func Execute() {
 		revise.ReviseCmd,
 		validate.ValidateCmd,
 		doctor.DoctorCmd,
-	}
-
-	for _, command := range commands {
-		command.SilenceUsage = true
 	}
 
 	RootCmd.AddCommand(commands...)
