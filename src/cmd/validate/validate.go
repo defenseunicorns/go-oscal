@@ -34,7 +34,7 @@ var ValidateCmd = &cobra.Command{
 
 		// Log any go-oscal related warnings (ie version warnings)
 		for _, warning := range validationResponse.Warnings {
-			log.Print(warning)
+			log.Println(warning)
 		}
 
 		// Return any validation errors
@@ -55,4 +55,5 @@ var ValidateCmd = &cobra.Command{
 func init() {
 	ValidateCmd.Flags().StringVarP(&inputfile, "input-file", "f", "", "the path to a oscal json schema file")
 	ValidateCmd.Flags().StringVarP(&validationResultFile, "validation-result", "r", "", "the path to a validation result file")
+	ValidateCmd.MarkFlagRequired("input-file")
 }

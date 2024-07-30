@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/defenseunicorns/go-oscal/src/pkg/versioning"
-	"github.com/santhosh-tekuri/jsonschema/v5"
+	"github.com/santhosh-tekuri/jsonschema/v6"
 )
 
 type ValidationResponse struct {

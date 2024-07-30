@@ -17,10 +17,11 @@ var logFile string // -l, --log-file
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
-	Use:   "go-oscal",
-	Args:  cobra.ExactArgs(0),
-	Short: "Generate Go data types from OSCAL JSON schema",
-	Long:  "Generate Go data types from OSCAL JSON schema",
+	Use:           "go-oscal",
+	Args:          cobra.ExactArgs(0),
+	Short:         "Generate Go data types from OSCAL JSON schema",
+	Long:          "Generate Go data types from OSCAL JSON schema",
+	SilenceErrors: true,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		log.SetOutput(os.Stderr)
 		log.SetPrefix("go-oscal: ")
@@ -31,6 +32,9 @@ var RootCmd = &cobra.Command{
 			}
 			log.SetOutput(io.MultiWriter(os.Stderr, file))
 		}
+
+		// Silence the usage message for subcommands, in order to obtain clean output.
+		cmd.SilenceUsage = true
 	},
 }
 

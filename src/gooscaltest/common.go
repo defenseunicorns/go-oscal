@@ -2,11 +2,15 @@ package gooscaltest
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"log"
 	"os"
 	"sync"
 	"testing"
+
+	"github.com/defenseunicorns/go-oscal/src/internal/schemas"
+	"github.com/santhosh-tekuri/jsonschema/v6"
 )
 
 var (
@@ -26,11 +30,29 @@ var (
 	ValidPlanOfActionAndMilestones  = "../../../testdata/validation/plan-of-action-and-milestones.json"
 	ValidAsessmentPlan              = "../../../testdata/validation/assessment-plan.json"
 	MultipleDocPath                 = "../../../testdata/validation/multiple.yaml"
-	BasicErrorPathJson              = "../../../testdata/validation/basic-error.json"
 	writers                         = []io.Writer{}
 
 	pathSlice = []string{ValidComponentPath, NoVersionComponentPath, InvalidVersionComponentPath, UnsupportedVersionComponentPath, ValidAssessmentResultPath, ValidCatalogPath, ValidCatalogJsonPath, InvalidCatalogPath, ValidProfilePath, ValidSSP, MultipleDocPath, ValidPlanOfActionAndMilestones, ValidAsessmentPlan}
 )
+
+// GetOscalSchema returns the jsonschema Schema for a given version
+func GetOscalSchema(version string) (*jsonschema.Schema, error) {
+	compiler := jsonschema.NewCompiler()
+
+	// Create the schemaUrl (url) to the github schema file
+	// URL is used in ValidationError to point to the exact schema that failed validation
+	schemaUrl := schemas.CreateSchemaPath(version)
+	// Get the schema map from the local schema file
+	schemaMap, err := schemas.GetOscalMapFromVersion(version)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get schema map: %w", err)
+	}
+
+	// Add the schema map to the compiler with the url
+	compiler.AddResource(schemaUrl, schemaMap)
+	// Compile the schema
+	return compiler.Compile(schemaUrl)
+}
 
 // GetByteMap reads the files in PathSlice and stores them in ByteMap
 func GetByteMap(t *testing.T) {

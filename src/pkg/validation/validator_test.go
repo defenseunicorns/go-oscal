@@ -157,118 +157,6 @@ func TestValidator(t *testing.T) {
 
 	})
 
-	t.Run("Validate", func(t *testing.T) {
-		t.Parallel()
-
-		t.Run("returns nil when a valid component definition of the correct version is passed", func(t *testing.T) {
-			t.Parallel()
-			validator, err := NewValidator(gooscaltest.ByteMap[gooscaltest.ValidComponentPath])
-			if err != nil {
-				t.Errorf("expected no error, got %v", err)
-			}
-			err = validator.Validate()
-			if err != nil {
-				t.Errorf("expected no error, got %v", err)
-			}
-		})
-
-		t.Run("returns error when it fails to validate against the supported schema", func(t *testing.T) {
-			t.Parallel()
-			validator, err := NewValidator(gooscaltest.ByteMap[gooscaltest.InvalidCatalogPath])
-			if err != nil {
-				t.Errorf("expected no error, got %v", err)
-			}
-			err = validator.Validate()
-			if err == nil {
-				t.Errorf("expected error, got %v", err)
-			}
-		})
-
-		t.Run("returns error when it fails to validate against the desired version", func(t *testing.T) {
-			t.Parallel()
-			validator, err := NewValidatorDesiredVersion(gooscaltest.ByteMap[gooscaltest.ValidComponentPath], "1.0.5")
-			if err != nil {
-				t.Errorf("expected no error, got %v", err)
-			}
-			err = validator.Validate()
-			if err == nil {
-				t.Errorf("expected error, got %v", err)
-			}
-		})
-
-		t.Run("supports catalog", func(t *testing.T) {
-			t.Parallel()
-			validator, err := NewValidator(gooscaltest.ByteMap[gooscaltest.ValidCatalogPath])
-			if err != nil {
-				t.Errorf("expected no error, got %v", err)
-			}
-			err = validator.Validate()
-			if err != nil {
-				t.Errorf("expected no error, got %v", err)
-			}
-		})
-
-		t.Run("supports assessment-result", func(t *testing.T) {
-			t.Parallel()
-			validator, err := NewValidator(gooscaltest.ByteMap[gooscaltest.ValidAssessmentResultPath])
-			if err != nil {
-				t.Errorf("expected no error, got %v", err)
-			}
-			err = validator.Validate()
-			if err != nil {
-				t.Errorf("expected no error, got %v", err)
-			}
-		})
-
-		t.Run("supports profile", func(t *testing.T) {
-			t.Parallel()
-			validator, err := NewValidator(gooscaltest.ByteMap[gooscaltest.ValidProfilePath])
-			if err != nil {
-				t.Errorf("expected no error, got %v", err)
-			}
-			err = validator.Validate()
-			if err != nil {
-				t.Errorf("expected no error, got %v", err)
-			}
-		})
-
-		t.Run("supports system-security-plan", func(t *testing.T) {
-			t.Parallel()
-			validator, err := NewValidator(gooscaltest.ByteMap[gooscaltest.ValidSSP])
-			if err != nil {
-				t.Errorf("expected no error, got %v", err)
-			}
-			err = validator.Validate()
-			if err != nil {
-				t.Errorf("expected no error, got %v", err)
-			}
-		})
-
-		t.Run("supports plan-of-action-and-milestones", func(t *testing.T) {
-			t.Parallel()
-			validator, err := NewValidator(gooscaltest.ByteMap[gooscaltest.ValidPlanOfActionAndMilestones])
-			if err != nil {
-				t.Errorf("expected no error, got %v", err)
-			}
-			err = validator.Validate()
-			if err != nil {
-				t.Errorf("expected no error, got %v", err)
-			}
-		})
-
-		t.Run("supports assessment-plan", func(t *testing.T) {
-			t.Parallel()
-			validator, err := NewValidator(gooscaltest.ByteMap[gooscaltest.ValidAsessmentPlan])
-			if err != nil {
-				t.Errorf("expected no error, got %v", err)
-			}
-			err = validator.Validate()
-			if err != nil {
-				t.Errorf("expected no error, got %v", err)
-			}
-		})
-	})
-
 	t.Run("GetValidationResult", func(t *testing.T) {
 		t.Parallel()
 
@@ -348,5 +236,125 @@ func TestValidator(t *testing.T) {
 				t.Errorf("expected true, got false")
 			}
 		})
+	})
+}
+
+func TestValidator_Validate(t *testing.T) {
+	t.Parallel()
+	gooscaltest.GetByteMap(t)
+
+	t.Run("returns nil when a valid component definition of the correct version is passed", func(t *testing.T) {
+		t.Parallel()
+		validator, err := NewValidator(gooscaltest.ByteMap[gooscaltest.ValidComponentPath])
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+		err = validator.Validate()
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+	})
+
+	t.Run("returns error when it fails to validate against the supported schema", func(t *testing.T) {
+		t.Parallel()
+		validator, err := NewValidator(gooscaltest.ByteMap[gooscaltest.InvalidCatalogPath])
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+		err = validator.Validate()
+		if err == nil {
+			t.Errorf("expected error, got %v", err)
+		}
+		result, err := validator.GetValidationResult()
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+		if result.Valid {
+			t.Errorf("expected false, got true")
+		}
+	})
+
+	t.Run("returns error when it fails to validate against the desired version", func(t *testing.T) {
+		t.Parallel()
+		validator, err := NewValidatorDesiredVersion(gooscaltest.ByteMap[gooscaltest.ValidComponentPath], "1.0.5")
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+		err = validator.Validate()
+		if err == nil {
+			t.Errorf("expected error, got %v", err)
+		}
+	})
+
+	t.Run("supports catalog", func(t *testing.T) {
+		t.Parallel()
+		validator, err := NewValidator(gooscaltest.ByteMap[gooscaltest.ValidCatalogPath])
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+		err = validator.Validate()
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+	})
+
+	t.Run("supports assessment-result", func(t *testing.T) {
+		t.Parallel()
+		validator, err := NewValidator(gooscaltest.ByteMap[gooscaltest.ValidAssessmentResultPath])
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+		err = validator.Validate()
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+	})
+
+	t.Run("supports profile", func(t *testing.T) {
+		t.Parallel()
+		validator, err := NewValidator(gooscaltest.ByteMap[gooscaltest.ValidProfilePath])
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+		err = validator.Validate()
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+	})
+
+	t.Run("supports system-security-plan", func(t *testing.T) {
+		t.Parallel()
+		validator, err := NewValidator(gooscaltest.ByteMap[gooscaltest.ValidSSP])
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+		err = validator.Validate()
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+	})
+
+	t.Run("supports plan-of-action-and-milestones", func(t *testing.T) {
+		t.Parallel()
+		validator, err := NewValidator(gooscaltest.ByteMap[gooscaltest.ValidPlanOfActionAndMilestones])
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+		err = validator.Validate()
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+	})
+
+	t.Run("supports assessment-plan", func(t *testing.T) {
+		t.Parallel()
+		validator, err := NewValidator(gooscaltest.ByteMap[gooscaltest.ValidAsessmentPlan])
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+		err = validator.Validate()
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
 	})
 }

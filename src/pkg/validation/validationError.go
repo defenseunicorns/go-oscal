@@ -1,10 +1,11 @@
 package validation
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/defenseunicorns/go-oscal/src/pkg/model"
-	"github.com/santhosh-tekuri/jsonschema/v5"
+	"github.com/santhosh-tekuri/jsonschema/v6"
 )
 
 // Extension of the jsonschema.BasicError struct to include the failed value
@@ -22,17 +23,47 @@ type ValidatorError struct {
 	FailedValue interface{} `json:"failedValue,omitempty" yaml:"failedValue,omitempty"`
 }
 
-// Creates a []ValidatorError from a jsonschema.Basic
-// The jsonschema.Basic contains the errors from the validation
-func ExtractErrors(originalObject map[string]interface{}, validationError jsonschema.Basic) (validationErrors []ValidatorError) {
-	for _, basicError := range validationError.Errors {
-		if !strings.HasPrefix(basicError.Error, "missing properties:") && (basicError.InstanceLocation == "" || basicError.Error == "" || strings.HasPrefix(basicError.Error, "doesn't validate with")) {
+// Creates a []ValidatorError from a jsonschema.OutputUnit
+// The jsonschema.OutputUnit contains the errors from the validation
+func ExtractErrors(originalObject map[string]interface{}, detailedOutputUnit *jsonschema.OutputUnit) (validationErrors []ValidatorError) {
+	if detailedOutputUnit == nil {
+		return
+	}
+
+	topLevelErrors := make(map[string]*ValidatorError)
+	flattenedErrors := Flatten(detailedOutputUnit)
+
+	for _, schErr := range flattenedErrors {
+		if schErr == nil || schErr.Error == nil {
 			continue
 		}
-		if len(validationErrors) > 0 && validationErrors[len(validationErrors)-1].InstanceLocation == basicError.InstanceLocation {
-			validationErrors[len(validationErrors)-1].Error += ", " + basicError.Error
+		var errorString string
+
+		// Create the error string
+		errorBytes, err := schErr.Error.MarshalJSON()
+		if err != nil {
+			errorString = fmt.Sprintf("error marshalling error: %v", err)
 		} else {
-			failedValue := model.FindValue(originalObject, strings.Split(basicError.InstanceLocation, "/")[1:])
+			errorString = string(errorBytes)
+		}
+
+		// If the error is a top-level error, add it to the topLevelErrors map
+		if schErr.InstanceLocation == "" {
+			existing, ok := topLevelErrors[schErr.KeywordLocation]
+			if !ok {
+				topLevelErrors[schErr.KeywordLocation] = &ValidatorError{
+					KeywordLocation:         schErr.KeywordLocation,
+					AbsoluteKeywordLocation: schErr.AbsoluteKeywordLocation,
+					InstanceLocation:        schErr.InstanceLocation,
+					Error:                   errorString,
+				}
+			} else {
+				existing.Error += ", " + errorString
+			}
+		} else {
+			// Get the failed value
+			failedValue := model.FindValue(originalObject, strings.Split(schErr.InstanceLocation, "/")[1:])
+			// Skip if the failed value is a map or slice
 			_, mapOk := failedValue.(map[string]interface{})
 			_, sliceOk := failedValue.([]interface{})
 			if mapOk || sliceOk {
@@ -40,15 +71,40 @@ func ExtractErrors(originalObject map[string]interface{}, validationError jsonsc
 			}
 			// Create a ValidatorError from the jsonschema.BasicError
 			validationError := ValidatorError{
-				KeywordLocation:         basicError.KeywordLocation,
-				AbsoluteKeywordLocation: basicError.AbsoluteKeywordLocation,
-				InstanceLocation:        basicError.InstanceLocation,
-				Error:                   basicError.Error,
+				KeywordLocation:         schErr.KeywordLocation,
+				AbsoluteKeywordLocation: schErr.AbsoluteKeywordLocation,
+				InstanceLocation:        schErr.InstanceLocation,
+				Error:                   errorString,
 				FailedValue:             failedValue,
 			}
 			validationErrors = append(validationErrors, validationError)
 		}
 	}
-	return validationErrors
 
+	// Append the top level errors if there are no instance errors
+	if len(validationErrors) == 0 {
+		for _, value := range topLevelErrors {
+			validationErrors = append(validationErrors, *value)
+		}
+	}
+	return validationErrors
+}
+
+// Flatten function to collect all OutputUnits into a slice
+func Flatten(outputUnit *jsonschema.OutputUnit) []*jsonschema.OutputUnit {
+	var result []*jsonschema.OutputUnit
+	var flattenHelper func(*jsonschema.OutputUnit)
+
+	flattenHelper = func(unit *jsonschema.OutputUnit) {
+		if unit == nil {
+			return
+		}
+		result = append(result, unit)
+		for _, child := range unit.Errors {
+			flattenHelper(&child)
+		}
+	}
+
+	flattenHelper(outputUnit)
+	return result
 }

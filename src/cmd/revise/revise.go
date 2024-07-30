@@ -44,7 +44,7 @@ var ReviseCmd = &cobra.Command{
 		// Log any warnings
 		if len(revisionResponse.Warnings) > 0 {
 			for _, warning := range revisionResponse.Warnings {
-				log.Print(warning)
+				log.Println(warning)
 			}
 		}
 
@@ -65,8 +65,9 @@ var ReviseCmd = &cobra.Command{
 }
 
 func init() {
-	ReviseCmd.Flags().StringVarP(&opts.InputFile, "file", "f", "", "input file to convert")
-	ReviseCmd.Flags().StringVarP(&opts.OutputFile, "output", "o", "", "output file to write to")
+	ReviseCmd.Flags().StringVarP(&opts.InputFile, "input-file", "f", "", "input file to convert")
+	ReviseCmd.Flags().StringVarP(&opts.OutputFile, "output-file", "o", "", "output file to write to")
 	ReviseCmd.Flags().StringVarP(&opts.ValidationResult, "validation-result", "r", "", "validation result file to write to")
 	ReviseCmd.Flags().StringVarP(&opts.Version, "version", "v", versioning.GetLatestSupportedVersion(), "version to convert to")
+	ReviseCmd.MarkFlagRequired("input-file")
 }

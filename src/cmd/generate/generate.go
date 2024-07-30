@@ -20,6 +20,7 @@ var GenerateCmd = &cobra.Command{
 	Long:  "Generate Golang data types from OSCAL Complete schema.",
 	// Example: generateHelp,
 	RunE: func(cmd *cobra.Command, componentDefinitionPaths []string) error {
+
 		output, err := GenerateCommand(*opts)
 		if err != nil {
 			return err
@@ -62,4 +63,5 @@ func init() {
 	GenerateCmd.Flags().StringVarP(&opts.OutputFile, "output-file", "o", "", "the name of the file to write the output to (outputs to STDOUT by default)")
 	GenerateCmd.Flags().StringVarP(&opts.Pkg, "pkg", "p", "main", "the name of the package for the generated code")
 	GenerateCmd.Flags().StringVarP(&opts.Tags, "tags", "t", "json,yaml", "comma separated list of the tags to put on the struct")
+	GenerateCmd.MarkFlagRequired("input-file")
 }
