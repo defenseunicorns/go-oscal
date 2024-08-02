@@ -49,8 +49,17 @@ func GenerateCommand(flags generate.BaseFlags) (output []byte, err error) {
 		return
 	}
 
+	keyMap, err := generate.GenerateOrderedMap(flags.XsdFile)
+	if err != nil {
+		return output, fmt.Errorf("failed to generate keymap from xsd file with error: %v", err)
+	}
+
+	for k, v := range keyMap {
+		fmt.Printf("Key %s - Values: %v\n", k, v)
+	}
+
 	// Generate the Go structs.
-	output, err = generate.Generate(schemaBytes, flags.Pkg, tagList)
+	output, err = generate.Generate(schemaBytes, keyMap, flags.Pkg, tagList)
 	if err != nil {
 		return output, fmt.Errorf("failed to generate Go structs: %s", err)
 	}
@@ -60,8 +69,10 @@ func GenerateCommand(flags generate.BaseFlags) (output []byte, err error) {
 
 func init() {
 	GenerateCmd.Flags().StringVarP(&opts.InputFile, "input-file", "f", "", "the path to a oscal json schema file")
+	GenerateCmd.Flags().StringVarP(&opts.XsdFile, "xsd-file", "x", "", "the path to a oscal xsd file")
 	GenerateCmd.Flags().StringVarP(&opts.OutputFile, "output-file", "o", "", "the name of the file to write the output to (outputs to STDOUT by default)")
 	GenerateCmd.Flags().StringVarP(&opts.Pkg, "pkg", "p", "main", "the name of the package for the generated code")
 	GenerateCmd.Flags().StringVarP(&opts.Tags, "tags", "t", "json,yaml", "comma separated list of the tags to put on the struct")
 	GenerateCmd.MarkFlagRequired("input-file")
+	GenerateCmd.MarkFlagRequired("xsd-file")
 }

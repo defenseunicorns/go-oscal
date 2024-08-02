@@ -2,12 +2,14 @@ package generate
 
 import (
 	"fmt"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
 	"unicode"
 
 	"github.com/swaggest/jsonschema-go"
+	"github.com/xuri/xgen"
 )
 
 var Imports []string = []string{"time"}
@@ -109,6 +111,81 @@ var intToWordMap = []string{
 	"seven",
 	"eight",
 	"nine",
+}
+
+func GenerateOrderedMap(filePath string) (map[string][]string, error) {
+
+	orderedMap := make(map[string][]string)
+
+	parser := xgen.NewParser(&xgen.Options{
+		FilePath:            filePath,
+		InputDir:            "",
+		OutputDir:           "output_test",
+		Lang:                "Go",
+		Package:             "test",
+		Extract:             true,
+		IncludeMap:          make(map[string]bool),
+		LocalNameNSMap:      make(map[string]string),
+		NSSchemaLocationMap: make(map[string]string),
+		ParseFileList:       make(map[string]bool),
+		ParseFileMap:        make(map[string][]interface{}),
+		ProtoTree:           make([]interface{}, 0),
+		RemoteSchema:        make(map[string][]byte),
+	})
+
+	err := parser.Parse()
+	if err != nil {
+		return nil, err
+	}
+
+	// traverse the ProtoTree to identify ComplexTypes (structs) and their
+	// attributes and elements
+	for _, ele := range parser.ProtoTree {
+		if ele == nil {
+			continue
+		}
+		elements := make([]string, 0)
+		var structName string
+		if reflect.TypeOf(ele).String()[6:] == "ComplexType" {
+			structName = ele.(*xgen.ComplexType).Name
+			if !strings.Contains(structName, "ASSEMBLY") {
+				continue
+			}
+			for _, attribute := range ele.(*xgen.ComplexType).Attributes {
+				elements = append(elements, attribute.Name)
+			}
+
+			for _, element := range ele.(*xgen.ComplexType).Elements {
+				var plural string
+				if element.Plural {
+					plural = "s"
+				}
+				elements = append(elements, fmt.Sprintf("%s%s", element.Name, plural))
+			}
+		}
+		if len(elements) > 0 {
+			// TODO: rename the complex type accordingly
+			// structArr := strings.Split(structName, "-")
+			// structName = strings.Join(structArr[2:len(structArr)-1], "-")
+			structName = trimAssemblyName(structName)
+			orderedMap[FmtFieldName(structName)] = elements
+		}
+	}
+
+	return orderedMap, nil
+}
+
+// trims the assembly names based on groups
+func trimAssemblyName(name string) string {
+
+	var trimmed string
+	split := strings.Split(name, "-")
+	if strings.Contains(name, "common") || strings.Contains(name, "oscal-component-definition") {
+		trimmed = strings.Join(split[3:len(split)-1], "-")
+	} else {
+		trimmed = strings.Join(split[2:len(split)-1], "-")
+	}
+	return trimmed
 }
 
 // addPointerIfOptionalNonPrimitive adds a pointer to the type if the field is optional

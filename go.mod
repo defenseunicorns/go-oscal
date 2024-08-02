@@ -14,5 +14,7 @@ require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/swaggest/refl v1.3.0 // indirect
+	github.com/xuri/xgen v0.0.0-20240722131518-d0691b701898 // indirect
+	golang.org/x/net v0.7.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 )

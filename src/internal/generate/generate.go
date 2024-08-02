@@ -12,6 +12,7 @@ import (
 // BaseFlags represents command-line flags for the base go-oscal command.
 type BaseFlags struct {
 	InputFile  string // -f / --input-file
+	XsdFile    string // -x / --xsd-file
 	OutputFile string // -o / --output-file
 	Pkg        string // -p / --pkg
 	Tags       string // -t / --tags
@@ -24,9 +25,10 @@ type GeneratorConfig struct {
 	definitions map[string]jsonschema.Schema
 	structMap   map[string]string
 	nameMap     map[string]string
+	keyMap      map[string][]string
 }
 
-func NewGeneratorConfig(tags []string, pkgName string) GeneratorConfig {
+func NewGeneratorConfig(tags []string, pkgName string, keyMap map[string][]string) GeneratorConfig {
 	return GeneratorConfig{
 		tags:        tags,
 		pkgName:     pkgName,
@@ -34,17 +36,18 @@ func NewGeneratorConfig(tags []string, pkgName string) GeneratorConfig {
 		definitions: map[string]jsonschema.Schema{},
 		structMap:   map[string]string{},
 		nameMap:     map[string]string{},
+		keyMap:      keyMap,
 	}
 }
 
 // Generate a struct definition given a JSON string representation of an object.
-func Generate(oscalSchema []byte, pkgName string, tags []string) (typeBytes []byte, err error) {
+func Generate(oscalSchema []byte, keyMap map[string][]string, pkgName string, tags []string) (typeBytes []byte, err error) {
 	schema, err := populateSchema(oscalSchema)
 	if err != nil {
 		return typeBytes, err
 	}
 
-	config := NewGeneratorConfig(tags, pkgName)
+	config := NewGeneratorConfig(tags, pkgName, keyMap)
 
 	// Initialize the build process.
 	err = config.initBuild(&schema)
@@ -158,13 +161,26 @@ func (c *GeneratorConfig) buildStructString(def jsonschema.Schema) (structString
 
 	// create a slice of the keys in the properties map
 	var keys []string
-	for key := range def.Properties {
-		if !KeysToIgnore[key] {
-			keys = append(keys, key)
+
+	if item, ok := c.keyMap[name]; ok {
+
+		for _, key := range item {
+			if !KeysToIgnore[key] {
+				if def.Properties[key].TypeObject != nil {
+					keys = append(keys, key)
+				}
+			}
 		}
+
+	} else {
+		fmt.Printf("did not find key %s\n", name)
+		for key := range def.Properties {
+			if !KeysToIgnore[key] {
+				keys = append(keys, key)
+			}
+		}
+		slices.Sort(keys)
 	}
-	// Sort the keys alphabetically
-	slices.Sort(keys)
 
 	// If there are no properties, return a map[string]interface{} type
 	if len(keys) == 0 {
