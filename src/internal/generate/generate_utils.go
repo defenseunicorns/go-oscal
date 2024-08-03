@@ -146,27 +146,42 @@ func GenerateOrderedMap(filePath string) (map[string][]string, error) {
 		}
 		elements := make([]string, 0)
 		var structName string
+		fmt.Printf("Type of element: %v\n", reflect.TypeOf(ele).String()[6:])
 		if reflect.TypeOf(ele).String()[6:] == "ComplexType" {
 			structName = ele.(*xgen.ComplexType).Name
-			if !strings.Contains(structName, "ASSEMBLY") {
-				continue
-			}
+			fmt.Printf("\tcomplex type identified: %s - base: %s\n", structName, ele.(*xgen.ComplexType).Base)
+			// if !strings.Contains(structName, "ASSEMBLY") && !strings.Contains(structName, "FIELD") {
+			// 	continue
+			// }
 			for _, attribute := range ele.(*xgen.ComplexType).Attributes {
-				elements = append(elements, attribute.Name)
+				fmt.Printf("\t\tcomplex type attribute %s - Type %s\n", attribute.Name, attribute.Type)
+				elements = append(elements, makePlural(attribute.Name, attribute.Plural))
 			}
 
 			for _, element := range ele.(*xgen.ComplexType).Elements {
-				var plural string
-				if element.Plural {
-					plural = "s"
-				}
-				elements = append(elements, fmt.Sprintf("%s%s", element.Name, plural))
+				fmt.Printf("\t\tcomplex type element %s - Type %s\n", element.Name, element.Type)
+				elements = append(elements, makePlural(element.Name, element.Plural))
 			}
 		}
+
+		if reflect.TypeOf(ele).String()[6:] == "SimpleType" {
+			fmt.Printf("\tsimple type identified: %s - base: %s\n", ele.(*xgen.SimpleType).Name, ele.(*xgen.SimpleType).Base)
+
+		}
+
+		// if reflect.TypeOf(ele).String()[6:] == "Element" {
+		// 	fmt.Printf("\telement identified: %s - Type: %s\n", ele.(*xgen.Element).Name, ele.(*xgen.Element).Type)
+		// }
+
+		// if reflect.TypeOf(ele).String()[6:] == "Attribute" {
+		// 	fmt.Printf("\tattribute identified: %s - Type: %s\n", ele.(*xgen.Attribute).Name, ele.(*xgen.Attribute).Type)
+		// }
+
+		// if reflect.TypeOf(ele).String()[6:] == "Group" {
+		// 	fmt.Printf("\tGroup identified: %s\n", ele.(*xgen.Group).Name)
+		// }
+
 		if len(elements) > 0 {
-			// TODO: rename the complex type accordingly
-			// structArr := strings.Split(structName, "-")
-			// structName = strings.Join(structArr[2:len(structArr)-1], "-")
 			structName = trimAssemblyName(structName)
 			orderedMap[FmtFieldName(structName)] = elements
 		}
@@ -180,12 +195,36 @@ func trimAssemblyName(name string) string {
 
 	var trimmed string
 	split := strings.Split(name, "-")
+	fmt.Printf("split: %v\n", split)
+	if len(split) < 4 {
+		return name
+	}
 	if strings.Contains(name, "common") || strings.Contains(name, "oscal-component-definition") {
 		trimmed = strings.Join(split[3:len(split)-1], "-")
 	} else {
 		trimmed = strings.Join(split[2:len(split)-1], "-")
 	}
 	return trimmed
+}
+
+func makePlural(word string, isPlural bool) string {
+	if !isPlural {
+		return word
+	}
+	// Basic pluralization rules
+	if strings.HasSuffix(word, "s") || strings.HasSuffix(word, "x") || strings.HasSuffix(word, "z") || strings.HasSuffix(word, "ch") || strings.HasSuffix(word, "sh") {
+		return word + "es"
+	}
+	if strings.HasSuffix(word, "y") && !strings.HasSuffix(word, "ay") && !strings.HasSuffix(word, "ey") && !strings.HasSuffix(word, "iy") && !strings.HasSuffix(word, "oy") && !strings.HasSuffix(word, "uy") {
+		return word[:len(word)-1] + "ies"
+	}
+	if strings.HasSuffix(word, "f") {
+		return word[:len(word)-1] + "ves"
+	}
+	if strings.HasSuffix(word, "fe") {
+		return word[:len(word)-2] + "ves"
+	}
+	return word + "s"
 }
 
 // addPointerIfOptionalNonPrimitive adds a pointer to the type if the field is optional
@@ -221,6 +260,7 @@ func buildTagString(tags []string, field string, required bool) string {
 
 // getRef builds a ref string from a schema
 func getRef(schema jsonschema.Schema) (string, error) {
+
 	if schema.Ref != nil {
 		return *schema.Ref, nil
 	} else if schema.ID != nil {

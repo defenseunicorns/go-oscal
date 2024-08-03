@@ -171,6 +171,19 @@ func (c *GeneratorConfig) buildStructString(def jsonschema.Schema) (structString
 				}
 			}
 		}
+		// How are we going to check for fields that were missed?
+		// optimally there won't be any - but it would be good to verify
+		var temp []string
+		for key := range def.Properties {
+			if !KeysToIgnore[key] {
+				temp = append(temp, key)
+			}
+		}
+
+		if len(keys) != len(temp) {
+			fmt.Printf("struct %s does not have correct length of keys\n", name)
+
+		}
 
 	} else {
 		fmt.Printf("did not find key %s\n", name)

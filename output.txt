@@ -1,0 +1,2034 @@
+go clean
+rm -rf /home/dev/work/go-oscal/bin
+CGO_ENABLED=0 go build  -trimpath -tags '' -ldflags '-w -s' -o '/home/dev/work/go-oscal/bin/go-oscal' .
+/home/dev/work/go-oscal/bin/go-oscal generate -f src/internal/schemas/oscal_complete_schema-1-1-2.json -x tmp/oscal_complete_schema.xsd --pkg oscalTypes_1_1_2 --tags json,yaml -o src/types/oscal-1-1-2/types.go
+Type of element: Element
+Type of element: ComplexType
+	complex type identified: oscal-catalog-catalog-ASSEMBLY - base: 
+		complex type attribute uuid - Type UUIDDatatype
+		complex type element metadata - Type oscal-metadata-metadata-ASSEMBLY
+		complex type element param - Type oscal-control-common-parameter-ASSEMBLY
+		complex type element control - Type oscal-catalog-control-ASSEMBLY
+		complex type element group - Type oscal-catalog-group-ASSEMBLY
+		complex type element back-matter - Type oscal-metadata-back-matter-ASSEMBLY
+split: [oscal catalog catalog ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: title - base: MarkupLineDatatype
+Type of element: ComplexType
+	complex type identified: oscal-catalog-group-ASSEMBLY - base: 
+		complex type attribute id - Type TokenDatatype
+		complex type attribute class - Type TokenDatatype
+		complex type element title - Type title
+		complex type element param - Type oscal-control-common-parameter-ASSEMBLY
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element part - Type oscal-control-common-part-ASSEMBLY
+		complex type element group - Type oscal-catalog-group-ASSEMBLY
+		complex type element control - Type oscal-catalog-control-ASSEMBLY
+split: [oscal catalog group ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: title - base: MarkupLineDatatype
+Type of element: ComplexType
+	complex type identified: oscal-catalog-control-ASSEMBLY - base: 
+		complex type attribute id - Type TokenDatatype
+		complex type attribute class - Type TokenDatatype
+		complex type element title - Type title
+		complex type element param - Type oscal-control-common-parameter-ASSEMBLY
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element part - Type oscal-control-common-part-ASSEMBLY
+		complex type element control - Type oscal-catalog-control-ASSEMBLY
+split: [oscal catalog control ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: title - base: MarkupLineDatatype
+Type of element: ComplexType
+	complex type identified: oscal-control-common-part-ASSEMBLY - base: 
+		complex type attribute id - Type TokenDatatype
+		complex type attribute name - Type TokenDatatype
+		complex type attribute ns - Type URIDatatype
+		complex type attribute class - Type TokenDatatype
+		complex type element title - Type title
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element part - Type oscal-control-common-part-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+split: [oscal control common part ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: label - base: MarkupLineDatatype
+Type of element: ComplexType
+	complex type identified: usage - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: oscal-control-common-parameter-ASSEMBLY - base: 
+		complex type attribute id - Type TokenDatatype
+		complex type attribute class - Type TokenDatatype
+		complex type attribute depends-on - Type TokenDatatype
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element label - Type label
+		complex type element usage - Type usage
+		complex type element constraint - Type oscal-control-common-parameter-constraint-ASSEMBLY
+		complex type element guideline - Type oscal-control-common-parameter-guideline-ASSEMBLY
+		complex type element value - Type oscal-control-common-parameter-value-FIELD
+		complex type element select - Type oscal-control-common-parameter-selection-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [oscal control common parameter ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: SimpleType
+	simple type identified: StringDatatype - base: StringDatatype
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: test - base: 
+		complex type element expression - Type expression
+		complex type element remarks - Type remarks
+split: [test]
+Type of element: ComplexType
+	complex type identified: oscal-control-common-parameter-constraint-ASSEMBLY - base: 
+		complex type element description - Type description
+		complex type element test - Type test
+split: [oscal control common parameter constraint ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: oscal-control-common-parameter-guideline-ASSEMBLY - base: 
+Type of element: SimpleType
+	simple type identified: oscal-control-common-parameter-value-FIELD - base: StringDatatype
+Type of element: ComplexType
+	complex type identified: choice - base: MarkupLineDatatype
+Type of element: ComplexType
+	complex type identified: oscal-control-common-parameter-selection-ASSEMBLY - base: 
+		complex type attribute how-many - Type TokenDatatype
+		complex type element choice - Type choice
+split: [oscal control common parameter selection ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: oscal-control-common-include-all-ASSEMBLY - base: 
+Type of element: ComplexType
+	complex type identified: title - base: MarkupLineDatatype
+Type of element: ComplexType
+	complex type identified: title - base: MarkupLineDatatype
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: revision - base: 
+		complex type element title - Type title
+		complex type element published - Type oscal-metadata-published-FIELD
+		complex type element last-modified - Type oscal-metadata-last-modified-FIELD
+		complex type element version - Type oscal-metadata-version-FIELD
+		complex type element oscal-version - Type oscal-metadata-oscal-version-FIELD
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [revision]
+Type of element: ComplexType
+	complex type identified: revisions - base: 
+		complex type element revision - Type revision
+split: [revisions]
+Type of element: ComplexType
+	complex type identified: title - base: MarkupLineDatatype
+Type of element: SimpleType
+	simple type identified: StringDatatype - base: StringDatatype
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: role - base: 
+		complex type attribute id - Type TokenDatatype
+		complex type element title - Type title
+		complex type element short-name - Type short-name
+		complex type element description - Type description
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [role]
+Type of element: ComplexType
+	complex type identified: title - base: MarkupLineDatatype
+Type of element: SimpleType
+	simple type identified: URIDatatype - base: URIDatatype
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: location - base: 
+		complex type attribute uuid - Type UUIDDatatype
+		complex type element title - Type title
+		complex type element address - Type oscal-metadata-address-ASSEMBLY
+		complex type element email-address - Type oscal-metadata-email-address-FIELD
+		complex type element telephone-number - Type oscal-metadata-telephone-number-FIELD
+		complex type element url - Type url
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [location]
+Type of element: SimpleType
+	simple type identified: StringDatatype - base: StringDatatype
+Type of element: SimpleType
+	simple type identified: StringDatatype - base: StringDatatype
+Type of element: ComplexType
+	complex type identified: external-id - base: StringDatatype
+		complex type attribute scheme - Type URIDatatype
+split: [external id]
+Type of element: SimpleType
+	simple type identified: UUIDDatatype - base: UUIDDatatype
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: party - base: 
+		complex type attribute uuid - Type UUIDDatatype
+		complex type attribute type - Type StringDatatype
+		complex type element name - Type name
+		complex type element short-name - Type short-name
+		complex type element external-id - Type external-id
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element email-address - Type oscal-metadata-email-address-FIELD
+		complex type element telephone-number - Type oscal-metadata-telephone-number-FIELD
+		complex type element address - Type oscal-metadata-address-ASSEMBLY
+		complex type element location-uuid - Type oscal-metadata-location-uuid-FIELD
+		complex type element member-of-organization - Type member-of-organization
+		complex type element remarks - Type remarks
+split: [party]
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: oscal-metadata-metadata-ASSEMBLY - base: 
+		complex type element title - Type title
+		complex type element published - Type oscal-metadata-published-FIELD
+		complex type element last-modified - Type oscal-metadata-last-modified-FIELD
+		complex type element version - Type oscal-metadata-version-FIELD
+		complex type element oscal-version - Type oscal-metadata-oscal-version-FIELD
+		complex type element revisions - Type revisions
+		complex type element document-id - Type oscal-metadata-document-id-FIELD
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element role - Type role
+		complex type element location - Type location
+		complex type element party - Type party
+		complex type element responsible-party - Type oscal-metadata-responsible-party-ASSEMBLY
+		complex type element action - Type oscal-metadata-action-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [oscal metadata metadata ASSEMBLY]
+Type of element: SimpleType
+	simple type identified: oscal-metadata-location-uuid-FIELD - base: UUIDDatatype
+Type of element: SimpleType
+	simple type identified: oscal-metadata-party-uuid-FIELD - base: UUIDDatatype
+Type of element: SimpleType
+	simple type identified: oscal-metadata-role-id-FIELD - base: TokenDatatype
+Type of element: ComplexType
+	complex type identified: title - base: MarkupLineDatatype
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: text - base: MarkupLineDatatype
+Type of element: ComplexType
+	complex type identified: citation - base: 
+		complex type element text - Type text
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+split: [citation]
+Type of element: ComplexType
+	complex type identified: rlink - base: 
+		complex type attribute href - Type URIReferenceDatatype
+		complex type attribute media-type - Type StringDatatype
+		complex type element hash - Type oscal-metadata-hash-FIELD
+split: [rlink]
+Type of element: ComplexType
+	complex type identified: base64 - base: Base64Datatype
+		complex type attribute filename - Type TokenDatatype
+		complex type attribute media-type - Type StringDatatype
+split: [base64]
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: resource - base: 
+		complex type attribute uuid - Type UUIDDatatype
+		complex type element title - Type title
+		complex type element description - Type description
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element document-id - Type oscal-metadata-document-id-FIELD
+		complex type element citation - Type citation
+		complex type element rlink - Type rlink
+		complex type element base64 - Type base64
+		complex type element remarks - Type remarks
+split: [resource]
+Type of element: ComplexType
+	complex type identified: oscal-metadata-back-matter-ASSEMBLY - base: 
+		complex type element resource - Type resource
+split: [oscal metadata back matter ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: oscal-metadata-property-ASSEMBLY - base: 
+		complex type attribute name - Type TokenDatatype
+		complex type attribute uuid - Type UUIDDatatype
+		complex type attribute ns - Type URIDatatype
+		complex type attribute value - Type StringDatatype
+		complex type attribute class - Type TokenDatatype
+		complex type attribute group - Type TokenDatatype
+		complex type element remarks - Type remarks
+split: [oscal metadata property ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: text - base: MarkupLineDatatype
+Type of element: ComplexType
+	complex type identified: oscal-metadata-link-ASSEMBLY - base: 
+		complex type attribute href - Type URIReferenceDatatype
+		complex type attribute rel - Type TokenDatatype
+		complex type attribute media-type - Type StringDatatype
+		complex type attribute resource-fragment - Type StringDatatype
+		complex type element text - Type text
+split: [oscal metadata link ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: oscal-metadata-responsible-party-ASSEMBLY - base: 
+		complex type attribute role-id - Type TokenDatatype
+		complex type element party-uuid - Type UUIDDatatype
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [oscal metadata responsible party ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: oscal-metadata-action-ASSEMBLY - base: 
+		complex type attribute uuid - Type UUIDDatatype
+		complex type attribute date - Type DateTimeWithTimezoneDatatype
+		complex type attribute type - Type TokenDatatype
+		complex type attribute system - Type URIDatatype
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element responsible-party - Type oscal-metadata-responsible-party-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [oscal metadata action ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: oscal-metadata-responsible-role-ASSEMBLY - base: 
+		complex type attribute role-id - Type TokenDatatype
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element party-uuid - Type UUIDDatatype
+		complex type element remarks - Type remarks
+split: [oscal metadata responsible role ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: oscal-metadata-hash-FIELD - base: StringDatatype
+		complex type attribute algorithm - Type StringDatatype
+split: [oscal metadata hash FIELD]
+Type of element: ComplexType
+	complex type identified: oscal-metadata-remarks-FIELD - base: MarkupMultilineDatatype
+Type of element: SimpleType
+	simple type identified: oscal-metadata-published-FIELD - base: DateTimeWithTimezoneDatatype
+Type of element: SimpleType
+	simple type identified: oscal-metadata-last-modified-FIELD - base: DateTimeWithTimezoneDatatype
+Type of element: SimpleType
+	simple type identified: oscal-metadata-version-FIELD - base: StringDatatype
+Type of element: SimpleType
+	simple type identified: oscal-metadata-oscal-version-FIELD - base: StringDatatype
+Type of element: SimpleType
+	simple type identified: oscal-metadata-email-address-FIELD - base: EmailAddressDatatype
+Type of element: ComplexType
+	complex type identified: oscal-metadata-telephone-number-FIELD - base: StringDatatype
+		complex type attribute type - Type StringDatatype
+split: [oscal metadata telephone number FIELD]
+Type of element: ComplexType
+	complex type identified: oscal-metadata-address-ASSEMBLY - base: 
+		complex type element addr-line - Type oscal-metadata-addr-line-FIELD
+		complex type element city - Type city
+split: [oscal metadata address ASSEMBLY]
+Type of element: Element
+Type of element: SimpleType
+	simple type identified: StringDatatype - base: StringDatatype
+Type of element: Element
+Type of element: SimpleType
+	simple type identified: StringDatatype - base: StringDatatype
+Type of element: Element
+Type of element: SimpleType
+	simple type identified: StringDatatype - base: StringDatatype
+Type of element: Element
+Type of element: Attribute
+Type of element: SimpleType
+	simple type identified: oscal-metadata-addr-line-FIELD - base: StringDatatype
+Type of element: ComplexType
+	complex type identified: oscal-metadata-document-id-FIELD - base: StringDatatype
+		complex type attribute scheme - Type URIDatatype
+split: [oscal metadata document id FIELD]
+Type of element: Element
+Type of element: ComplexType
+	complex type identified: oscal-profile-profile-ASSEMBLY - base: 
+		complex type attribute uuid - Type UUIDDatatype
+		complex type element metadata - Type oscal-metadata-metadata-ASSEMBLY
+		complex type element import - Type oscal-profile-import-ASSEMBLY
+		complex type element merge - Type oscal-profile-merge-ASSEMBLY
+		complex type element modify - Type oscal-profile-modify-ASSEMBLY
+		complex type element back-matter - Type oscal-metadata-back-matter-ASSEMBLY
+split: [oscal profile profile ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: oscal-profile-import-ASSEMBLY - base: 
+		complex type attribute href - Type URIReferenceDatatype
+		complex type element include-all - Type oscal-control-common-include-all-ASSEMBLY
+		complex type element include-controls - Type oscal-profile-select-control-by-id-ASSEMBLY
+		complex type element exclude-controls - Type oscal-profile-select-control-by-id-ASSEMBLY
+split: [oscal profile import ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: combine - base: 
+		complex type attribute method - Type StringDatatype
+split: [combine]
+Type of element: ComplexType
+	complex type identified: flat - base: 
+Type of element: ComplexType
+	complex type identified: oscal-profile-merge-ASSEMBLY - base: 
+		complex type element combine - Type combine
+		complex type element flat - Type flat
+		complex type element as-is - Type as-is
+split: [oscal profile merge ASSEMBLY]
+Type of element: Element
+Type of element: ComplexType
+	complex type identified: custom - base: 
+		complex type element group - Type oscal-profile-group-ASSEMBLY
+		complex type element insert-controls - Type oscal-profile-insert-controls-ASSEMBLY
+split: [custom]
+Type of element: Element
+Type of element: ComplexType
+	complex type identified: title - base: MarkupLineDatatype
+Type of element: ComplexType
+	complex type identified: oscal-profile-group-ASSEMBLY - base: 
+		complex type attribute id - Type TokenDatatype
+		complex type attribute class - Type TokenDatatype
+		complex type element title - Type title
+		complex type element param - Type oscal-control-common-parameter-ASSEMBLY
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element part - Type oscal-control-common-part-ASSEMBLY
+		complex type element group - Type oscal-profile-group-ASSEMBLY
+		complex type element insert-controls - Type oscal-profile-insert-controls-ASSEMBLY
+split: [oscal profile group ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: label - base: MarkupLineDatatype
+Type of element: ComplexType
+	complex type identified: usage - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: set-parameter - base: 
+		complex type attribute param-id - Type TokenDatatype
+		complex type attribute class - Type TokenDatatype
+		complex type attribute depends-on - Type TokenDatatype
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element label - Type label
+		complex type element usage - Type usage
+		complex type element constraint - Type oscal-control-common-parameter-constraint-ASSEMBLY
+		complex type element guideline - Type oscal-control-common-parameter-guideline-ASSEMBLY
+		complex type element value - Type StringDatatype
+		complex type element select - Type oscal-control-common-parameter-selection-ASSEMBLY
+split: [set parameter]
+Type of element: ComplexType
+	complex type identified: remove - base: 
+		complex type attribute by-name - Type TokenDatatype
+		complex type attribute by-class - Type TokenDatatype
+		complex type attribute by-id - Type TokenDatatype
+		complex type attribute by-item-name - Type TokenDatatype
+		complex type attribute by-ns - Type TokenDatatype
+split: [remove]
+Type of element: ComplexType
+	complex type identified: title - base: MarkupLineDatatype
+Type of element: ComplexType
+	complex type identified: add - base: 
+		complex type attribute position - Type TokenDatatype
+		complex type attribute by-id - Type TokenDatatype
+		complex type element title - Type title
+		complex type element param - Type oscal-control-common-parameter-ASSEMBLY
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element part - Type oscal-control-common-part-ASSEMBLY
+split: [add]
+Type of element: ComplexType
+	complex type identified: alter - base: 
+		complex type attribute control-id - Type TokenDatatype
+		complex type element remove - Type remove
+		complex type element add - Type add
+split: [alter]
+Type of element: ComplexType
+	complex type identified: oscal-profile-modify-ASSEMBLY - base: 
+		complex type element set-parameter - Type set-parameter
+		complex type element alter - Type alter
+split: [oscal profile modify ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: oscal-profile-insert-controls-ASSEMBLY - base: 
+		complex type attribute order - Type TokenDatatype
+		complex type element include-all - Type oscal-control-common-include-all-ASSEMBLY
+		complex type element include-controls - Type oscal-profile-select-control-by-id-ASSEMBLY
+		complex type element exclude-controls - Type oscal-profile-select-control-by-id-ASSEMBLY
+split: [oscal profile insert controls ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: oscal-profile-select-control-by-id-ASSEMBLY - base: 
+		complex type attribute with-child-controls - Type TokenDatatype
+		complex type element with-id - Type oscal-profile-with-id-FIELD
+		complex type element matching - Type oscal-profile-matching-ASSEMBLY
+split: [oscal profile select control by id ASSEMBLY]
+Type of element: SimpleType
+	simple type identified: oscal-profile-with-id-FIELD - base: TokenDatatype
+Type of element: ComplexType
+	complex type identified: oscal-profile-matching-ASSEMBLY - base: 
+		complex type attribute pattern - Type StringDatatype
+split: [oscal profile matching ASSEMBLY]
+Type of element: Element
+Type of element: ComplexType
+	complex type identified: oscal-component-definition-component-definition-ASSEMBLY - base: 
+		complex type attribute uuid - Type UUIDDatatype
+		complex type element metadata - Type oscal-metadata-metadata-ASSEMBLY
+		complex type element import-component-definition - Type oscal-component-definition-import-component-definition-ASSEMBLY
+		complex type element component - Type oscal-component-definition-defined-component-ASSEMBLY
+		complex type element capability - Type oscal-component-definition-capability-ASSEMBLY
+		complex type element back-matter - Type oscal-metadata-back-matter-ASSEMBLY
+split: [oscal component definition component definition ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: oscal-component-definition-import-component-definition-ASSEMBLY - base: 
+		complex type attribute href - Type URIReferenceDatatype
+split: [oscal component definition import component definition ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: title - base: MarkupLineDatatype
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: purpose - base: MarkupLineDatatype
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: oscal-component-definition-defined-component-ASSEMBLY - base: 
+		complex type attribute uuid - Type UUIDDatatype
+		complex type attribute type - Type StringDatatype
+		complex type element title - Type title
+		complex type element description - Type description
+		complex type element purpose - Type purpose
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element responsible-role - Type oscal-metadata-responsible-role-ASSEMBLY
+		complex type element protocol - Type oscal-implementation-common-protocol-ASSEMBLY
+		complex type element control-implementation - Type oscal-component-definition-control-implementation-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [oscal component definition defined component ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: oscal-component-definition-capability-ASSEMBLY - base: 
+		complex type attribute uuid - Type UUIDDatatype
+		complex type attribute name - Type StringDatatype
+		complex type element description - Type description
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element incorporates-component - Type oscal-component-definition-incorporates-component-ASSEMBLY
+		complex type element control-implementation - Type oscal-component-definition-control-implementation-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [oscal component definition capability ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: oscal-component-definition-incorporates-component-ASSEMBLY - base: 
+		complex type attribute component-uuid - Type UUIDDatatype
+		complex type element description - Type description
+split: [oscal component definition incorporates component ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: oscal-component-definition-control-implementation-ASSEMBLY - base: 
+		complex type attribute uuid - Type UUIDDatatype
+		complex type attribute source - Type URIReferenceDatatype
+		complex type element description - Type description
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element set-parameter - Type oscal-implementation-common-set-parameter-ASSEMBLY
+		complex type element implemented-requirement - Type oscal-component-definition-implemented-requirement-ASSEMBLY
+split: [oscal component definition control implementation ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: oscal-component-definition-implemented-requirement-ASSEMBLY - base: 
+		complex type attribute uuid - Type UUIDDatatype
+		complex type attribute control-id - Type TokenDatatype
+		complex type element description - Type description
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element set-parameter - Type oscal-implementation-common-set-parameter-ASSEMBLY
+		complex type element responsible-role - Type oscal-metadata-responsible-role-ASSEMBLY
+		complex type element statement - Type oscal-component-definition-statement-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [oscal component definition implemented requirement ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: oscal-component-definition-statement-ASSEMBLY - base: 
+		complex type attribute statement-id - Type TokenDatatype
+		complex type attribute uuid - Type UUIDDatatype
+		complex type element description - Type description
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element responsible-role - Type oscal-metadata-responsible-role-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [oscal component definition statement ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: title - base: MarkupLineDatatype
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: purpose - base: MarkupLineDatatype
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: status - base: 
+		complex type attribute state - Type TokenDatatype
+		complex type element remarks - Type remarks
+split: [status]
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: oscal-implementation-common-system-component-ASSEMBLY - base: 
+		complex type attribute uuid - Type UUIDDatatype
+		complex type attribute type - Type StringDatatype
+		complex type element title - Type title
+		complex type element description - Type description
+		complex type element purpose - Type purpose
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element status - Type status
+		complex type element responsible-role - Type oscal-metadata-responsible-role-ASSEMBLY
+		complex type element protocol - Type oscal-implementation-common-protocol-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [oscal implementation common system component ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: title - base: MarkupLineDatatype
+Type of element: ComplexType
+	complex type identified: oscal-implementation-common-protocol-ASSEMBLY - base: 
+		complex type attribute uuid - Type UUIDDatatype
+		complex type attribute name - Type StringDatatype
+		complex type element title - Type title
+		complex type element port-range - Type oscal-implementation-common-port-range-ASSEMBLY
+split: [oscal implementation common protocol ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: oscal-implementation-common-port-range-ASSEMBLY - base: 
+		complex type attribute start - Type NonNegativeIntegerDatatype
+		complex type attribute end - Type NonNegativeIntegerDatatype
+		complex type attribute transport - Type TokenDatatype
+split: [oscal implementation common port range ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: oscal-implementation-common-implementation-status-ASSEMBLY - base: 
+		complex type attribute state - Type TokenDatatype
+		complex type element remarks - Type remarks
+split: [oscal implementation common implementation status ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: title - base: MarkupLineDatatype
+Type of element: ComplexType
+	complex type identified: oscal-implementation-common-system-user-ASSEMBLY - base: 
+		complex type element title - Type title
+		complex type element short-name - Type short-name
+split: [oscal implementation common system user ASSEMBLY]
+Type of element: Element
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: Element
+Type of element: Element
+Type of element: Element
+Type of element: Element
+Type of element: Element
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: Element
+Type of element: Attribute
+Type of element: ComplexType
+	complex type identified: title - base: MarkupLineDatatype
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: oscal-implementation-common-authorized-privilege-ASSEMBLY - base: 
+		complex type element title - Type title
+		complex type element description - Type description
+		complex type element function-performed - Type oscal-implementation-common-function-performed-FIELD
+split: [oscal implementation common authorized privilege ASSEMBLY]
+Type of element: SimpleType
+	simple type identified: oscal-implementation-common-function-performed-FIELD - base: StringDatatype
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: implemented-component - base: 
+		complex type attribute component-uuid - Type UUIDDatatype
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element responsible-party - Type oscal-metadata-responsible-party-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [implemented component]
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: oscal-implementation-common-inventory-item-ASSEMBLY - base: 
+		complex type attribute uuid - Type UUIDDatatype
+		complex type element description - Type description
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element responsible-party - Type oscal-metadata-responsible-party-ASSEMBLY
+		complex type element implemented-component - Type implemented-component
+		complex type element remarks - Type remarks
+split: [oscal implementation common inventory item ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: oscal-implementation-common-set-parameter-ASSEMBLY - base: 
+		complex type element value - Type value
+split: [oscal implementation common set parameter ASSEMBLY]
+Type of element: Element
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: Element
+Type of element: Attribute
+Type of element: ComplexType
+	complex type identified: oscal-implementation-common-system-id-FIELD - base: StringDatatype
+		complex type attribute identifier-type - Type URIDatatype
+split: [oscal implementation common system id FIELD]
+Type of element: Element
+Type of element: ComplexType
+	complex type identified: oscal-ssp-system-security-plan-ASSEMBLY - base: 
+		complex type attribute uuid - Type UUIDDatatype
+		complex type element metadata - Type oscal-metadata-metadata-ASSEMBLY
+		complex type element import-profile - Type oscal-ssp-import-profile-ASSEMBLY
+		complex type element system-characteristics - Type oscal-ssp-system-characteristics-ASSEMBLY
+		complex type element system-implementation - Type oscal-ssp-system-implementation-ASSEMBLY
+		complex type element control-implementation - Type oscal-ssp-control-implementation-ASSEMBLY
+		complex type element back-matter - Type oscal-metadata-back-matter-ASSEMBLY
+split: [oscal ssp system security plan ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: oscal-ssp-import-profile-ASSEMBLY - base: 
+		complex type attribute href - Type URIReferenceDatatype
+		complex type element remarks - Type remarks
+split: [oscal ssp import profile ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: oscal-ssp-system-characteristics-ASSEMBLY - base: 
+		complex type element system-id - Type oscal-implementation-common-system-id-FIELD
+		complex type element system-name - Type system-name
+split: [oscal ssp system characteristics ASSEMBLY]
+Type of element: Element
+Type of element: SimpleType
+	simple type identified: StringDatatype - base: StringDatatype
+Type of element: Element
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: Element
+Type of element: Element
+Type of element: Element
+Type of element: Element
+Type of element: SimpleType
+	simple type identified: StringDatatype - base: StringDatatype
+Type of element: Element
+Type of element: Element
+Type of element: Element
+Type of element: Element
+Type of element: Element
+Type of element: Element
+Type of element: Element
+Type of element: Element
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: Element
+Type of element: ComplexType
+	complex type identified: title - base: MarkupLineDatatype
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: SimpleType
+	simple type identified: StringDatatype - base: StringDatatype
+Type of element: ComplexType
+	complex type identified: categorization - base: 
+		complex type attribute system - Type URIDatatype
+		complex type element information-type-id - Type information-type-id
+split: [categorization]
+Type of element: ComplexType
+	complex type identified: information-type - base: 
+		complex type attribute uuid - Type UUIDDatatype
+		complex type element title - Type title
+		complex type element description - Type description
+		complex type element categorization - Type categorization
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element confidentiality-impact - Type oscal-ssp-impact-ASSEMBLY
+		complex type element integrity-impact - Type oscal-ssp-impact-ASSEMBLY
+		complex type element availability-impact - Type oscal-ssp-impact-ASSEMBLY
+split: [information type]
+Type of element: ComplexType
+	complex type identified: oscal-ssp-system-information-ASSEMBLY - base: 
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element information-type - Type information-type
+split: [oscal ssp system information ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: adjustment-justification - base: 
+Type of element: ComplexType
+	complex type identified: oscal-ssp-impact-ASSEMBLY - base: 
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element base - Type oscal-ssp-base-FIELD
+		complex type element selected - Type oscal-ssp-selected-FIELD
+		complex type element adjustment-justification - Type adjustment-justification
+split: [oscal ssp impact ASSEMBLY]
+Type of element: SimpleType
+	simple type identified: oscal-ssp-base-FIELD - base: StringDatatype
+Type of element: SimpleType
+	simple type identified: oscal-ssp-selected-FIELD - base: StringDatatype
+Type of element: ComplexType
+	complex type identified: oscal-ssp-adjustment-justification-FIELD - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: oscal-ssp-security-impact-level-ASSEMBLY - base: 
+		complex type element security-objective-confidentiality - Type security-objective-confidentiality
+split: [oscal ssp security impact level ASSEMBLY]
+Type of element: Element
+Type of element: SimpleType
+	simple type identified: StringDatatype - base: StringDatatype
+Type of element: Element
+Type of element: SimpleType
+	simple type identified: StringDatatype - base: StringDatatype
+Type of element: Element
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: oscal-ssp-status-ASSEMBLY - base: 
+		complex type attribute state - Type StringDatatype
+		complex type element remarks - Type remarks
+split: [oscal ssp status ASSEMBLY]
+Type of element: SimpleType
+	simple type identified: oscal-ssp-date-authorized-FIELD - base: DateDatatype
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: oscal-ssp-authorization-boundary-ASSEMBLY - base: 
+		complex type element description - Type description
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element diagram - Type oscal-ssp-diagram-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [oscal ssp authorization boundary ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: caption - base: MarkupLineDatatype
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: oscal-ssp-diagram-ASSEMBLY - base: 
+		complex type attribute uuid - Type UUIDDatatype
+		complex type element description - Type description
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element caption - Type caption
+		complex type element remarks - Type remarks
+split: [oscal ssp diagram ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: oscal-ssp-network-architecture-ASSEMBLY - base: 
+		complex type element description - Type description
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element diagram - Type oscal-ssp-diagram-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [oscal ssp network architecture ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: oscal-ssp-data-flow-ASSEMBLY - base: 
+		complex type element description - Type description
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element diagram - Type oscal-ssp-diagram-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [oscal ssp data flow ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: title - base: MarkupLineDatatype
+Type of element: SimpleType
+	simple type identified: UUIDDatatype - base: UUIDDatatype
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: leveraged-authorization - base: 
+		complex type attribute uuid - Type UUIDDatatype
+		complex type element title - Type title
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element party-uuid - Type party-uuid
+		complex type element date-authorized - Type DateDatatype
+		complex type element remarks - Type remarks
+split: [leveraged authorization]
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: oscal-ssp-system-implementation-ASSEMBLY - base: 
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element leveraged-authorization - Type leveraged-authorization
+		complex type element user - Type oscal-implementation-common-system-user-ASSEMBLY
+		complex type element component - Type oscal-implementation-common-system-component-ASSEMBLY
+		complex type element inventory-item - Type oscal-implementation-common-inventory-item-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [oscal ssp system implementation ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: oscal-ssp-control-implementation-ASSEMBLY - base: 
+		complex type element description - Type description
+		complex type element set-parameter - Type oscal-implementation-common-set-parameter-ASSEMBLY
+		complex type element implemented-requirement - Type oscal-ssp-implemented-requirement-ASSEMBLY
+split: [oscal ssp control implementation ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: oscal-ssp-implemented-requirement-ASSEMBLY - base: 
+		complex type attribute uuid - Type UUIDDatatype
+		complex type attribute control-id - Type TokenDatatype
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element set-parameter - Type oscal-implementation-common-set-parameter-ASSEMBLY
+		complex type element responsible-role - Type oscal-metadata-responsible-role-ASSEMBLY
+		complex type element statement - Type oscal-ssp-statement-ASSEMBLY
+		complex type element by-component - Type oscal-ssp-by-component-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [oscal ssp implemented requirement ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: oscal-ssp-statement-ASSEMBLY - base: 
+		complex type attribute statement-id - Type TokenDatatype
+		complex type attribute uuid - Type UUIDDatatype
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element responsible-role - Type oscal-metadata-responsible-role-ASSEMBLY
+		complex type element by-component - Type oscal-ssp-by-component-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [oscal ssp statement ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: provided - base: 
+		complex type attribute uuid - Type UUIDDatatype
+		complex type element description - Type description
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element responsible-role - Type oscal-metadata-responsible-role-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [provided]
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: responsibility - base: 
+		complex type attribute uuid - Type UUIDDatatype
+		complex type attribute provided-uuid - Type UUIDDatatype
+		complex type element description - Type description
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element responsible-role - Type oscal-metadata-responsible-role-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [responsibility]
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: export - base: 
+		complex type element description - Type description
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element provided - Type provided
+		complex type element responsibility - Type responsibility
+		complex type element remarks - Type remarks
+split: [export]
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: inherited - base: 
+		complex type attribute uuid - Type UUIDDatatype
+		complex type attribute provided-uuid - Type UUIDDatatype
+		complex type element description - Type description
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element responsible-role - Type oscal-metadata-responsible-role-ASSEMBLY
+split: [inherited]
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: satisfied - base: 
+		complex type attribute uuid - Type UUIDDatatype
+		complex type attribute responsibility-uuid - Type UUIDDatatype
+		complex type element description - Type description
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element responsible-role - Type oscal-metadata-responsible-role-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [satisfied]
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: oscal-ssp-by-component-ASSEMBLY - base: 
+		complex type attribute component-uuid - Type UUIDDatatype
+		complex type attribute uuid - Type UUIDDatatype
+		complex type element description - Type description
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element set-parameter - Type oscal-implementation-common-set-parameter-ASSEMBLY
+		complex type element implementation-status - Type oscal-implementation-common-implementation-status-ASSEMBLY
+		complex type element export - Type export
+		complex type element inherited - Type inherited
+		complex type element satisfied - Type satisfied
+		complex type element responsible-role - Type oscal-metadata-responsible-role-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [oscal ssp by component ASSEMBLY]
+Type of element: Element
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: local-definitions - base: 
+		complex type element component - Type oscal-implementation-common-system-component-ASSEMBLY
+		complex type element inventory-item - Type oscal-implementation-common-inventory-item-ASSEMBLY
+		complex type element user - Type oscal-implementation-common-system-user-ASSEMBLY
+		complex type element objectives-and-methods - Type oscal-assessment-common-local-objective-ASSEMBLY
+		complex type element activity - Type oscal-assessment-common-activity-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [local definitions]
+Type of element: ComplexType
+	complex type identified: terms-and-conditions - base: 
+		complex type element part - Type oscal-assessment-common-assessment-part-ASSEMBLY
+split: [terms and conditions]
+Type of element: ComplexType
+	complex type identified: oscal-ap-assessment-plan-ASSEMBLY - base: 
+		complex type attribute uuid - Type UUIDDatatype
+		complex type element metadata - Type oscal-metadata-metadata-ASSEMBLY
+		complex type element import-ssp - Type oscal-assessment-common-import-ssp-ASSEMBLY
+		complex type element local-definitions - Type local-definitions
+		complex type element terms-and-conditions - Type terms-and-conditions
+		complex type element reviewed-controls - Type oscal-assessment-common-reviewed-controls-ASSEMBLY
+		complex type element assessment-subject - Type oscal-assessment-common-assessment-subject-ASSEMBLY
+		complex type element assessment-assets - Type oscal-assessment-common-assessment-assets-ASSEMBLY
+		complex type element task - Type oscal-assessment-common-task-ASSEMBLY
+		complex type element back-matter - Type oscal-metadata-back-matter-ASSEMBLY
+split: [oscal ap assessment plan ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: oscal-assessment-common-import-ssp-ASSEMBLY - base: 
+		complex type attribute href - Type URIReferenceDatatype
+		complex type element remarks - Type remarks
+split: [oscal assessment common import ssp ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: oscal-assessment-common-local-objective-ASSEMBLY - base: 
+		complex type attribute control-id - Type TokenDatatype
+		complex type element description - Type description
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element part - Type oscal-control-common-part-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [oscal assessment common local objective ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: oscal-assessment-common-assessment-method-ASSEMBLY - base: 
+		complex type attribute uuid - Type UUIDDatatype
+		complex type element description - Type description
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element part - Type oscal-assessment-common-assessment-part-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [oscal assessment common assessment method ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: title - base: MarkupLineDatatype
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: title - base: MarkupLineDatatype
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: step - base: 
+		complex type attribute uuid - Type UUIDDatatype
+		complex type element title - Type title
+		complex type element description - Type description
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element reviewed-controls - Type oscal-assessment-common-reviewed-controls-ASSEMBLY
+		complex type element responsible-role - Type oscal-metadata-responsible-role-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [step]
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: oscal-assessment-common-activity-ASSEMBLY - base: 
+		complex type attribute uuid - Type UUIDDatatype
+		complex type element title - Type title
+		complex type element description - Type description
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element step - Type step
+		complex type element related-controls - Type oscal-assessment-common-reviewed-controls-ASSEMBLY
+		complex type element responsible-role - Type oscal-metadata-responsible-role-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [oscal assessment common activity ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: title - base: MarkupLineDatatype
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: on-date - base: 
+		complex type attribute date - Type DateTimeWithTimezoneDatatype
+split: [on date]
+Type of element: ComplexType
+	complex type identified: within-date-range - base: 
+		complex type attribute start - Type DateTimeWithTimezoneDatatype
+		complex type attribute end - Type DateTimeWithTimezoneDatatype
+split: [within date range]
+Type of element: ComplexType
+	complex type identified: at-frequency - base: 
+		complex type attribute period - Type PositiveIntegerDatatype
+		complex type attribute unit - Type StringDatatype
+split: [at frequency]
+Type of element: ComplexType
+	complex type identified: timing - base: 
+		complex type element on-date - Type on-date
+		complex type element within-date-range - Type within-date-range
+		complex type element at-frequency - Type at-frequency
+split: [timing]
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: dependency - base: 
+		complex type attribute task-uuid - Type UUIDDatatype
+		complex type element remarks - Type remarks
+split: [dependency]
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: associated-activity - base: 
+		complex type attribute activity-uuid - Type UUIDDatatype
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element responsible-role - Type oscal-metadata-responsible-role-ASSEMBLY
+		complex type element subject - Type oscal-assessment-common-assessment-subject-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [associated activity]
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: oscal-assessment-common-task-ASSEMBLY - base: 
+		complex type attribute uuid - Type UUIDDatatype
+		complex type attribute type - Type TokenDatatype
+		complex type element title - Type title
+		complex type element description - Type description
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element timing - Type timing
+		complex type element dependency - Type dependency
+		complex type element task - Type oscal-assessment-common-task-ASSEMBLY
+		complex type element associated-activity - Type associated-activity
+		complex type element subject - Type oscal-assessment-common-assessment-subject-ASSEMBLY
+		complex type element responsible-role - Type oscal-metadata-responsible-role-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [oscal assessment common task ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: control-selection - base: 
+		complex type element description - Type description
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element include-all - Type oscal-control-common-include-all-ASSEMBLY
+		complex type element include-control - Type oscal-assessment-common-select-control-by-id-ASSEMBLY
+		complex type element exclude-control - Type oscal-assessment-common-select-control-by-id-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [control selection]
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: control-objective-selection - base: 
+		complex type element description - Type description
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element include-all - Type oscal-control-common-include-all-ASSEMBLY
+		complex type element include-objective - Type oscal-assessment-common-select-objective-by-id-ASSEMBLY
+		complex type element exclude-objective - Type oscal-assessment-common-select-objective-by-id-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [control objective selection]
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: oscal-assessment-common-reviewed-controls-ASSEMBLY - base: 
+		complex type element description - Type description
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element control-selection - Type control-selection
+		complex type element control-objective-selection - Type control-objective-selection
+		complex type element remarks - Type remarks
+split: [oscal assessment common reviewed controls ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: oscal-assessment-common-select-control-by-id-ASSEMBLY - base: 
+		complex type element statement-id - Type statement-id
+split: [oscal assessment common select control by id ASSEMBLY]
+Type of element: Element
+Type of element: Attribute
+Type of element: ComplexType
+	complex type identified: oscal-assessment-common-select-objective-by-id-ASSEMBLY - base: 
+		complex type attribute objective-id - Type TokenDatatype
+split: [oscal assessment common select objective by id ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: source - base: 
+		complex type attribute task-uuid - Type UUIDDatatype
+split: [source]
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: oscal-assessment-common-assessment-subject-placeholder-ASSEMBLY - base: 
+		complex type attribute uuid - Type UUIDDatatype
+		complex type element description - Type description
+		complex type element source - Type source
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [oscal assessment common assessment subject placeholder ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: oscal-assessment-common-assessment-subject-ASSEMBLY - base: 
+		complex type attribute type - Type TokenDatatype
+		complex type element description - Type description
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element include-all - Type oscal-control-common-include-all-ASSEMBLY
+		complex type element include-subject - Type oscal-assessment-common-select-subject-by-id-ASSEMBLY
+		complex type element exclude-subject - Type oscal-assessment-common-select-subject-by-id-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [oscal assessment common assessment subject ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: oscal-assessment-common-select-subject-by-id-ASSEMBLY - base: 
+		complex type attribute subject-uuid - Type UUIDDatatype
+		complex type attribute type - Type TokenDatatype
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [oscal assessment common select subject by id ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: title - base: MarkupLineDatatype
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: oscal-assessment-common-subject-reference-ASSEMBLY - base: 
+		complex type attribute subject-uuid - Type UUIDDatatype
+		complex type attribute type - Type TokenDatatype
+		complex type element title - Type title
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [oscal assessment common subject reference ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: title - base: MarkupLineDatatype
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: uses-component - base: 
+		complex type attribute component-uuid - Type UUIDDatatype
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element responsible-party - Type oscal-metadata-responsible-party-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [uses component]
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: assessment-platform - base: 
+		complex type attribute uuid - Type UUIDDatatype
+		complex type element title - Type title
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element uses-component - Type uses-component
+		complex type element remarks - Type remarks
+split: [assessment platform]
+Type of element: ComplexType
+	complex type identified: oscal-assessment-common-assessment-assets-ASSEMBLY - base: 
+		complex type element component - Type oscal-implementation-common-system-component-ASSEMBLY
+		complex type element assessment-platform - Type assessment-platform
+split: [oscal assessment common assessment assets ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: title - base: MarkupLineDatatype
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: status - base: 
+		complex type attribute state - Type TokenDatatype
+		complex type attribute reason - Type TokenDatatype
+		complex type element remarks - Type remarks
+split: [status]
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: oscal-assessment-common-finding-target-ASSEMBLY - base: 
+		complex type attribute type - Type StringDatatype
+		complex type attribute target-id - Type TokenDatatype
+		complex type element title - Type title
+		complex type element description - Type description
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element status - Type oscal-ssp-status-ASSEMBLY
+		complex type element implementation-status - Type oscal-implementation-common-implementation-status-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [oscal assessment common finding target ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: title - base: MarkupLineDatatype
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: oscal-assessment-common-finding-ASSEMBLY - base: 
+		complex type element title - Type title
+		complex type element description - Type description
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element origin - Type oscal-assessment-common-origin-ASSEMBLY
+		complex type element target - Type oscal-assessment-common-finding-target-ASSEMBLY
+		complex type element implementation-statement-uuid - Type implementation-statement-uuid
+split: [oscal assessment common finding ASSEMBLY]
+Type of element: Element
+Type of element: ComplexType
+	complex type identified: related-observation - base: 
+		complex type attribute observation-uuid - Type UUIDDatatype
+split: [related observation]
+Type of element: Element
+Type of element: ComplexType
+	complex type identified: associated-risk - base: 
+		complex type attribute risk-uuid - Type UUIDDatatype
+split: [associated risk]
+Type of element: Element
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: Element
+Type of element: Attribute
+Type of element: ComplexType
+	complex type identified: title - base: MarkupLineDatatype
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: oscal-assessment-common-observation-ASSEMBLY - base: 
+		complex type element title - Type title
+		complex type element description - Type description
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element method - Type method
+split: [oscal assessment common observation ASSEMBLY]
+Type of element: Element
+Type of element: SimpleType
+	simple type identified: TokenDatatype - base: TokenDatatype
+Type of element: Element
+Type of element: Element
+Type of element: Element
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: relevant-evidence - base: 
+		complex type attribute href - Type URIReferenceDatatype
+		complex type element description - Type description
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [relevant evidence]
+Type of element: Element
+Type of element: SimpleType
+	simple type identified: DateTimeWithTimezoneDatatype - base: DateTimeWithTimezoneDatatype
+Type of element: Element
+Type of element: SimpleType
+	simple type identified: DateTimeWithTimezoneDatatype - base: DateTimeWithTimezoneDatatype
+Type of element: Element
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: Element
+Type of element: Attribute
+Type of element: ComplexType
+	complex type identified: oscal-assessment-common-origin-ASSEMBLY - base: 
+		complex type element actor - Type oscal-assessment-common-origin-actor-ASSEMBLY
+		complex type element related-task - Type oscal-assessment-common-related-task-ASSEMBLY
+split: [oscal assessment common origin ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: oscal-assessment-common-origin-actor-ASSEMBLY - base: 
+		complex type attribute type - Type TokenDatatype
+		complex type attribute actor-uuid - Type UUIDDatatype
+		complex type attribute role-id - Type TokenDatatype
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+split: [oscal assessment common origin actor ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: identified-subject - base: 
+		complex type attribute subject-placeholder-uuid - Type UUIDDatatype
+		complex type element subject - Type oscal-assessment-common-assessment-subject-ASSEMBLY
+split: [identified subject]
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: oscal-assessment-common-related-task-ASSEMBLY - base: 
+		complex type attribute task-uuid - Type UUIDDatatype
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element responsible-party - Type oscal-metadata-responsible-party-ASSEMBLY
+		complex type element subject - Type oscal-assessment-common-assessment-subject-ASSEMBLY
+		complex type element identified-subject - Type identified-subject
+		complex type element remarks - Type remarks
+split: [oscal assessment common related task ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: oscal-assessment-common-threat-id-FIELD - base: URIDatatype
+		complex type attribute system - Type URIDatatype
+		complex type attribute href - Type URIReferenceDatatype
+split: [oscal assessment common threat id FIELD]
+Type of element: ComplexType
+	complex type identified: title - base: MarkupLineDatatype
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: statement - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: mitigating-factor - base: 
+		complex type attribute uuid - Type UUIDDatatype
+		complex type attribute implementation-uuid - Type UUIDDatatype
+		complex type element description - Type description
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element subject - Type oscal-assessment-common-subject-reference-ASSEMBLY
+split: [mitigating factor]
+Type of element: ComplexType
+	complex type identified: oscal-assessment-common-risk-ASSEMBLY - base: 
+		complex type element title - Type title
+		complex type element description - Type description
+		complex type element statement - Type statement
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element status - Type oscal-assessment-common-risk-status-FIELD
+		complex type element origin - Type oscal-assessment-common-origin-ASSEMBLY
+		complex type element threat-id - Type oscal-assessment-common-threat-id-FIELD
+		complex type element characterization - Type oscal-assessment-common-characterization-ASSEMBLY
+		complex type element mitigating-factor - Type mitigating-factor
+		complex type element deadline - Type deadline
+split: [oscal assessment common risk ASSEMBLY]
+Type of element: Element
+Type of element: Element
+Type of element: ComplexType
+	complex type identified: title - base: MarkupLineDatatype
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: SimpleType
+	simple type identified: DateTimeWithTimezoneDatatype - base: DateTimeWithTimezoneDatatype
+Type of element: SimpleType
+	simple type identified: DateTimeWithTimezoneDatatype - base: DateTimeWithTimezoneDatatype
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: related-response - base: 
+		complex type attribute response-uuid - Type UUIDDatatype
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element related-task - Type oscal-assessment-common-related-task-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [related response]
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: entry - base: 
+		complex type attribute uuid - Type UUIDDatatype
+		complex type element title - Type title
+		complex type element description - Type description
+		complex type element start - Type start
+		complex type element end - Type end
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element logged-by - Type oscal-assessment-common-logged-by-ASSEMBLY
+		complex type element status-change - Type oscal-assessment-common-risk-status-FIELD
+		complex type element related-response - Type related-response
+		complex type element remarks - Type remarks
+split: [entry]
+Type of element: ComplexType
+	complex type identified: risk-log - base: 
+		complex type element entry - Type entry
+split: [risk log]
+Type of element: Element
+Type of element: ComplexType
+	complex type identified: related-observation - base: 
+		complex type attribute observation-uuid - Type UUIDDatatype
+split: [related observation]
+Type of element: Element
+Type of element: Attribute
+Type of element: ComplexType
+	complex type identified: oscal-assessment-common-logged-by-ASSEMBLY - base: 
+		complex type attribute party-uuid - Type UUIDDatatype
+		complex type attribute role-id - Type TokenDatatype
+split: [oscal assessment common logged by ASSEMBLY]
+Type of element: SimpleType
+	simple type identified: oscal-assessment-common-risk-status-FIELD - base: TokenDatatype
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: facet - base: 
+		complex type attribute name - Type TokenDatatype
+		complex type attribute system - Type URIDatatype
+		complex type attribute value - Type StringDatatype
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [facet]
+Type of element: ComplexType
+	complex type identified: oscal-assessment-common-characterization-ASSEMBLY - base: 
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element origin - Type oscal-assessment-common-origin-ASSEMBLY
+		complex type element facet - Type facet
+split: [oscal assessment common characterization ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: title - base: MarkupLineDatatype
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: title - base: MarkupLineDatatype
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: required-asset - base: 
+		complex type attribute uuid - Type UUIDDatatype
+		complex type element subject - Type oscal-assessment-common-subject-reference-ASSEMBLY
+		complex type element title - Type title
+		complex type element description - Type description
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [required asset]
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: oscal-assessment-common-response-ASSEMBLY - base: 
+		complex type attribute uuid - Type UUIDDatatype
+		complex type attribute lifecycle - Type TokenDatatype
+		complex type element title - Type title
+		complex type element description - Type description
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element origin - Type oscal-assessment-common-origin-ASSEMBLY
+		complex type element required-asset - Type required-asset
+		complex type element task - Type oscal-assessment-common-task-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [oscal assessment common response ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: title - base: MarkupLineDatatype
+Type of element: ComplexType
+	complex type identified: oscal-assessment-common-assessment-part-ASSEMBLY - base: 
+		complex type attribute uuid - Type UUIDDatatype
+		complex type attribute name - Type TokenDatatype
+		complex type attribute ns - Type URIDatatype
+		complex type attribute class - Type TokenDatatype
+		complex type element title - Type title
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element part - Type oscal-assessment-common-assessment-part-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+split: [oscal assessment common assessment part ASSEMBLY]
+Type of element: Element
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: local-definitions - base: 
+		complex type element objectives-and-methods - Type oscal-assessment-common-local-objective-ASSEMBLY
+		complex type element activity - Type oscal-assessment-common-activity-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [local definitions]
+Type of element: ComplexType
+	complex type identified: oscal-ar-assessment-results-ASSEMBLY - base: 
+		complex type attribute uuid - Type UUIDDatatype
+		complex type element metadata - Type oscal-metadata-metadata-ASSEMBLY
+		complex type element import-ap - Type oscal-ar-import-ap-ASSEMBLY
+		complex type element local-definitions - Type local-definitions
+		complex type element result - Type oscal-ar-result-ASSEMBLY
+		complex type element back-matter - Type oscal-metadata-back-matter-ASSEMBLY
+split: [oscal ar assessment results ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: title - base: MarkupLineDatatype
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: oscal-ar-result-ASSEMBLY - base: 
+		complex type element title - Type title
+		complex type element description - Type description
+		complex type element start - Type start
+split: [oscal ar result ASSEMBLY]
+Type of element: Element
+Type of element: SimpleType
+	simple type identified: DateTimeWithTimezoneDatatype - base: DateTimeWithTimezoneDatatype
+Type of element: Element
+Type of element: Element
+Type of element: Element
+Type of element: ComplexType
+	complex type identified: local-definitions - base: 
+		complex type element component - Type oscal-implementation-common-system-component-ASSEMBLY
+		complex type element inventory-item - Type oscal-implementation-common-inventory-item-ASSEMBLY
+		complex type element user - Type oscal-implementation-common-system-user-ASSEMBLY
+		complex type element assessment-assets - Type oscal-assessment-common-assessment-assets-ASSEMBLY
+		complex type element assessment-task - Type oscal-assessment-common-task-ASSEMBLY
+split: [local definitions]
+Type of element: Element
+Type of element: Element
+Type of element: ComplexType
+	complex type identified: attestation - base: 
+		complex type element responsible-party - Type oscal-metadata-responsible-party-ASSEMBLY
+		complex type element part - Type oscal-assessment-common-assessment-part-ASSEMBLY
+split: [attestation]
+Type of element: Element
+Type of element: ComplexType
+	complex type identified: title - base: MarkupLineDatatype
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: SimpleType
+	simple type identified: DateTimeWithTimezoneDatatype - base: DateTimeWithTimezoneDatatype
+Type of element: SimpleType
+	simple type identified: DateTimeWithTimezoneDatatype - base: DateTimeWithTimezoneDatatype
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: entry - base: 
+		complex type attribute uuid - Type UUIDDatatype
+		complex type element title - Type title
+		complex type element description - Type description
+		complex type element start - Type start
+		complex type element end - Type end
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element logged-by - Type oscal-assessment-common-logged-by-ASSEMBLY
+		complex type element related-task - Type oscal-assessment-common-related-task-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [entry]
+Type of element: ComplexType
+	complex type identified: assessment-log - base: 
+		complex type element entry - Type entry
+split: [assessment log]
+Type of element: Element
+Type of element: Element
+Type of element: Element
+Type of element: Element
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: Element
+Type of element: Attribute
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: oscal-ar-import-ap-ASSEMBLY - base: 
+		complex type attribute href - Type URIReferenceDatatype
+		complex type element remarks - Type remarks
+split: [oscal ar import ap ASSEMBLY]
+Type of element: Element
+Type of element: ComplexType
+	complex type identified: oscal-poam-plan-of-action-and-milestones-ASSEMBLY - base: 
+		complex type attribute uuid - Type UUIDDatatype
+		complex type element metadata - Type oscal-metadata-metadata-ASSEMBLY
+		complex type element import-ssp - Type oscal-assessment-common-import-ssp-ASSEMBLY
+		complex type element system-id - Type oscal-implementation-common-system-id-FIELD
+		complex type element local-definitions - Type oscal-poam-local-definitions-ASSEMBLY
+		complex type element observation - Type oscal-assessment-common-observation-ASSEMBLY
+		complex type element risk - Type oscal-assessment-common-risk-ASSEMBLY
+		complex type element finding - Type oscal-assessment-common-finding-ASSEMBLY
+		complex type element poam-item - Type oscal-poam-poam-item-ASSEMBLY
+		complex type element back-matter - Type oscal-metadata-back-matter-ASSEMBLY
+split: [oscal poam plan of action and milestones ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: oscal-poam-local-definitions-ASSEMBLY - base: 
+		complex type element component - Type oscal-implementation-common-system-component-ASSEMBLY
+		complex type element inventory-item - Type oscal-implementation-common-inventory-item-ASSEMBLY
+		complex type element assessment-assets - Type oscal-assessment-common-assessment-assets-ASSEMBLY
+		complex type element remarks - Type remarks
+split: [oscal poam local definitions ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: title - base: MarkupLineDatatype
+Type of element: ComplexType
+	complex type identified: description - base: MarkupMultilineDatatype
+Type of element: ComplexType
+	complex type identified: origin - base: 
+		complex type element actor - Type oscal-assessment-common-origin-actor-ASSEMBLY
+split: [origin]
+Type of element: ComplexType
+	complex type identified: related-finding - base: 
+		complex type attribute finding-uuid - Type UUIDDatatype
+split: [related finding]
+Type of element: ComplexType
+	complex type identified: related-observation - base: 
+		complex type attribute observation-uuid - Type UUIDDatatype
+split: [related observation]
+Type of element: ComplexType
+	complex type identified: associated-risk - base: 
+		complex type attribute risk-uuid - Type UUIDDatatype
+split: [associated risk]
+Type of element: ComplexType
+	complex type identified: remarks - base: 
+Type of element: ComplexType
+	complex type identified: oscal-poam-poam-item-ASSEMBLY - base: 
+		complex type attribute uuid - Type UUIDDatatype
+		complex type element title - Type title
+		complex type element description - Type description
+		complex type element prop - Type oscal-metadata-property-ASSEMBLY
+		complex type element link - Type oscal-metadata-link-ASSEMBLY
+		complex type element origin - Type oscal-assessment-common-origin-ASSEMBLY
+		complex type element related-finding - Type related-finding
+		complex type element related-observation - Type related-observation
+		complex type element associated-risk - Type associated-risk
+		complex type element remarks - Type remarks
+split: [oscal poam poam item ASSEMBLY]
+Type of element: ComplexType
+	complex type identified: MarkupMultilineDatatype - base: 
+Type of element: Element
+Type of element: Element
+Type of element: Element
+Type of element: Element
+Type of element: Element
+Type of element: Element
+Type of element: Group
+Type of element: Element
+Type of element: Element
+Type of element: Element
+Type of element: Group
+Type of element: Element
+Type of element: Element
+Type of element: Element
+Type of element: Group
+Type of element: ComplexType
+	complex type identified: preformattedType - base: inlineMarkupType
+Type of element: ComplexType
+	complex type identified: listType - base: 
+		complex type element li - Type listItemType
+split: [listType]
+Type of element: ComplexType
+	complex type identified: orderedListType - base: listType
+		complex type attribute start - Type int
+split: [orderedListType]
+Type of element: Element
+Type of element: Element
+Type of element: Group
+Type of element: ComplexType
+	complex type identified: listItemType - base: 
+		complex type element p - Type inlineMarkupType
+split: [listItemType]
+Type of element: ComplexType
+	complex type identified: tableType - base: 
+		complex type element tr - Type tableRowType
+split: [tableType]
+Type of element: ComplexType
+	complex type identified: tableRowType - base: 
+		complex type element td - Type tableCellType
+		complex type element th - Type tableCellType
+split: [tableRowType]
+Type of element: ComplexType
+	complex type identified: tableCellType - base: inlineMarkupType
+		complex type attribute align - Type alignType
+split: [tableCellType]
+Type of element: ComplexType
+	complex type identified: blockQuoteType - base: 
+Type of element: ComplexType
+	complex type identified: MarkupLineDatatype - base: inlineMarkupType
+Type of element: ComplexType
+	complex type identified: inlineMarkupType - base: 
+Type of element: Element
+Type of element: Element
+Type of element: Element
+Type of element: Group
+Type of element: Element
+Type of element: Element
+Type of element: Element
+Type of element: Element
+Type of element: Element
+Type of element: Element
+Type of element: Element
+Type of element: Element
+Type of element: Group
+Type of element: ComplexType
+	complex type identified: codeType - base: inlineMarkupType
+		complex type attribute class - Type string
+split: [codeType]
+Type of element: ComplexType
+	complex type identified: imageType - base: 
+		complex type attribute alt - Type string
+		complex type attribute src - Type string
+		complex type attribute title - Type string
+split: [imageType]
+Type of element: ComplexType
+	complex type identified: anchorType - base: 
+		complex type attribute href - Type string
+		complex type attribute title - Type string
+split: [anchorType]
+Type of element: ComplexType
+	complex type identified: insertType - base: 
+		complex type attribute type - Type string
+		complex type attribute id-ref - Type string
+split: [insertType]
+Type of element: SimpleType
+	simple type identified: Base64Datatype - base: string
+Type of element: SimpleType
+	simple type identified: BooleanDatatype - base: bool
+Type of element: SimpleType
+	simple type identified: DateDatatype - base: string
+Type of element: SimpleType
+	simple type identified: DateTimeDatatype - base: string
+Type of element: SimpleType
+	simple type identified: DateTimeWithTimezoneDatatype - base: string
+Type of element: SimpleType
+	simple type identified: EmailAddressDatatype - base: StringDatatype
+Type of element: SimpleType
+	simple type identified: NonNegativeIntegerDatatype - base: int
+Type of element: SimpleType
+	simple type identified: PositiveIntegerDatatype - base: int
+Type of element: SimpleType
+	simple type identified: StringDatatype - base: string
+Type of element: SimpleType
+	simple type identified: TokenDatatype - base: StringDatatype
+Type of element: SimpleType
+	simple type identified: URIDatatype - base: string
+Type of element: SimpleType
+	simple type identified: URIReferenceDatatype - base: string
+Type of element: SimpleType
+	simple type identified: UUIDDatatype - base: StringDatatype
+Key IncorporatesComponent - Values: [component-uuid description]
+Key InformationType - Values: [uuid title description categorizations props links confidentiality-impact integrity-impact availability-impact]
+Key ControlObjectiveSelection - Values: [description props links include-all include-objectives exclude-objectives remarks]
+Key Characterization - Values: [props links origin facets]
+Key Group - Values: [id class title params props links parts groups insert-controlses]
+Key Address - Values: [addr-lines city]
+Key Diagram - Values: [uuid description props links caption remarks]
+Key AssessmentPlatform - Values: [uuid title props links uses-components remarks]
+Key IdentifiedSubject - Values: [subject-placeholder-uuid subjects]
+Key MitigatingFactor - Values: [uuid implementation-uuid description props links subjects]
+Key RelatedFinding - Values: [finding-uuid]
+Key Hash - Values: [algorithm]
+Key SystemCharacteristics - Values: [system-ids system-name]
+Key SystemComponent - Values: [uuid type title description purpose props links status responsible-roles protocols remarks]
+Key LocalObjective - Values: [control-id description props links parts remarks]
+Key ThreatId - Values: [system href]
+Key Response - Values: [uuid lifecycle title description props links origins required-assets tasks remarks]
+Key AssessmentPart - Values: [uuid name ns class title props parts links]
+Key OrderedListType - Values: [start]
+Key Location - Values: [uuid title address email-addresses telephone-numbers urls props links remarks]
+Key Responsibility - Values: [uuid provided-uuid description props links responsible-roles remarks]
+Key Rlink - Values: [href media-type hashes]
+Key Statement - Values: [statement-id uuid props links responsible-roles by-components remarks]
+Key Attestation - Values: [responsible-parties parts]
+Key Provided - Values: [uuid description props links responsible-roles remarks]
+Key ByComponent - Values: [component-uuid uuid description props links set-parameters implementation-status export inheriteds satisfieds responsible-roles remarks]
+Key TermsAndConditions - Values: [parts]
+Key AssessmentLog - Values: [entries]
+Key ImportAp - Values: [href remarks]
+Key Base64 - Values: [filename media-type]
+Key Import - Values: [href include-all include-controlses exclude-controlses]
+Key AssessmentResults - Values: [uuid metadata import-ap local-definitions results back-matter]
+Key SystemInformation - Values: [props links information-types]
+Key RelatedObservation - Values: [observation-uuid]
+Key ResponsibleParty - Values: [role-id party-uuids props links remarks]
+Key Custom - Values: [groups insert-controlses]
+Key ControlImplementation - Values: [description set-parameters implemented-requirements]
+Key ImportProfile - Values: [href remarks]
+Key SelectSubjectById - Values: [subject-uuid type props links remarks]
+Key AssociatedRisk - Values: [risk-uuid]
+Key Test - Values: [expression remarks]
+Key Revision - Values: [title published last-modified version oscal-version props links remarks]
+Key TableRowType - Values: [tds ths]
+Key LeveragedAuthorization - Values: [uuid title props links party-uuid date-authorized remarks]
+Key OnDate - Values: [date]
+Key ReviewedControls - Values: [description props links control-selections control-objective-selections remarks]
+Key Entry - Values: [uuid title description start end props links logged-bies related-tasks remarks]
+Key ParameterSelection - Values: [how-many choices]
+Key Capability - Values: [uuid name description props links incorporates-components control-implementations remarks]
+Key TelephoneNumber - Values: [type]
+Key ImportComponentDefinition - Values: [href]
+Key ImplementedRequirement - Values: [uuid control-id props links set-parameters responsible-roles statements by-components remarks]
+Key AtFrequency - Values: [period unit]
+Key Observation - Values: [title description props links methods]
+Key Origin - Values: [actors]
+Key RequiredAsset - Values: [uuid subjects title description props links remarks]
+Key Resource - Values: [uuid title description props document-ids citation rlinks base64 remarks]
+Key SetParameter - Values: [values]
+Key AssessmentSubjectPlaceholder - Values: [uuid description sources props links remarks]
+Key TableType - Values: [trs]
+Key CodeType - Values: [class]
+Key LocalDefinitions - Values: [components inventory-items assessment-assets remarks]
+Key AssociatedActivity - Values: [activity-uuid props links responsible-roles subjects remarks]
+Key AuthorizationBoundary - Values: [description props links diagrams remarks]
+Key ImportSsp - Values: [href remarks]
+Key PlanOfActionAndMilestones - Values: [uuid metadata import-ssp system-id local-definitions observations risks findings poam-items back-matter]
+Key ComponentDefinition - Values: [uuid metadata import-component-definitions components capabilities back-matter]
+Key ImplementedComponent - Values: [component-uuid props links responsible-parties remarks]
+Key SubjectReference - Values: [subject-uuid type title props links remarks]
+Key Profile - Values: [uuid metadata imports merge modify back-matter]
+Key Satisfied - Values: [uuid responsibility-uuid description props links responsible-roles remarks]
+Key SystemImplementation - Values: [props links leveraged-authorizations users components inventory-items remarks]
+Key RelatedTask - Values: [task-uuid props links responsible-parties subjects identified-subject remarks]
+Key Combine - Values: [method]
+Key SelectControlById - Values: [statement-ids]
+Key InventoryItem - Values: [uuid description props links responsible-parties implemented-components remarks]
+Key Timing - Values: [on-date within-date-range at-frequency]
+Key OriginActor - Values: [type actor-uuid role-id props links]
+Key Link - Values: [href rel media-type resource-fragment text]
+Key Action - Values: [uuid date type system props links responsible-parties remarks]
+Key Add - Values: [position by-id title params props links parts]
+Key Inherited - Values: [uuid provided-uuid description props links responsible-roles]
+Key AssessmentSubject - Values: [type description props links include-all include-subjects exclude-subjects remarks]
+Key ImageType - Values: [alt src title]
+Key DocumentId - Values: [scheme]
+Key ControlSelection - Values: [description props links include-all include-controls exclude-controls remarks]
+Key AssessmentPlan - Values: [uuid metadata import-ssp local-definitions terms-and-conditions reviewed-controls assessment-subjects assessment-assets tasks back-matter]
+Key TableCellType - Values: [align]
+Key ResponsibleRole - Values: [role-id props links party-uuids remarks]
+Key PortRange - Values: [start end transport]
+Key AssessmentAssets - Values: [components assessment-platforms]
+Key FindingTarget - Values: [type target-id title description props links status implementation-status remarks]
+Key ParameterConstraint - Values: [description tests]
+Key WithinDateRange - Values: [start end]
+Key Modify - Values: [set-parameters alters]
+Key NetworkArchitecture - Values: [description props links diagrams remarks]
+Key PoamItem - Values: [uuid title description props links origins related-findings related-observations associated-risks remarks]
+Key Revisions - Values: [revisions]
+Key Remove - Values: [by-name by-class by-id by-item-name by-ns]
+Key AssessmentMethod - Values: [uuid description props links part remarks]
+Key Matching - Values: [pattern]
+Key ImplementationStatus - Values: [state remarks]
+Key SystemId - Values: [identifier-type]
+Key Dependency - Values: [task-uuid remarks]
+Key Risk - Values: [title description statement props links status origins threat-ids characterizations mitigating-factors deadline]
+Key LoggedBy - Values: [party-uuid role-id]
+Key Citation - Values: [text props links]
+Key Property - Values: [name uuid ns value class group remarks]
+Key SecurityImpactLevel - Values: [security-objective-confidentiality]
+Key Export - Values: [description props links provideds responsibilities remarks]
+Key Result - Values: [title description start]
+Key BackMatter - Values: [resources]
+Key AuthorizedPrivilege - Values: [title description function-performeds]
+Key DataFlow - Values: [description props links diagrams remarks]
+Key SelectObjectiveById - Values: [objective-id]
+Key Finding - Values: [title description props links origins target implementation-statement-uuid]
+Key Facet - Values: [name system value props links remarks]
+Key DefinedComponent - Values: [uuid type title description purpose props links responsible-roles protocols control-implementations remarks]
+Key Categorization - Values: [system information-type-ids]
+Key ListItemType - Values: [ps]
+Key InsertType - Values: [type id-ref]
+Key Impact - Values: [props links base selected adjustment-justification]
+Key Task - Values: [uuid type title description props links timing dependencies tasks associated-activities subjects responsible-roles remarks]
+Key RelevantEvidence - Values: [href description props links remarks]
+Key RelatedResponse - Values: [response-uuid props links related-tasks remarks]
+Key InsertControls - Values: [order include-all include-controlses exclude-controlses]
+Key Step - Values: [uuid title description props links reviewed-controls responsible-roles remarks]
+Key Activity - Values: [uuid title description props links steps related-controls responsible-roles remarks]
+Key AnchorType - Values: [href title]
+Key Catalog - Values: [uuid metadata params controls groups back-matter]
+Key Part - Values: [id name ns class title props parts links]
+Key SystemSecurityPlan - Values: [uuid metadata import-profile system-characteristics system-implementation control-implementation back-matter]
+Key Control - Values: [id class title params props links parts controls]
+Key Metadata - Values: [title published last-modified version oscal-version revisions document-ids props links roles locations parties responsible-parties actions remarks]
+Key Status - Values: [state reason remarks]
+Key UsesComponent - Values: [component-uuid props links responsible-parties remarks]
+Key RiskLog - Values: [entries]
+Key ExternalId - Values: [scheme]
+Key Alter - Values: [control-id removes adds]
+Key Party - Values: [uuid type name short-name external-ids props links email-addresses telephone-numbers addresses location-uuids member-of-organizations remarks]
+Key Merge - Values: [combine flat as-is]
+Key Protocol - Values: [uuid name title port-ranges]
+Key SystemUser - Values: [title short-name]
+Key Source - Values: [task-uuid]
+Key ListType - Values: [lis]
+Key Parameter - Values: [id class depends-on props links label usage constraints guidelines values select remarks]
+Key Role - Values: [id title short-name description props links remarks]
+did not find key OscalCompleteSchema
+struct LocalDefinitions does not have correct length of keys
+did not find key AssessmentPlanTermsAndConditions
+struct Result does not have correct length of keys
+struct Group does not have correct length of keys
+struct SystemId does not have correct length of keys
+did not find key PlanOfActionAndMilestonesLocalDefinitions
+struct Observation does not have correct length of keys
+struct Risk does not have correct length of keys
+struct Finding does not have correct length of keys
+struct PoamItem does not have correct length of keys
+struct Import does not have correct length of keys
+struct Merge does not have correct length of keys
+struct SystemCharacteristics does not have correct length of keys
+did not find key RevisionHistoryEntry
+struct DocumentId does not have correct length of keys
+struct AssessmentPart does not have correct length of keys
+did not find key AssessedControls
+did not find key ReferencedControlObjectives
+did not find key IncludeAll
+did not find key EventTiming
+did not find key TaskDependency
+did not find key ParameterGuideline
+struct ParameterSelection does not have correct length of keys
+struct Part does not have correct length of keys
+did not find key ControlImplementationSet
+struct Origin does not have correct length of keys
+struct ThreatId does not have correct length of keys
+did not find key PoamItemOrigin
+did not find key CombinationRule
+did not find key FlatWithoutGrouping
+did not find key ParameterSetting
+did not find key Alteration
+struct SystemUser does not have correct length of keys
+struct SetParameter does not have correct length of keys
+struct Address does not have correct length of keys
+struct TelephoneNumber does not have correct length of keys
+did not find key PartyExternalIdentifier
+struct SelectControlById does not have correct length of keys
+did not find key FrequencyCondition
+did not find key OnDateCondition
+did not find key OnDateRangeCondition
+did not find key ResourceLink
+struct Base64 does not have correct length of keys
+did not find key ConstraintTest
+did not find key ImplementedRequirementControlImplementation
+did not find key ObjectiveStatus
+did not find key Addition
+did not find key Removal
+struct ByComponent does not have correct length of keys
+struct Hash does not have correct length of keys
+did not find key ControlStatementImplementation
+struct Export does not have correct length of keys
+did not find key ControlImplementationResponsibility
