@@ -7,6 +7,11 @@ import (
 	"strconv"
 	"strings"
 
+	oscalTypes_1_0_4 "github.com/defenseunicorns/go-oscal/src/types/oscal-1-0-4"
+	oscalTypes_1_0_6 "github.com/defenseunicorns/go-oscal/src/types/oscal-1-0-6"
+	oscalTypes_1_1_0 "github.com/defenseunicorns/go-oscal/src/types/oscal-1-1-0"
+	oscalTypes_1_1_1 "github.com/defenseunicorns/go-oscal/src/types/oscal-1-1-1"
+	oscalTypes_1_1_2 "github.com/defenseunicorns/go-oscal/src/types/oscal-1-1-2"
 	"gopkg.in/yaml.v3"
 )
 
@@ -129,6 +134,177 @@ func MarshalByExtension(model interface{}, outputFile string) (bytes []byte, err
 		if err != nil {
 			return nil, err
 		}
+	default:
+		return nil, fmt.Errorf("invalid file extension must be yaml or json: %s", ext)
+	}
+
+	return bytes, nil
+}
+
+func marshallYamlToStruct(data []byte) ([]byte, error) {
+
+	var oscalModel = oscalTypes_1_1_2.OscalModels{}
+
+	err := yaml.Unmarshal(data, &oscalModel)
+	if err != nil {
+		return nil, err
+	}
+	bytes, err := yaml.Marshal(oscalModel)
+	if err != nil {
+		return nil, err
+	}
+
+	return bytes, nil
+}
+
+func Marshall104(data []byte, ext string) (bytes []byte, err error) {
+	var oscalModel = oscalTypes_1_0_4.OscalModels{}
+
+	switch ext {
+	case "json":
+		err := json.Unmarshal(data, &oscalModel)
+		if err != nil {
+			return nil, err
+		}
+		bytes, err = json.Marshal(oscalModel)
+		if err != nil {
+			return nil, err
+		}
+
+	case "yaml":
+		err := yaml.Unmarshal(data, &oscalModel)
+		if err != nil {
+			return nil, err
+		}
+		bytes, err = yaml.Marshal(oscalModel)
+		if err != nil {
+			return nil, err
+		}
+
+	default:
+		return nil, fmt.Errorf("invalid file extension must be yaml or json: %s", ext)
+	}
+
+	return bytes, nil
+}
+
+func Marshall106(data []byte, ext string) (bytes []byte, err error) {
+	var oscalModel = oscalTypes_1_0_6.OscalModels{}
+
+	switch ext {
+	case "json":
+		err := json.Unmarshal(data, &oscalModel)
+		if err != nil {
+			return nil, err
+		}
+		bytes, err = json.Marshal(oscalModel)
+		if err != nil {
+			return nil, err
+		}
+
+	case "yaml":
+		err := yaml.Unmarshal(data, &oscalModel)
+		if err != nil {
+			return nil, err
+		}
+		bytes, err = yaml.Marshal(oscalModel)
+		if err != nil {
+			return nil, err
+		}
+
+	default:
+		return nil, fmt.Errorf("invalid file extension must be yaml or json: %s", ext)
+	}
+
+	return bytes, nil
+}
+
+func Marshall110(data []byte, ext string) (bytes []byte, err error) {
+	var oscalModel = oscalTypes_1_1_0.OscalModels{}
+
+	switch ext {
+	case "json":
+		err := json.Unmarshal(data, &oscalModel)
+		if err != nil {
+			return nil, err
+		}
+		bytes, err = json.Marshal(oscalModel)
+		if err != nil {
+			return nil, err
+		}
+
+	case "yaml":
+		err := yaml.Unmarshal(data, &oscalModel)
+		if err != nil {
+			return nil, err
+		}
+		bytes, err = yaml.Marshal(oscalModel)
+		if err != nil {
+			return nil, err
+		}
+
+	default:
+		return nil, fmt.Errorf("invalid file extension must be yaml or json: %s", ext)
+	}
+
+	return bytes, nil
+}
+
+func Marshall111(data []byte, ext string) (bytes []byte, err error) {
+	var oscalModel = oscalTypes_1_1_1.OscalModels{}
+
+	switch ext {
+	case "json":
+		err := json.Unmarshal(data, &oscalModel)
+		if err != nil {
+			return nil, err
+		}
+		bytes, err = json.Marshal(oscalModel)
+		if err != nil {
+			return nil, err
+		}
+
+	case "yaml":
+		err := yaml.Unmarshal(data, &oscalModel)
+		if err != nil {
+			return nil, err
+		}
+		bytes, err = yaml.Marshal(oscalModel)
+		if err != nil {
+			return nil, err
+		}
+
+	default:
+		return nil, fmt.Errorf("invalid file extension must be yaml or json: %s", ext)
+	}
+
+	return bytes, nil
+}
+
+func Marshall112(data []byte, ext string) (bytes []byte, err error) {
+	var oscalModel = oscalTypes_1_1_2.OscalModels{}
+
+	switch ext {
+	case "json":
+		err := json.Unmarshal(data, &oscalModel)
+		if err != nil {
+			return nil, err
+		}
+		bytes, err = json.Marshal(oscalModel)
+		if err != nil {
+			return nil, err
+		}
+
+	case "yaml":
+		err := yaml.Unmarshal(data, &oscalModel)
+		if err != nil {
+			return nil, err
+		}
+		bytes, err = yaml.Marshal(oscalModel)
+		if err != nil {
+			return nil, err
+		}
+
 	default:
 		return nil, fmt.Errorf("invalid file extension must be yaml or json: %s", ext)
 	}

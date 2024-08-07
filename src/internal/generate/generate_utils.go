@@ -3,6 +3,7 @@ package generate
 import (
 	"fmt"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"unicode"
@@ -41,6 +42,85 @@ var KeysToIgnore map[string]bool = map[string]bool{
 
 var Aliases map[string][]string = map[string][]string{
 	"OscalCompleteSchema": {"OscalModels"},
+}
+
+// Uses camel case for key and dash case for values
+// Key originates from the findSubType function where as the use of keys requires dash case
+var OrderedKeyMap map[string][]string = map[string][]string{
+	"OscalCompleteSchema": {
+		"catalog",
+		"profile",
+		"component-definition",
+		"system-security-plan",
+		"assessment-plan",
+		"assessment-results",
+		"plan-of-action-and-milestones",
+	},
+	"Catalog": {
+		"uuid",
+		"metadata",
+		"params",
+		"controls",
+		"groups",
+		"back-matter",
+	},
+	"Profile": {
+		"uuid",
+		"metadata",
+		"imports",
+		"merge",
+		"modify",
+		"back-matter",
+	},
+	"ComponentDefinition": {
+		"uuid",
+		"metadata",
+		"import-component-definitions",
+		"components",
+		"capabilities",
+		"back-matter",
+	},
+	"SystemSecurityPlan": {
+		"uuid",
+		"metadata",
+		"import-profile",
+		"system-characteristics",
+		"system-implementation",
+		"control-implementation",
+		"back-matter",
+	},
+	"AssessmentPlan": {
+		"uuid",
+		"metadata",
+		"import-ssp",
+		"local-definitions",
+		"terms-and-conditions",
+		"reviewed-controls",
+		"assessment-subjects",
+		"assessment-assets",
+		"tasks",
+		"back-matter",
+	},
+	"AssessmentResults": {
+		"uuid",
+		"metadata",
+		"import-ap",
+		"local-definitions",
+		"results",
+		"back-matter",
+	},
+	"PlanOfActionAndMilestones": {
+		"uuid",
+		"metadata",
+		"import-ssp",
+		"system-id",
+		"local-definitions",
+		"observations",
+		"risks",
+		"findings",
+		"poam-items",
+		"back-matter",
+	},
 }
 
 const headerComment string = `/*
@@ -395,4 +475,24 @@ func buildImportString() string {
 	}
 	imports += ")\n"
 	return imports
+}
+
+func sortCompare(a, b []string) error {
+	if len(a) != len(b) {
+		return fmt.Errorf("slices are not the same length \n\tWant: %v \n\tGot: %v", a, b)
+	}
+
+	// Create a copy of a so as to not modify a
+	var c []string
+	copy(a, c)
+
+	slices.Sort(c)
+	slices.Sort(b)
+
+	for i, v := range c {
+		if v != b[i] {
+			return fmt.Errorf("slices are not the same \n\tWant: %v \n\tGot: %v", a, b)
+		}
+	}
+	return nil
 }

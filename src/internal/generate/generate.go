@@ -158,13 +158,35 @@ func (c *GeneratorConfig) buildStructString(def jsonschema.Schema) (structString
 
 	// create a slice of the keys in the properties map
 	var keys []string
-	for key := range def.Properties {
-		if !KeysToIgnore[key] {
-			keys = append(keys, key)
+	if item, ok := OrderedKeyMap[name]; ok {
+
+		for _, key := range item {
+			if !KeysToIgnore[key] {
+				if def.Properties[key].TypeObject != nil {
+					keys = append(keys, key)
+				}
+			}
 		}
+		// // build this slice for comparison to track potential drift
+		// var tempKeys []string
+		// for key := range def.Properties {
+		// 	if !KeysToIgnore[key] {
+		// 		tempKeys = append(tempKeys, key)
+		// 	}
+		// }
+		// err = sortCompare(keys, tempKeys)
+		// if err != nil {
+		// 	return structString, err
+		// }
+
+	} else {
+		for key := range def.Properties {
+			if !KeysToIgnore[key] {
+				keys = append(keys, key)
+			}
+		}
+		slices.Sort(keys)
 	}
-	// Sort the keys alphabetically
-	slices.Sort(keys)
 
 	// If there are no properties, return a map[string]interface{} type
 	if len(keys) == 0 {
@@ -181,7 +203,6 @@ func (c *GeneratorConfig) buildStructString(def jsonschema.Schema) (structString
 
 	// Add top level struct definition
 	structString += fmt.Sprintf("type %s struct {\n", name)
-
 	// Add the properties to the struct string
 	for _, key := range keys {
 		// Set the parent of the property schema to the definition
@@ -205,9 +226,6 @@ func (c *GeneratorConfig) buildStructString(def jsonschema.Schema) (structString
 	}
 	// Close the struct
 	structString += "}"
-	if err != nil {
-		return structString, err
-	}
 
 	return structString, err
 }

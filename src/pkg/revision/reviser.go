@@ -2,10 +2,13 @@ package revision
 
 import (
 	"encoding/json"
+	"fmt"
+	"strings"
 
 	"github.com/defenseunicorns/go-oscal/src/pkg/model"
 	"github.com/defenseunicorns/go-oscal/src/pkg/validation"
 	"github.com/defenseunicorns/go-oscal/src/pkg/versioning"
+	"gopkg.in/yaml.v3"
 )
 
 type Reviser struct {
@@ -72,5 +75,41 @@ func (u *Reviser) Revise() (err error) {
 
 // GetRevisedBytes returns the upgraded model as bytes, marshalled to the desired extension.
 func (u *Reviser) GetRevisedBytes(ext string) (bytes []byte, err error) {
-	return model.MarshalByExtension(u.upgradedJsonMap, ext)
+	// return model.MarshalByExtension(u.upgradedJsonMap, ext)
+	split := strings.Split(ext, ".")
+	ext = split[len(split)-1]
+
+	switch ext {
+	case "json":
+		bytes, err = json.Marshal(u.upgradedJsonMap)
+		if err != nil {
+			return nil, err
+		}
+
+	case "yaml":
+		bytes, err = yaml.Marshal(u.upgradedJsonMap)
+		if err != nil {
+			return nil, err
+		}
+
+	default:
+		return nil, fmt.Errorf("invalid file extension must be yaml or json: %s", ext)
+	}
+
+	// Use the intended upgrade schema version
+	switch u.GetSchemaVersion() {
+	case "1.0.4":
+		return model.Marshall104(bytes, ext)
+	case "1.0.6":
+		return model.Marshall106(bytes, ext)
+	case "1.1.0":
+		return model.Marshall110(bytes, ext)
+	case "1.1.1":
+		return model.Marshall111(bytes, ext)
+	case "1.1.2":
+		return model.Marshall112(bytes, ext)
+	default:
+		return nil, fmt.Errorf("unsupported model version")
+	}
+
 }
