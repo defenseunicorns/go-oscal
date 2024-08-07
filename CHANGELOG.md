@@ -1,5 +1,36 @@
 # Changelog
 
+## [0.6.0](https://github.com/defenseunicorns/go-oscal/compare/v0.5.0...v0.6.0) (2024-08-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* **validation:** #274 refactor to accommodate updating to jsonschema v6 ([#282](https://github.com/defenseunicorns/go-oscal/issues/282))
+
+### refactor
+
+* **validation:** [#274](https://github.com/defenseunicorns/go-oscal/issues/274) refactor to accommodate updating to jsonschema v6 ([#282](https://github.com/defenseunicorns/go-oscal/issues/282)) ([5e1a894](https://github.com/defenseunicorns/go-oscal/commit/5e1a8941fab19b04030db994e10d5063d08f05bd))
+
+
+### Miscellaneous
+
+* **deps:** update actions/download-artifact action to v4.1.8 ([#275](https://github.com/defenseunicorns/go-oscal/issues/275)) ([06c015f](https://github.com/defenseunicorns/go-oscal/commit/06c015f994948c030747466bde50d8beb14d4d16))
+* **deps:** update actions/github-script digest to 35b1cdd ([#286](https://github.com/defenseunicorns/go-oscal/issues/286)) ([b81dbfb](https://github.com/defenseunicorns/go-oscal/commit/b81dbfbc5ab7326ecdbcf816f3b7c8603b7d4885))
+* **deps:** update actions/setup-go action to v5.0.2 ([#279](https://github.com/defenseunicorns/go-oscal/issues/279)) ([40b2efe](https://github.com/defenseunicorns/go-oscal/commit/40b2efe131c04c3ff121a19bc2647bcda3c8c01c))
+* **deps:** update actions/setup-node action to v4.0.3 ([#276](https://github.com/defenseunicorns/go-oscal/issues/276)) ([54f6ab5](https://github.com/defenseunicorns/go-oscal/commit/54f6ab5a132982dcbe092c6da7ff8881f045f7f5))
+* **deps:** update actions/upload-artifact action to v4.3.4 ([#277](https://github.com/defenseunicorns/go-oscal/issues/277)) ([c149bc7](https://github.com/defenseunicorns/go-oscal/commit/c149bc7e0757c0e4f5a577435541fcca1b039543))
+* **deps:** update actions/upload-artifact action to v4.3.6 ([#287](https://github.com/defenseunicorns/go-oscal/issues/287)) ([31eb0c5](https://github.com/defenseunicorns/go-oscal/commit/31eb0c5175edbd235237561e58992c33f891057e))
+* **deps:** update anchore/sbom-action action to v0.16.1 ([#278](https://github.com/defenseunicorns/go-oscal/issues/278)) ([ad3e6aa](https://github.com/defenseunicorns/go-oscal/commit/ad3e6aae883ef6a819bcc25c8aa635e9175f2ab6))
+* **deps:** update anchore/sbom-action action to v0.17.0 ([#281](https://github.com/defenseunicorns/go-oscal/issues/281)) ([5000d31](https://github.com/defenseunicorns/go-oscal/commit/5000d311d277b2d918e84f0a556108823eadd80f))
+* **deps:** update dependency commitlint to v19.4.0 ([#290](https://github.com/defenseunicorns/go-oscal/issues/290)) ([d2351fd](https://github.com/defenseunicorns/go-oscal/commit/d2351fd7504d9eeddd2068b323e2dcd59222a1b3))
+* **deps:** update github/codeql-action action to v3.25.11 ([#273](https://github.com/defenseunicorns/go-oscal/issues/273)) ([6910af5](https://github.com/defenseunicorns/go-oscal/commit/6910af5c5e4d0d151b3e07992bdaa9baf69549dd))
+* **deps:** update github/codeql-action action to v3.25.12 ([#280](https://github.com/defenseunicorns/go-oscal/issues/280)) ([147c634](https://github.com/defenseunicorns/go-oscal/commit/147c6340b3a2a273c9909e68b698101ac82a69b9))
+* **deps:** update github/codeql-action action to v3.25.13 ([#283](https://github.com/defenseunicorns/go-oscal/issues/283)) ([e7dc32a](https://github.com/defenseunicorns/go-oscal/commit/e7dc32a6830213af63c0be625897ccaf2db91e44))
+* **deps:** update github/codeql-action action to v3.25.15 ([#284](https://github.com/defenseunicorns/go-oscal/issues/284)) ([462e363](https://github.com/defenseunicorns/go-oscal/commit/462e3636c39819bfc842d03bab16572ce3ab5163))
+* **deps:** update github/codeql-action action to v3.26.0 ([#289](https://github.com/defenseunicorns/go-oscal/issues/289)) ([27c7494](https://github.com/defenseunicorns/go-oscal/commit/27c74942664ba43b775730f973536cb324658c07))
+* **deps:** update module github.com/swaggest/jsonschema-go to v0.3.72 ([#272](https://github.com/defenseunicorns/go-oscal/issues/272)) ([f61f486](https://github.com/defenseunicorns/go-oscal/commit/f61f486f5c8f4ed003081438994b63a24b377895))
+* **deps:** update ossf/scorecard-action action to v2.4.0 ([#285](https://github.com/defenseunicorns/go-oscal/issues/285)) ([2a1e32e](https://github.com/defenseunicorns/go-oscal/commit/2a1e32e82228af59ad39fbb37cb1e7282df3bfdc))
+
 ## [0.5.0](https://github.com/defenseunicorns/go-oscal/compare/v0.4.3...v0.5.0) (2024-06-18)
 
 
