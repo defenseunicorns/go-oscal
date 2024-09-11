@@ -23,16 +23,6 @@ This project uses a custom script to generate Go types from OSCAL JSON schemas. 
    ```
 
 2. The `gen-types.sh` script performs the following actions:
-
-   - Reads JSON schema files from `src/internal/schemas`
-   - Generates Go types for each schema version using `quicktype`
-   - Outputs the generated types to `src/types/oscal-<version>/types.go`
-   - Adds YAML and XML tags to the generated structs
-
-## Script Details
-
-The `hack/gen-types.sh` script:
-
 - Iterates through all `oscal_complete_schema-*.json` files in the `src/internal/schemas` directory
 - Extracts the version number from each filename
 - Creates an output directory for each version
