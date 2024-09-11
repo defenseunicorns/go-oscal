@@ -4,7 +4,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/defenseunicorns/go-oscal)](https://goreportcard.com/report/github.com/defenseunicorns/go-oscal)
 [![License](https://img.shields.io/github/license/defenseunicorns/go-oscal)](https://github.com/defenseunicorns/go-oscal/blob/main/LICENSE)
 
-go-oscal is a comprehensive Go library designed for interacting with the Open Security Controls Assessment Language (OSCAL). It offers robust support for OSCAL releases >=1.0.4, providing Go types that correspond to the latest OSCAL schemas. Notably, go-oscal offers more than just type definitions; it includes tooling for validating OSCAL documents against their respective OSCAL version schemas, facilitating the seamless transition of existing OSCAL documents to newer versions, and generating new OSCAL types as needed. Leveraging the OSCAL Complete Schema definition, go-oscal ensures that developers have access to the most up-to-date and accurate representations of OSCAL releases for their projects.
+go-oscal is a comprehensive Go library designed for interacting with the Open Security Controls Assessment Language (OSCAL). It offers robust support for OSCAL releases >=1.0.4, providing Go types (using [quicktype](https://github.com/quicktype/quicktype)) that correspond to the latest OSCAL schemas. Notably, go-oscal offers more than just type definitions; it includes tooling for validating OSCAL documents against their respective OSCAL version schemas, facilitating the seamless transition of existing OSCAL documents to newer versions, and generating new OSCAL types as needed. Leveraging the OSCAL Complete Schema definition, go-oscal ensures that developers have access to the most up-to-date and accurate representations of OSCAL releases for their projects.
 
 ## Table Of Contents
 
@@ -16,6 +16,8 @@ go-oscal is a comprehensive Go library designed for interacting with the Open Se
     - [Import](#import)
       - [Using Types](#using-types)
   - [Development](#development)
+  - [Generating Types](#generating-types)
+  - [Upgrading OSCAL Version](#upgrading-oscal-version)
   - [Additional Resources and Projects](#additional-resources-and-projects)
 
 ## Usage
@@ -31,7 +33,6 @@ go build .
 - [validate](./docs/commands/validate.md)
 - [revise](./docs/commands/revise.md)
 - [doctor](./docs/commands/doctor.md)
-- [generate](./docs/commands/generate.md)
 
 
 ### Import
@@ -63,6 +64,22 @@ For development, the `Makefile` can be used to build, test, and generate the Go 
 
 ```bash 
 make test
+```
+
+## Generating Types
+
+To [generate the types](./docs/generating-types.md), run the following command:
+
+```bash
+make generate
+```
+
+## Upgrading OSCAL Version
+
+To [upgrade the OSCAL version](./docs/upgrading-oscal-version.md), run the following command:
+
+```bash
+make upgrade OSCAL_LATEST=X-X-X UNDOCTORED_SCHEMA=path/to/undoctored-schema.json
 ```
 
 ## Additional Resources and Projects
