@@ -49,5 +49,8 @@
       "datasourceTemplate": "github-tags",
       "depNameTemplate": "usnistgov/OSCAL"
     }
+  ],
+  "labels": [
+    "dependencies"
   ]
 }
