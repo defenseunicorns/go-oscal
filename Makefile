@@ -46,7 +46,7 @@ SRC := $(shell find . -type f -name '*.go' -print) go.mod go.sum
 #//////////////////////////////////////////////////////////////////////////////
 #
 .PHONY: all
-all: clean build test generate-compdef-stdout generate-ssp-stdout
+all: clean build test generate
 
 .PHONY: help
 help: ## Show this help message.
@@ -77,7 +77,7 @@ install: ## Install binary to $INSTALL_PATH.
 .PHONY: upgrade
 upgrade: ## Upgrade oscal schema version and generate new types and doctored schema. 
 	make doctor-latest-schema
-	make generate-latest-schema
+	make generate
 	echo -e "---\noscal: v$(subst -,.,$(OSCAL_LATEST))" > update/oscal-version.yaml
 	rm $(UNDOCTORED_SCHEMA)
 
@@ -85,6 +85,6 @@ upgrade: ## Upgrade oscal schema version and generate new types and doctored sch
 doctor-latest-schema: clean build
 	$(BINDIR)/$(BINNAME) doctor -f $(UNDOCTORED_SCHEMA) -o $(OSCAL_LATEST_SCHEMA)
 
-.PHONY: generate-latest
-generate-latest-schema: clean build
-	$(BINDIR)/$(BINNAME) generate -f $(OSCAL_LATEST_SCHEMA) --pkg $(OSCAL_LATEST_PACKAGE) --tags json,yaml -o $(OSCAL_LATEST_OUTPUT)/types.go
+.PHONY: generate
+generate:
+	go generate

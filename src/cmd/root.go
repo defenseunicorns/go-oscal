@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"github.com/defenseunicorns/go-oscal/src/cmd/doctor"
-	"github.com/defenseunicorns/go-oscal/src/cmd/generate"
 	"github.com/defenseunicorns/go-oscal/src/cmd/revise"
 	"github.com/defenseunicorns/go-oscal/src/cmd/validate"
 	"github.com/defenseunicorns/go-oscal/src/internal/logging"
@@ -46,7 +45,6 @@ func init() {
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	commands := []*cobra.Command{
-		generate.GenerateCmd,
 		revise.ReviseCmd,
 		validate.ValidateCmd,
 		doctor.DoctorCmd,
