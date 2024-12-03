@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.6.2](https://github.com/defenseunicorns/go-oscal/compare/v0.6.1...v0.6.2) (2024-12-03)
+
+
+### Features
+
+* **deps:** update dependency usnistgov/oscal to v1.1.3 ([#331](https://github.com/defenseunicorns/go-oscal/issues/331)) ([37c9d23](https://github.com/defenseunicorns/go-oscal/commit/37c9d2300a3e5aec62ecf5ef848b58cc22237217))
+
+
+### Miscellaneous
+
+* **deps:** update anchore/sbom-action action to v0.17.8 ([#330](https://github.com/defenseunicorns/go-oscal/issues/330)) ([e6ce561](https://github.com/defenseunicorns/go-oscal/commit/e6ce5617fef9939725ce5bf938ec952117985b2f))
+* **deps:** update github/codeql-action action to v3.27.6 ([#333](https://github.com/defenseunicorns/go-oscal/issues/333)) ([41fbd9c](https://github.com/defenseunicorns/go-oscal/commit/41fbd9cd5126716b5fd3786d6b2fa19090e8371c))
+
 ## [0.6.1](https://github.com/defenseunicorns/go-oscal/compare/v0.6.0...v0.6.1) (2024-11-21)
 
 
