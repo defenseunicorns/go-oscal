@@ -257,6 +257,12 @@ Example:
 	Output: FooID
 */
 func FmtFieldName(s string) string {
+
+	// Handle definitions that include #/definitions/<modeltype>:<fieldname>
+	if strings.Contains(s, ":") {
+		s = strings.Split(s, ":")[1]
+	}
+
 	runes := []rune(s)
 	for len(runes) > 0 && !unicode.IsLetter(runes[0]) && !unicode.IsDigit(runes[0]) {
 		runes = runes[1:]
