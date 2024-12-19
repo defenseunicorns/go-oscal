@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.6.3](https://github.com/defenseunicorns/go-oscal/compare/v0.6.2...v0.6.3) (2024-12-19)
+
+
+### Miscellaneous
+
+* **deps:** update actions/setup-go action to v5.2.0 ([#336](https://github.com/defenseunicorns/go-oscal/issues/336)) ([f267c7c](https://github.com/defenseunicorns/go-oscal/commit/f267c7c5532026c23fc5d685007aaa60380c7322))
+* **deps:** update actions/upload-artifact action to v4.5.0 ([#339](https://github.com/defenseunicorns/go-oscal/issues/339)) ([dc1da31](https://github.com/defenseunicorns/go-oscal/commit/dc1da314767379e0a57817a9199b6d41cd1da1d9))
+* **deps:** update anchore/sbom-action action to v0.17.9 ([#337](https://github.com/defenseunicorns/go-oscal/issues/337)) ([9ed9264](https://github.com/defenseunicorns/go-oscal/commit/9ed9264e9881f4bac37f57e36d095dac0e57e181))
+* **deps:** update dependency commitlint to v19.6.1 ([#338](https://github.com/defenseunicorns/go-oscal/issues/338)) ([54947ed](https://github.com/defenseunicorns/go-oscal/commit/54947ed077368b03a0fed6e6c8794d6b6067435a))
+* **deps:** update github/codeql-action action to v3.27.9 ([#335](https://github.com/defenseunicorns/go-oscal/issues/335)) ([30392d9](https://github.com/defenseunicorns/go-oscal/commit/30392d988a27d720c01588db252a57bb6c9e6659))
+
 ## [0.6.2](https://github.com/defenseunicorns/go-oscal/compare/v0.6.1...v0.6.2) (2024-12-03)
 
 
