@@ -2,6 +2,10 @@
 
 ## [0.6.3](https://github.com/defenseunicorns/go-oscal/compare/v0.6.2...v0.6.3) (2025-08-13)
 
+This release adds some minor fixes to CI and project management - otherwise is primarily dependency updates. 
+
+No user facing changes.
+
 
 ### Bug Fixes
 
