@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.4](https://github.com/defenseunicorns/go-oscal/compare/v0.6.3...v0.6.4) (2025-08-14)
+
+
+### Miscellaneous
+
+* **deps:** update anchore/sbom-action action to v0.20.5 ([#366](https://github.com/defenseunicorns/go-oscal/issues/366)) ([9144a47](https://github.com/defenseunicorns/go-oscal/commit/9144a47b07dd80e388363cc84234bc55b77c522f))
+* **deps:** update goreleaser/goreleaser-action action to v6.4.0 ([#365](https://github.com/defenseunicorns/go-oscal/issues/365)) ([8608d65](https://github.com/defenseunicorns/go-oscal/commit/8608d654703e9c7e12c670f4f90b54df16a8d2a3))
+
 ## [0.6.3](https://github.com/defenseunicorns/go-oscal/compare/v0.6.2...v0.6.3) (2025-08-13)
 
 This release adds some minor fixes to CI and project management - otherwise is primarily dependency updates. 
