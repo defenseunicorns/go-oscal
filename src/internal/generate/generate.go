@@ -73,7 +73,7 @@ func Generate(oscalSchema []byte, pkgName string, tags []string) (typeBytes []by
 		if err != nil {
 			return typeBytes, err
 		}
-		typeString += fmt.Sprintf("const OSCAL_VERSION = %s/n", version)
+		typeString += fmt.Sprintf("const Version = %q\n", version)
 	}
 
 	// Add the struct definitions in order of creation.
