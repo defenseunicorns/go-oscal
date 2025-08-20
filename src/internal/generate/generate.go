@@ -68,13 +68,15 @@ func Generate(oscalSchema []byte, pkgName string, tags []string) (typeBytes []by
 
 	// Parse the schema ID for the version reference
 	schemaId := schema.ID
-	if schemaId != nil {
-		version, err := extractVersion(*schemaId)
-		if err != nil {
-			return typeBytes, err
-		}
-		typeString += fmt.Sprintf("const Version = %q\n", version)
+	if schemaId == nil {
+		return typeBytes, fmt.Errorf("unable to find $id in schema")
 	}
+
+	version, err := extractVersion(*schemaId)
+	if err != nil {
+		return typeBytes, err
+	}
+	typeString += fmt.Sprintf("const Version = %q\n", version)
 
 	// Add the struct definitions in order of creation.
 	for _, ref := range config.refQueue.History() {
