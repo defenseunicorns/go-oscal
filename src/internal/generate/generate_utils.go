@@ -1,7 +1,9 @@
 package generate
 
 import (
+	"errors"
 	"fmt"
+	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
@@ -401,4 +403,25 @@ func buildImportString() string {
 	}
 	imports += ")\n"
 	return imports
+}
+
+// extractVersion parses a URL/string and returns the first x.y.z version it finds.
+func extractVersion(raw string) (string, error) {
+	u, err := url.Parse(raw)
+	if err != nil {
+		return "", err
+	}
+
+	// Match MAJOR.MINOR.PATCH (e.g., 1.1.3)
+	re := regexp.MustCompile(`\b\d+\.\d+\.\d+\b`)
+
+	// Search the path first; fall back to the whole string just in case.
+	if m := re.FindString(u.Path); m != "" {
+		return m, nil
+	}
+	if m := re.FindString(raw); m != "" {
+		return m, nil
+	}
+
+	return "", errors.New("version not found")
 }

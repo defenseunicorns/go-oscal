@@ -10,7 +10,7 @@ BINDIR       := $(CURDIR)/bin
 BINNAME      ?= go-oscal
 INSTALL_PATH ?= /usr/local/bin
 # This should be replaced with the latest version of the OSCAL schema.
-OSCAL_LATEST ?= 1-1-1
+OSCAL_LATEST ?= 1-1-3
 # This should be replaced with the path to the latest oscal complete json schema associated with OSCAL_LATEST.
 UNDOCTORED_SCHEMA ?= testdata/doctor/oscal_complete_schema-1-1-1.json
 OSCAL_LATEST_SCHEMA := src/internal/schemas/oscal_complete_schema-$(OSCAL_LATEST).json
@@ -87,4 +87,4 @@ doctor-latest-schema: clean build
 
 .PHONY: generate-latest
 generate-latest-schema: clean build
-	$(BINDIR)/$(BINNAME) generate -f $(OSCAL_LATEST_SCHEMA) --pkg $(OSCAL_LATEST_PACKAGE) --tags json,yaml -o $(OSCAL_LATEST_OUTPUT)/types.go
+	$(BINDIR)/$(BINNAME) generate -f $(OSCAL_LATEST_SCHEMA) --pkg $(OSCAL_LATEST_PACKAGE) --tags json,yaml -o $(OSCAL_LATEST_OUTPUT)types.go
