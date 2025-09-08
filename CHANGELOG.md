@@ -1,11 +1,11 @@
 # Changelog
 
-## [0.6.4](https://github.com/defenseunicorns/go-oscal/compare/v0.6.3...v0.6.4) (2025-09-08)
+## [0.7.0](https://github.com/defenseunicorns/go-oscal/compare/v0.6.3...v0.7.0) (2025-09-08)
 
 
 ### Features
 
-* **types:** add version constant to types ([#368](https://github.com/defenseunicorns/go-oscal/issues/368)) ([2085e33](https://github.com/defenseunicorns/go-oscal/commit/2085e3355a40ca027891b01d5dac14532f7c2a92))
+* **feat:** add version constant to types ([#368](https://github.com/defenseunicorns/go-oscal/issues/368)) ([2085e33](https://github.com/defenseunicorns/go-oscal/commit/2085e3355a40ca027891b01d5dac14532f7c2a92))
 
 
 ### Miscellaneous
