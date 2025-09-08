@@ -19,6 +19,8 @@ import (
 	"time"
 )
 
+const Version = "1.1.0"
+
 type OscalModels = OscalCompleteSchema
 type OscalCompleteSchema struct {
 	AssessmentPlan            *AssessmentPlan            `json:"assessment-plan,omitempty" yaml:"assessment-plan,omitempty"`
