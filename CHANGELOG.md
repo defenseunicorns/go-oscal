@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.7.0](https://github.com/defenseunicorns/go-oscal/compare/v0.6.3...v0.7.0) (2025-09-08)
+
+
+### Features
+
+* **feat:** add version constant to types ([#368](https://github.com/defenseunicorns/go-oscal/issues/368)) ([2085e33](https://github.com/defenseunicorns/go-oscal/commit/2085e3355a40ca027891b01d5dac14532f7c2a92))
+
+
+### Miscellaneous
+
+* **deps:** update actions/github-script action to v8 ([#376](https://github.com/defenseunicorns/go-oscal/issues/376)) ([637e32e](https://github.com/defenseunicorns/go-oscal/commit/637e32ebfa1cf33eeee69c6aa84725fc8b9675a6))
+* **deps:** update actions/setup-go action to v6 ([#373](https://github.com/defenseunicorns/go-oscal/issues/373)) ([26d5ac8](https://github.com/defenseunicorns/go-oscal/commit/26d5ac8dd8cad42cbf907297304cfe13bcc1ee81))
+* **deps:** update actions/setup-node action to v5 ([#374](https://github.com/defenseunicorns/go-oscal/issues/374)) ([786d7aa](https://github.com/defenseunicorns/go-oscal/commit/786d7aa9753a1671e688c6a49a5e5fb0dd8f4e08))
+* **deps:** update anchore/sbom-action action to v0.20.5 ([#366](https://github.com/defenseunicorns/go-oscal/issues/366)) ([9144a47](https://github.com/defenseunicorns/go-oscal/commit/9144a47b07dd80e388363cc84234bc55b77c522f))
+* **deps:** update github/codeql-action action to v3.29.10 ([#367](https://github.com/defenseunicorns/go-oscal/issues/367)) ([659a426](https://github.com/defenseunicorns/go-oscal/commit/659a4268e5a6f64a262c8d219a941f090c28f8d1))
+* **deps:** update github/codeql-action action to v3.29.11 ([#370](https://github.com/defenseunicorns/go-oscal/issues/370)) ([5a94113](https://github.com/defenseunicorns/go-oscal/commit/5a94113250cabb2fc45c65e1b5355038a026b156))
+* **deps:** update github/codeql-action action to v3.30.1 ([#371](https://github.com/defenseunicorns/go-oscal/issues/371)) ([3924ff0](https://github.com/defenseunicorns/go-oscal/commit/3924ff0fbeac115dae5063ef320d91a097906d21))
+* **deps:** update googleapis/release-please-action action to v4.3.0 ([#369](https://github.com/defenseunicorns/go-oscal/issues/369)) ([14a6646](https://github.com/defenseunicorns/go-oscal/commit/14a66464feb82485f78aff6099f51244b2ff850c))
+* **deps:** update goreleaser/goreleaser-action action to v6.4.0 ([#365](https://github.com/defenseunicorns/go-oscal/issues/365)) ([8608d65](https://github.com/defenseunicorns/go-oscal/commit/8608d654703e9c7e12c670f4f90b54df16a8d2a3))
+* **deps:** update module github.com/spf13/cobra to v1.10.1 ([#372](https://github.com/defenseunicorns/go-oscal/issues/372)) ([62ef02b](https://github.com/defenseunicorns/go-oscal/commit/62ef02be1bcf6bd24de3394e83b9fbc34078fc32))
+
 ## [0.6.3](https://github.com/defenseunicorns/go-oscal/compare/v0.6.2...v0.6.3) (2025-08-13)
 
 This release adds some minor fixes to CI and project management - otherwise is primarily dependency updates. 
