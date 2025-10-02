@@ -1,10 +1,10 @@
-* @defenseunicorns/lula-dev 
+* @brandtkeller @meganwolf0
 
 # Privileged pipeline files
-/.github/ @mike-winberry @brandtkeller @CloudBeard
-/.gitignore @mike-winberry @brandtkeller @CloudBeard
-/.goreleaser.yml @mike-winberry @brandtkeller @CloudBeard
+/.github/ @brandtkeller @meganwolf0
+/.gitignore @brandtkeller @meganwolf0
+/.goreleaser.yml @brandtkeller @meganwolf0
 
 # Additional privileged files
-/CODEOWNERS @mike-winberry @brandtkeller
-/LICENSE @mike-winberry @brandtkeller
+/CODEOWNERS @jeff-mccoy @daveworth
+/LICENSE @jeff-mccoy @austenbryan
