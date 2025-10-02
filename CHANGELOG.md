@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.7.1](https://github.com/defenseunicorns/go-oscal/compare/v0.7.0...v0.7.1) (2025-10-02)
+
+
+### Miscellaneous
+
+* **deps:** update anchore/sbom-action action to v0.20.6 ([#379](https://github.com/defenseunicorns/go-oscal/issues/379)) ([0be9d31](https://github.com/defenseunicorns/go-oscal/commit/0be9d3182c942a669c773d7dfb96fdfe5fc17c09))
+* **deps:** update dependency @commitlint/config-conventional to v20 ([#380](https://github.com/defenseunicorns/go-oscal/issues/380)) ([7d30c17](https://github.com/defenseunicorns/go-oscal/commit/7d30c1763b66f9ac4d121d7df5b8270032d23b3b))
+* **deps:** update dependency commitlint to v20 ([#381](https://github.com/defenseunicorns/go-oscal/issues/381)) ([b21ddb5](https://github.com/defenseunicorns/go-oscal/commit/b21ddb5644de53bb3b79d4fabdb642a30a7ed38a))
+* **deps:** update dependency commitlint to v20.1.0 ([#383](https://github.com/defenseunicorns/go-oscal/issues/383)) ([077373b](https://github.com/defenseunicorns/go-oscal/commit/077373be54ab430b838f7cbb5063f455ff5f65c2))
+* **deps:** update github/codeql-action action to v3.30.4 ([#377](https://github.com/defenseunicorns/go-oscal/issues/377)) ([1ad5a4e](https://github.com/defenseunicorns/go-oscal/commit/1ad5a4ec544614aa3c720db3bb325fdebe714a3d))
+* **deps:** update github/codeql-action action to v3.30.5 ([#382](https://github.com/defenseunicorns/go-oscal/issues/382)) ([29fb5dd](https://github.com/defenseunicorns/go-oscal/commit/29fb5dd0d6cc0c1ce0cd9007619e60d689a62938))
+* **deps:** update ossf/scorecard-action action to v2.4.3 ([#384](https://github.com/defenseunicorns/go-oscal/issues/384)) ([4ff14f1](https://github.com/defenseunicorns/go-oscal/commit/4ff14f1a533aa0d4f29712f756e54452a87d06a2))
+* update codeowners ([#386](https://github.com/defenseunicorns/go-oscal/issues/386)) ([6a1dac9](https://github.com/defenseunicorns/go-oscal/commit/6a1dac9c81e1dab4467bdc9937fe61e793ac8842))
+
 ## [0.7.0](https://github.com/defenseunicorns/go-oscal/compare/v0.6.3...v0.7.0) (2025-09-08)
 
 
