@@ -18,19 +18,16 @@
         "pin",
         "digest"
       ],
-      "automerge": true,
-      "automergeType": "pr"
+      "automerge": false
     },
     {
       "matchDepTypes": [
         "devDependencies"
       ],
-      "automerge": true,
-      "automergeType": "pr"
+      "automerge": false
     }
   ],
-  "platformAutomerge": true,
-  "platformCommit": true,
+  "platformAutomerge": false,
   "postUpdateOptions": [
     "gomodTidy"
   ],
