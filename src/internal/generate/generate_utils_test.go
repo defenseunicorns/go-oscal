@@ -333,3 +333,121 @@ func TestGetCustomTypeKey(t *testing.T) {
 		}
 	}
 }
+
+func TestFormatDescription(t *testing.T) {
+	t.Parallel()
+
+	t.Run("returns formatted comment from description", func(t *testing.T) {
+		t.Parallel()
+		desc := "A catalog of security controls."
+		result := formatDescription(&desc, nil, "")
+		expected := "// A catalog of security controls.\n"
+		if result != expected {
+			t.Errorf("expected %q, got %q", expected, result)
+		}
+	})
+
+	t.Run("falls back to title if no description", func(t *testing.T) {
+		t.Parallel()
+		title := "Security Catalog"
+		result := formatDescription(nil, &title, "")
+		expected := "// Security Catalog\n"
+		if result != expected {
+			t.Errorf("expected %q, got %q", expected, result)
+		}
+	})
+
+	t.Run("prefers description over title", func(t *testing.T) {
+		t.Parallel()
+		desc := "A catalog of security controls."
+		title := "Security Catalog"
+		result := formatDescription(&desc, &title, "")
+		expected := "// A catalog of security controls.\n"
+		if result != expected {
+			t.Errorf("expected %q, got %q", expected, result)
+		}
+	})
+
+	t.Run("returns empty for nil description and title", func(t *testing.T) {
+		t.Parallel()
+		result := formatDescription(nil, nil, "")
+		if result != "" {
+			t.Errorf("expected empty, got %q", result)
+		}
+	})
+
+	t.Run("returns empty for empty description and title", func(t *testing.T) {
+		t.Parallel()
+		empty := ""
+		result := formatDescription(&empty, &empty, "")
+		if result != "" {
+			t.Errorf("expected empty, got %q", result)
+		}
+	})
+
+	t.Run("adds prefix to each line", func(t *testing.T) {
+		t.Parallel()
+		desc := "A field description."
+		result := formatDescription(&desc, nil, "\t")
+		expected := "\t// A field description.\n"
+		if result != expected {
+			t.Errorf("expected %q, got %q", expected, result)
+		}
+	})
+
+	t.Run("wraps long descriptions", func(t *testing.T) {
+		t.Parallel()
+		desc := "This is a very long description that should be wrapped across multiple lines because it exceeds the maximum line width of seventy-seven characters."
+		result := formatDescription(&desc, nil, "")
+		// Should contain multiple lines
+		if len(result) == 0 {
+			t.Errorf("expected non-empty result")
+		}
+		// Should start with comment prefix
+		if result[:3] != "// " {
+			t.Errorf("expected result to start with '// ', got %q", result[:3])
+		}
+	})
+}
+
+func TestWrapText(t *testing.T) {
+	t.Parallel()
+
+	t.Run("returns single line for short text", func(t *testing.T) {
+		t.Parallel()
+		result := wrapText("Short text", 80)
+		if len(result) != 1 {
+			t.Errorf("expected 1 line, got %d", len(result))
+		}
+		if result[0] != "Short text" {
+			t.Errorf("expected 'Short text', got %q", result[0])
+		}
+	})
+
+	t.Run("wraps at word boundary", func(t *testing.T) {
+		t.Parallel()
+		result := wrapText("This is a test", 10)
+		if len(result) < 2 {
+			t.Errorf("expected multiple lines, got %d", len(result))
+		}
+	})
+
+	t.Run("handles empty text", func(t *testing.T) {
+		t.Parallel()
+		result := wrapText("", 80)
+		if len(result) != 0 {
+			t.Errorf("expected 0 lines, got %d", len(result))
+		}
+	})
+
+	t.Run("handles single word longer than max width", func(t *testing.T) {
+		t.Parallel()
+		result := wrapText("superlongword", 5)
+		if len(result) != 1 {
+			t.Errorf("expected 1 line, got %d", len(result))
+		}
+		if result[0] != "superlongword" {
+			t.Errorf("expected 'superlongword', got %q", result[0])
+		}
+	})
+}

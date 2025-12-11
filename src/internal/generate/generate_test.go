@@ -100,10 +100,21 @@ func TestBuildStructs(t *testing.T) {
 		var structMap = map[string]string{}
 		duplicates := []string{}
 		for k, value := range config.structMap {
-			firstLine := strings.ReplaceAll(strings.Split(value, "\n")[0], " ", "")
-			mapValue := structMap[firstLine]
+			// Find the first line that contains the type declaration (skip comment lines)
+			var typeLine string
+			for _, line := range strings.Split(value, "\n") {
+				trimmed := strings.TrimSpace(line)
+				if strings.HasPrefix(trimmed, "type ") || strings.HasPrefix(trimmed, "type\t") {
+					typeLine = strings.ReplaceAll(line, " ", "")
+					break
+				}
+			}
+			if typeLine == "" {
+				continue
+			}
+			mapValue := structMap[typeLine]
 			if mapValue == "" {
-				structMap[firstLine] = k
+				structMap[typeLine] = k
 				continue
 			}
 

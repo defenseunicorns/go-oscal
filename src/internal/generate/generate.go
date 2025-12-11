@@ -180,7 +180,11 @@ func (c *GeneratorConfig) buildStructString(def jsonschema.Schema) (structString
 
 	// If there are no properties, return a map[string]interface{} type
 	if len(keys) == 0 {
-		structString = fmt.Sprintf("type %s = map[string]interface{}", name)
+		// Add doc comment from description for type alias
+		if comment := formatDescription(def.Description, def.Title, ""); comment != "" {
+			structString += comment
+		}
+		structString += fmt.Sprintf("type %s = map[string]interface{}", name)
 		return structString, err
 	}
 
@@ -189,6 +193,11 @@ func (c *GeneratorConfig) buildStructString(def jsonschema.Schema) (structString
 		for _, alias := range aliases {
 			structString += fmt.Sprintf("type %s = %s\n", alias, name)
 		}
+	}
+
+	// Add struct doc comment from description
+	if comment := formatDescription(def.Description, def.Title, ""); comment != "" {
+		structString += comment
 	}
 
 	// Add top level struct definition
@@ -213,6 +222,12 @@ func (c *GeneratorConfig) buildStructString(def jsonschema.Schema) (structString
 
 		propType = addPointerIfOptionalNonPrimitive(required[key], propType)
 		propTags := buildTagString(c.tags, key, required[key])
+
+		// Add field doc comment from description
+		if fieldComment := formatDescription(propSchema.Description, propSchema.Title, "\t"); fieldComment != "" {
+			structString += fieldComment
+		}
+
 		structString += fmt.Sprintf("\t%s %s %s\n", propName, propType, propTags)
 	}
 	// Close the struct

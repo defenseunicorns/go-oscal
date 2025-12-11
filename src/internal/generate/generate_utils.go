@@ -425,3 +425,63 @@ func extractVersion(raw string) (string, error) {
 
 	return "", errors.New("version not found")
 }
+
+// formatDescription formats a schema description as a Go doc comment.
+// Returns empty string if no description is available.
+// The prefix parameter is prepended to each line (e.g., "\t" for field comments).
+func formatDescription(description *string, title *string, prefix string) string {
+	var text string
+	if description != nil && *description != "" {
+		text = *description
+	} else if title != nil && *title != "" {
+		text = *title
+	} else {
+		return ""
+	}
+
+	// Clean up the text
+	text = strings.TrimSpace(text)
+
+	// Calculate max line width (accounting for prefix and "// ")
+	maxWidth := 77 - len(prefix)
+	if maxWidth < 40 {
+		maxWidth = 40
+	}
+
+	lines := wrapText(text, maxWidth)
+
+	var result strings.Builder
+	for _, line := range lines {
+		result.WriteString(prefix)
+		result.WriteString("// ")
+		result.WriteString(line)
+		result.WriteString("\n")
+	}
+	return result.String()
+}
+
+// wrapText wraps text at the specified width, breaking at word boundaries.
+func wrapText(text string, maxWidth int) []string {
+	if maxWidth <= 0 {
+		maxWidth = 77
+	}
+
+	var lines []string
+	words := strings.Fields(text)
+	if len(words) == 0 {
+		return lines
+	}
+
+	currentLine := words[0]
+	for _, word := range words[1:] {
+		if len(currentLine)+1+len(word) <= maxWidth {
+			currentLine += " " + word
+		} else {
+			lines = append(lines, currentLine)
+			currentLine = word
+		}
+	}
+	lines = append(lines, currentLine)
+
+	return lines
+}
