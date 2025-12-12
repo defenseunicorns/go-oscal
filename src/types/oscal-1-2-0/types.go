@@ -118,7 +118,16 @@ type AssessmentAssets struct {
 	Components          *[]SystemComponent   `json:"components,omitempty" yaml:"components,omitempty"`
 }
 
-type AssessmentSubject = map[string]interface{}
+type AssessmentSubject struct {
+	Description     string               `json:"description,omitempty" yaml:"description,omitempty"`
+	ExcludeSubjects *[]SelectSubjectById `json:"exclude-subjects,omitempty" yaml:"exclude-subjects,omitempty"`
+	IncludeAll      *IncludeAll          `json:"include-all,omitempty" yaml:"include-all,omitempty"`
+	IncludeSubjects *[]SelectSubjectById `json:"include-subjects,omitempty" yaml:"include-subjects,omitempty"`
+	Links           *[]Link              `json:"links,omitempty" yaml:"links,omitempty"`
+	Props           *[]Property          `json:"props,omitempty" yaml:"props,omitempty"`
+	Remarks         string               `json:"remarks,omitempty" yaml:"remarks,omitempty"`
+	Type            string               `json:"type,omitempty" yaml:"type,omitempty"`
+}
 
 type BackMatter struct {
 	Resources *[]Resource `json:"resources,omitempty" yaml:"resources,omitempty"`
@@ -219,9 +228,32 @@ type Control struct {
 	Title    string       `json:"title" yaml:"title"`
 }
 
-type Group = map[string]interface{}
+type Group struct {
+	Class    string       `json:"class,omitempty" yaml:"class,omitempty"`
+	Controls *[]Control   `json:"controls,omitempty" yaml:"controls,omitempty"`
+	Groups   *[]Group     `json:"groups,omitempty" yaml:"groups,omitempty"`
+	ID       string       `json:"id,omitempty" yaml:"id,omitempty"`
+	Links    *[]Link      `json:"links,omitempty" yaml:"links,omitempty"`
+	Params   *[]Parameter `json:"params,omitempty" yaml:"params,omitempty"`
+	Parts    *[]Part      `json:"parts,omitempty" yaml:"parts,omitempty"`
+	Props    *[]Property  `json:"props,omitempty" yaml:"props,omitempty"`
+	Title    string       `json:"title,omitempty" yaml:"title,omitempty"`
+}
 
-type Parameter = map[string]interface{}
+type Parameter struct {
+	Class       string                 `json:"class,omitempty" yaml:"class,omitempty"`
+	Constraints *[]ParameterConstraint `json:"constraints,omitempty" yaml:"constraints,omitempty"`
+	DependsOn   string                 `json:"depends-on,omitempty" yaml:"depends-on,omitempty"`
+	Guidelines  *[]ParameterGuideline  `json:"guidelines,omitempty" yaml:"guidelines,omitempty"`
+	ID          string                 `json:"id,omitempty" yaml:"id,omitempty"`
+	Label       string                 `json:"label,omitempty" yaml:"label,omitempty"`
+	Links       *[]Link                `json:"links,omitempty" yaml:"links,omitempty"`
+	Props       *[]Property            `json:"props,omitempty" yaml:"props,omitempty"`
+	Remarks     string                 `json:"remarks,omitempty" yaml:"remarks,omitempty"`
+	Select      *ParameterSelection    `json:"select,omitempty" yaml:"select,omitempty"`
+	Usage       string                 `json:"usage,omitempty" yaml:"usage,omitempty"`
+	Values      *[]string              `json:"values,omitempty" yaml:"values,omitempty"`
+}
 
 type Capability struct {
 	ControlImplementations *[]ControlImplementationSet `json:"control-implementations,omitempty" yaml:"control-implementations,omitempty"`
@@ -354,9 +386,19 @@ type SystemId struct {
 	IdentifierType string `json:"identifier-type,omitempty" yaml:"identifier-type,omitempty"`
 }
 
-type Import = map[string]interface{}
+type Import struct {
+	ExcludeControls *[]SelectControlById `json:"exclude-controls,omitempty" yaml:"exclude-controls,omitempty"`
+	Href            string               `json:"href,omitempty" yaml:"href,omitempty"`
+	IncludeAll      *IncludeAll          `json:"include-all,omitempty" yaml:"include-all,omitempty"`
+	IncludeControls *[]SelectControlById `json:"include-controls,omitempty" yaml:"include-controls,omitempty"`
+}
 
-type Merge = map[string]interface{}
+type Merge struct {
+	AsIs    bool                 `json:"as-is,omitempty" yaml:"as-is,omitempty"`
+	Combine *CombinationRule     `json:"combine,omitempty" yaml:"combine,omitempty"`
+	Custom  *CustomGrouping      `json:"custom,omitempty" yaml:"custom,omitempty"`
+	Flat    *FlatWithoutGrouping `json:"flat,omitempty" yaml:"flat,omitempty"`
+}
 
 type Modify struct {
 	Alters        *[]Alteration       `json:"alters,omitempty" yaml:"alters,omitempty"`
@@ -424,6 +466,34 @@ type SystemComponent struct {
 	Title            string                `json:"title" yaml:"title"`
 	Type             string                `json:"type" yaml:"type"`
 	UUID             string                `json:"uuid" yaml:"uuid"`
+}
+
+type SelectSubjectById struct {
+	Links       *[]Link     `json:"links,omitempty" yaml:"links,omitempty"`
+	Props       *[]Property `json:"props,omitempty" yaml:"props,omitempty"`
+	Remarks     string      `json:"remarks,omitempty" yaml:"remarks,omitempty"`
+	SubjectUuid string      `json:"subject-uuid" yaml:"subject-uuid"`
+	Type        string      `json:"type" yaml:"type"`
+}
+
+type IncludeAll = map[string]interface{}
+
+type Link struct {
+	Href             string `json:"href" yaml:"href"`
+	MediaType        string `json:"media-type,omitempty" yaml:"media-type,omitempty"`
+	Rel              string `json:"rel,omitempty" yaml:"rel,omitempty"`
+	ResourceFragment string `json:"resource-fragment,omitempty" yaml:"resource-fragment,omitempty"`
+	Text             string `json:"text,omitempty" yaml:"text,omitempty"`
+}
+
+type Property struct {
+	Class   string `json:"class,omitempty" yaml:"class,omitempty"`
+	Group   string `json:"group,omitempty" yaml:"group,omitempty"`
+	Name    string `json:"name" yaml:"name"`
+	Ns      string `json:"ns,omitempty" yaml:"ns,omitempty"`
+	Remarks string `json:"remarks,omitempty" yaml:"remarks,omitempty"`
+	UUID    string `json:"uuid,omitempty" yaml:"uuid,omitempty"`
+	Value   string `json:"value" yaml:"value"`
 }
 
 type Resource struct {
@@ -497,14 +567,6 @@ type DocumentId struct {
 	Scheme     string `json:"scheme,omitempty" yaml:"scheme,omitempty"`
 }
 
-type Link struct {
-	Href             string `json:"href" yaml:"href"`
-	MediaType        string `json:"media-type,omitempty" yaml:"media-type,omitempty"`
-	Rel              string `json:"rel,omitempty" yaml:"rel,omitempty"`
-	ResourceFragment string `json:"resource-fragment,omitempty" yaml:"resource-fragment,omitempty"`
-	Text             string `json:"text,omitempty" yaml:"text,omitempty"`
-}
-
 type Location struct {
 	Address          *Address           `json:"address,omitempty" yaml:"address,omitempty"`
 	EmailAddresses   *[]string          `json:"email-addresses,omitempty" yaml:"email-addresses,omitempty"`
@@ -517,16 +579,20 @@ type Location struct {
 	UUID             string             `json:"uuid" yaml:"uuid"`
 }
 
-type Party = map[string]interface{}
-
-type Property struct {
-	Class   string `json:"class,omitempty" yaml:"class,omitempty"`
-	Group   string `json:"group,omitempty" yaml:"group,omitempty"`
-	Name    string `json:"name" yaml:"name"`
-	Ns      string `json:"ns,omitempty" yaml:"ns,omitempty"`
-	Remarks string `json:"remarks,omitempty" yaml:"remarks,omitempty"`
-	UUID    string `json:"uuid,omitempty" yaml:"uuid,omitempty"`
-	Value   string `json:"value" yaml:"value"`
+type Party struct {
+	Addresses             *[]Address                 `json:"addresses,omitempty" yaml:"addresses,omitempty"`
+	EmailAddresses        *[]string                  `json:"email-addresses,omitempty" yaml:"email-addresses,omitempty"`
+	ExternalIds           *[]PartyExternalIdentifier `json:"external-ids,omitempty" yaml:"external-ids,omitempty"`
+	Links                 *[]Link                    `json:"links,omitempty" yaml:"links,omitempty"`
+	LocationUuids         *[]string                  `json:"location-uuids,omitempty" yaml:"location-uuids,omitempty"`
+	MemberOfOrganizations *[]string                  `json:"member-of-organizations,omitempty" yaml:"member-of-organizations,omitempty"`
+	Name                  string                     `json:"name,omitempty" yaml:"name,omitempty"`
+	Props                 *[]Property                `json:"props,omitempty" yaml:"props,omitempty"`
+	Remarks               string                     `json:"remarks,omitempty" yaml:"remarks,omitempty"`
+	ShortName             string                     `json:"short-name,omitempty" yaml:"short-name,omitempty"`
+	TelephoneNumbers      *[]TelephoneNumber         `json:"telephone-numbers,omitempty" yaml:"telephone-numbers,omitempty"`
+	Type                  string                     `json:"type,omitempty" yaml:"type,omitempty"`
+	UUID                  string                     `json:"uuid,omitempty" yaml:"uuid,omitempty"`
 }
 
 type ResponsibleParty struct {
@@ -558,9 +624,25 @@ type Role struct {
 	Title       string      `json:"title" yaml:"title"`
 }
 
-type ReferencedControlObjectives = map[string]interface{}
+type ReferencedControlObjectives struct {
+	Description       string                 `json:"description,omitempty" yaml:"description,omitempty"`
+	ExcludeObjectives *[]SelectObjectiveById `json:"exclude-objectives,omitempty" yaml:"exclude-objectives,omitempty"`
+	IncludeAll        *IncludeAll            `json:"include-all,omitempty" yaml:"include-all,omitempty"`
+	IncludeObjectives *[]SelectObjectiveById `json:"include-objectives,omitempty" yaml:"include-objectives,omitempty"`
+	Links             *[]Link                `json:"links,omitempty" yaml:"links,omitempty"`
+	Props             *[]Property            `json:"props,omitempty" yaml:"props,omitempty"`
+	Remarks           string                 `json:"remarks,omitempty" yaml:"remarks,omitempty"`
+}
 
-type AssessedControls = map[string]interface{}
+type AssessedControls struct {
+	Description     string                               `json:"description,omitempty" yaml:"description,omitempty"`
+	ExcludeControls *[]AssessedControlsSelectControlById `json:"exclude-controls,omitempty" yaml:"exclude-controls,omitempty"`
+	IncludeAll      *IncludeAll                          `json:"include-all,omitempty" yaml:"include-all,omitempty"`
+	IncludeControls *[]AssessedControlsSelectControlById `json:"include-controls,omitempty" yaml:"include-controls,omitempty"`
+	Links           *[]Link                              `json:"links,omitempty" yaml:"links,omitempty"`
+	Props           *[]Property                          `json:"props,omitempty" yaml:"props,omitempty"`
+	Remarks         string                               `json:"remarks,omitempty" yaml:"remarks,omitempty"`
+}
 
 type AssociatedActivity struct {
 	ActivityUuid     string              `json:"activity-uuid" yaml:"activity-uuid"`
@@ -584,7 +666,11 @@ type ResponsibleRole struct {
 	RoleId     string      `json:"role-id" yaml:"role-id"`
 }
 
-type EventTiming = map[string]interface{}
+type EventTiming struct {
+	AtFrequency     *FrequencyCondition   `json:"at-frequency,omitempty" yaml:"at-frequency,omitempty"`
+	OnDate          *OnDateCondition      `json:"on-date,omitempty" yaml:"on-date,omitempty"`
+	WithinDateRange *OnDateRangeCondition `json:"within-date-range,omitempty" yaml:"within-date-range,omitempty"`
+}
 
 type AssessmentPart struct {
 	Class string            `json:"class,omitempty" yaml:"class,omitempty"`
@@ -617,6 +703,20 @@ type Part struct {
 	Props *[]Property `json:"props,omitempty" yaml:"props,omitempty"`
 	Prose string      `json:"prose,omitempty" yaml:"prose,omitempty"`
 	Title string      `json:"title,omitempty" yaml:"title,omitempty"`
+}
+
+type ParameterConstraint struct {
+	Description string            `json:"description,omitempty" yaml:"description,omitempty"`
+	Tests       *[]ConstraintTest `json:"tests,omitempty" yaml:"tests,omitempty"`
+}
+
+type ParameterGuideline struct {
+	Prose string `json:"prose" yaml:"prose"`
+}
+
+type ParameterSelection struct {
+	Choice  *[]string `json:"choice,omitempty" yaml:"choice,omitempty"`
+	HowMany string    `json:"how-many,omitempty" yaml:"how-many,omitempty"`
 }
 
 type ControlImplementationSet struct {
@@ -668,8 +768,8 @@ type Map struct {
 }
 
 type GapSummary struct {
-	UnmappedControls []SelectControlById `json:"unmapped-controls" yaml:"unmapped-controls"`
-	UUID             string              `json:"uuid" yaml:"uuid"`
+	UnmappedControls []GapSummarySelectControlById `json:"unmapped-controls" yaml:"unmapped-controls"`
+	UUID             string                        `json:"uuid" yaml:"uuid"`
 }
 
 type MappingResourceReference struct {
@@ -764,13 +864,40 @@ type ThreatId struct {
 	System string `json:"system" yaml:"system"`
 }
 
+type SelectControlById struct {
+	Matching          *[]Matching `json:"matching,omitempty" yaml:"matching,omitempty"`
+	WithChildControls string      `json:"with-child-controls,omitempty" yaml:"with-child-controls,omitempty"`
+	WithIds           *[]string   `json:"with-ids,omitempty" yaml:"with-ids,omitempty"`
+}
+
+type CombinationRule = map[string]interface{}
+
+type CustomGrouping struct {
+	Groups         *[]CustomGroupingGroup `json:"groups,omitempty" yaml:"groups,omitempty"`
+	InsertControls *[]InsertControls      `json:"insert-controls,omitempty" yaml:"insert-controls,omitempty"`
+}
+
+type FlatWithoutGrouping = map[string]interface{}
+
 type Alteration struct {
 	Adds      *[]Addition `json:"adds,omitempty" yaml:"adds,omitempty"`
 	ControlId string      `json:"control-id" yaml:"control-id"`
 	Removes   *[]Removal  `json:"removes,omitempty" yaml:"removes,omitempty"`
 }
 
-type ParameterSetting = map[string]interface{}
+type ParameterSetting struct {
+	Class       string                 `json:"class,omitempty" yaml:"class,omitempty"`
+	Constraints *[]ParameterConstraint `json:"constraints,omitempty" yaml:"constraints,omitempty"`
+	DependsOn   string                 `json:"depends-on,omitempty" yaml:"depends-on,omitempty"`
+	Guidelines  *[]ParameterGuideline  `json:"guidelines,omitempty" yaml:"guidelines,omitempty"`
+	Label       string                 `json:"label,omitempty" yaml:"label,omitempty"`
+	Links       *[]Link                `json:"links,omitempty" yaml:"links,omitempty"`
+	ParamId     string                 `json:"param-id,omitempty" yaml:"param-id,omitempty"`
+	Props       *[]Property            `json:"props,omitempty" yaml:"props,omitempty"`
+	Select      *ParameterSelection    `json:"select,omitempty" yaml:"select,omitempty"`
+	Usage       string                 `json:"usage,omitempty" yaml:"usage,omitempty"`
+	Values      *[]string              `json:"values,omitempty" yaml:"values,omitempty"`
+}
 
 type ImplementedRequirement struct {
 	ByComponents     *[]ByComponent     `json:"by-components,omitempty" yaml:"by-components,omitempty"`
@@ -911,6 +1038,24 @@ type TelephoneNumber struct {
 	Type   string `json:"type,omitempty" yaml:"type,omitempty"`
 }
 
+type PartyExternalIdentifier struct {
+	ID     string `json:"id" yaml:"id"`
+	Scheme string `json:"scheme" yaml:"scheme"`
+}
+
+type SelectObjectiveById = map[string]interface{}
+
+type AssessedControlsSelectControlById struct {
+	ControlId    string    `json:"control-id" yaml:"control-id"`
+	StatementIds *[]string `json:"statement-ids,omitempty" yaml:"statement-ids,omitempty"`
+}
+
+type FrequencyCondition = map[string]interface{}
+
+type OnDateCondition = map[string]interface{}
+
+type OnDateRangeCondition = map[string]interface{}
+
 type AssessmentLogEntry struct {
 	Description  string         `json:"description,omitempty" yaml:"description,omitempty"`
 	End          *time.Time     `json:"end,omitempty" yaml:"end,omitempty"`
@@ -922,6 +1067,11 @@ type AssessmentLogEntry struct {
 	Start        time.Time      `json:"start" yaml:"start"`
 	Title        string         `json:"title,omitempty" yaml:"title,omitempty"`
 	UUID         string         `json:"uuid" yaml:"uuid"`
+}
+
+type ConstraintTest struct {
+	Expression string `json:"expression" yaml:"expression"`
+	Remarks    string `json:"remarks,omitempty" yaml:"remarks,omitempty"`
 }
 
 type ImplementedRequirementControlImplementation struct {
@@ -954,10 +1104,10 @@ type MappingItem struct {
 	Type    string      `json:"type" yaml:"type"`
 }
 
-type SelectControlById struct {
-	Matching          *[]Matching `json:"matching,omitempty" yaml:"matching,omitempty"`
-	WithChildControls string      `json:"with-child-controls,omitempty" yaml:"with-child-controls,omitempty"`
-	WithIds           *[]string   `json:"with-ids,omitempty" yaml:"with-ids,omitempty"`
+type GapSummarySelectControlById struct {
+	Matching          *[]SelectControlByIdMatching `json:"matching,omitempty" yaml:"matching,omitempty"`
+	WithChildControls string                       `json:"with-child-controls,omitempty" yaml:"with-child-controls,omitempty"`
+	WithIds           *[]string                    `json:"with-ids,omitempty" yaml:"with-ids,omitempty"`
 }
 
 type OriginActor struct {
@@ -1020,6 +1170,27 @@ type RiskLogEntry struct {
 	StatusChange     string                   `json:"status-change,omitempty" yaml:"status-change,omitempty"`
 	Title            string                   `json:"title,omitempty" yaml:"title,omitempty"`
 	UUID             string                   `json:"uuid" yaml:"uuid"`
+}
+
+type Matching = map[string]interface{}
+
+type CustomGroupingGroup struct {
+	Class          string                 `json:"class,omitempty" yaml:"class,omitempty"`
+	Groups         *[]CustomGroupingGroup `json:"groups,omitempty" yaml:"groups,omitempty"`
+	ID             string                 `json:"id,omitempty" yaml:"id,omitempty"`
+	InsertControls *[]InsertControls      `json:"insert-controls,omitempty" yaml:"insert-controls,omitempty"`
+	Links          *[]Link                `json:"links,omitempty" yaml:"links,omitempty"`
+	Params         *[]Parameter           `json:"params,omitempty" yaml:"params,omitempty"`
+	Parts          *[]Part                `json:"parts,omitempty" yaml:"parts,omitempty"`
+	Props          *[]Property            `json:"props,omitempty" yaml:"props,omitempty"`
+	Title          string                 `json:"title,omitempty" yaml:"title,omitempty"`
+}
+
+type InsertControls struct {
+	ExcludeControls *[]SelectControlById `json:"exclude-controls,omitempty" yaml:"exclude-controls,omitempty"`
+	IncludeAll      *IncludeAll          `json:"include-all,omitempty" yaml:"include-all,omitempty"`
+	IncludeControls *[]SelectControlById `json:"include-controls,omitempty" yaml:"include-controls,omitempty"`
+	Order           string               `json:"order,omitempty" yaml:"order,omitempty"`
 }
 
 type Addition struct {
@@ -1097,7 +1268,7 @@ type ControlStatementImplementation struct {
 	UUID             string             `json:"uuid" yaml:"uuid"`
 }
 
-type Matching = map[string]interface{}
+type SelectControlByIdMatching = map[string]interface{}
 
 type IdentifiedSubject struct {
 	SubjectPlaceholderUuid string              `json:"subject-placeholder-uuid" yaml:"subject-placeholder-uuid"`
