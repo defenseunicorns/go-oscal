@@ -107,7 +107,7 @@ func (c *GeneratorConfig) initBuild(schema *jsonschema.Schema) (err error) {
 		}
 	}
 
-	// No properties, so we need to add the properties from the oneOf schemas.
+	// No properties, so we need to add the properties from the oneOf or anyOf schemas.
 	if schema.Properties == nil {
 		schema.Properties = map[string]jsonschema.SchemaOrBool{}
 		if schema.OneOf != nil {
@@ -117,6 +117,16 @@ func (c *GeneratorConfig) initBuild(schema *jsonschema.Schema) (err error) {
 						if prop.TypeObject.Ref != nil && !RefsToIgnore[*prop.TypeObject.Ref] {
 							schema.Properties[key] = prop
 						}
+					}
+				}
+			}
+		}
+		if schema.AnyOf != nil {
+			for _, anyOf := range schema.AnyOf {
+				if anyOf.TypeObject.Properties != nil {
+					for key, prop := range anyOf.TypeObject.Properties {
+						// Add all properties from anyOf variants, not just those with direct refs
+						schema.Properties[key] = prop
 					}
 				}
 			}
@@ -155,6 +165,38 @@ func (c *GeneratorConfig) buildStructs() (err error) {
 }
 
 func (c *GeneratorConfig) buildStructString(def jsonschema.Schema) (structString string, err error) {
+
+	// Merge properties from anyOf or allOf schemas if the definition has no properties
+	if len(def.Properties) == 0 {
+		if def.Properties == nil {
+			def.Properties = map[string]jsonschema.SchemaOrBool{}
+		}
+		if def.AnyOf != nil {
+			for _, anyOf := range def.AnyOf {
+				if anyOf.TypeObject.Properties != nil {
+					for key, prop := range anyOf.TypeObject.Properties {
+						def.Properties[key] = prop
+					}
+				}
+				// Note: We don't merge required fields from anyOf variants
+				// because only one variant is active at a time, so all fields
+				// should be optional at the merged struct level
+			}
+		}
+		if def.AllOf != nil {
+			for _, allOf := range def.AllOf {
+				if allOf.TypeObject.Properties != nil {
+					for key, prop := range allOf.TypeObject.Properties {
+						def.Properties[key] = prop
+					}
+				}
+				// For allOf, we should merge required fields since all variants must be satisfied
+				if allOf.TypeObject.Required != nil {
+					def.Required = append(def.Required, allOf.TypeObject.Required...)
+				}
+			}
+		}
+	}
 
 	// Create a map of required fields
 	required := map[string]bool{}
