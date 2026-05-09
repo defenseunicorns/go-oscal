@@ -1,6 +1,6 @@
 {
   "$comment": "OSCAL Unified Model of Models: JSON Schema",
-  "$id": "http://csrc.nist.gov/ns/oscal/1.0/1.2.0/oscal-complete-schema.json",
+  "$id": "http://csrc.nist.gov/ns/oscal/1.0/1.2.1/oscal-complete-schema.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
     "Base64Datatype": {
@@ -1030,6 +1030,16 @@
           "items": {
             "additionalProperties": false,
             "description": "Assessment subjects will be identified while conducting the referenced activity-instance.",
+            "properties": {
+              "remarks": {
+                "$ref": "#/definitions/oscal-complete-oscal-metadata:remarks"
+              },
+              "task-uuid": {
+                "$ref": "#/definitions/UUIDDatatype",
+                "description": "A machine-oriented, globally unique identifier with cross-instance scope that can be used to reference (in this or other OSCAL instances) an assessment activity to be performed as part of the event. The locally defined UUID of the task can be used to reference the data item locally or globally (e.g., in an imported OSCAL instance). This UUID should be assigned per-subject, which means it should be consistently used to identify the same subject across revisions of the document.",
+                "title": "Task Universally Unique Identifier"
+              }
+            },
             "required": [
               "task-uuid"
             ],
@@ -1050,6 +1060,26 @@
         "sources"
       ],
       "title": "Assessment Subject Placeholder",
+      "type": "object"
+    },
+    "oscal-complete-oscal-assessment-common:associated-risk": {
+      "$id": "#/definitions/oscal-complete-oscal-assessment-common:associated-risk",
+      "additionalProperties": false,
+      "description": "Relates the finding to a set of referenced risks that were used to determine the finding.",
+      "properties": {
+        "remarks": {
+          "$ref": "#/definitions/oscal-complete-oscal-metadata:remarks"
+        },
+        "risk-uuid": {
+          "$ref": "#/definitions/UUIDDatatype",
+          "description": "A machine-oriented identifier reference to a risk defined in the list of risks.",
+          "title": "Risk Universally Unique Identifier Reference"
+        }
+      },
+      "required": [
+        "risk-uuid"
+      ],
+      "title": "Associated Risk",
       "type": "object"
     },
     "oscal-complete-oscal-assessment-common:characterization": {
@@ -1186,26 +1216,14 @@
         },
         "related-observations": {
           "items": {
-            "additionalProperties": false,
-            "description": "Relates the finding to a set of referenced observations that were used to determine the finding.",
-            "required": [
-              "observation-uuid"
-            ],
-            "title": "Related Observation",
-            "type": "object"
+            "$ref": "#/definitions/oscal-complete-oscal-assessment-common:related-observation"
           },
           "minItems": 1,
           "type": "array"
         },
         "related-risks": {
           "items": {
-            "additionalProperties": false,
-            "description": "Relates the finding to a set of referenced risks that were used to determine the finding.",
-            "required": [
-              "risk-uuid"
-            ],
-            "title": "Associated Risk",
-            "type": "object"
+            "$ref": "#/definitions/oscal-complete-oscal-assessment-common:associated-risk"
           },
           "minItems": 1,
           "type": "array"
@@ -1416,6 +1434,21 @@
       "$id": "#/definitions/oscal-complete-oscal-assessment-common:logged-by",
       "additionalProperties": false,
       "description": "Used to indicate who created a log entry in what role.",
+      "properties": {
+        "party-uuid": {
+          "$ref": "#/definitions/UUIDDatatype",
+          "description": "A machine-oriented identifier reference to the party who is making the log entry.",
+          "title": "Party UUID Reference"
+        },
+        "remarks": {
+          "$ref": "#/definitions/oscal-complete-oscal-metadata:remarks"
+        },
+        "role-id": {
+          "$ref": "#/definitions/TokenDatatype",
+          "description": "A point to the role-id of the role in which the party is making the log entry.",
+          "title": "Actor Role"
+        }
+      },
       "required": [
         "party-uuid"
       ],
@@ -1656,6 +1689,26 @@
         "actor-uuid"
       ],
       "title": "Originating Actor",
+      "type": "object"
+    },
+    "oscal-complete-oscal-assessment-common:related-observation": {
+      "$id": "#/definitions/oscal-complete-oscal-assessment-common:related-observation",
+      "additionalProperties": false,
+      "description": "Relates the identified element to a set of referenced observations that were used to support its determination.",
+      "properties": {
+        "observation-uuid": {
+          "$ref": "#/definitions/UUIDDatatype",
+          "description": "A machine-oriented identifier reference to an observation defined in the list of observations.",
+          "title": "Observation Universally Unique Identifier Reference"
+        },
+        "remarks": {
+          "$ref": "#/definitions/oscal-complete-oscal-metadata:remarks"
+        }
+      },
+      "required": [
+        "observation-uuid"
+      ],
+      "title": "Related Observation",
       "type": "object"
     },
     "oscal-complete-oscal-assessment-common:related-task": {
@@ -2183,13 +2236,7 @@
         },
         "related-observations": {
           "items": {
-            "additionalProperties": false,
-            "description": "Relates the finding to a set of referenced observations that were used to determine the finding.",
-            "required": [
-              "observation-uuid"
-            ],
-            "title": "Related Observation",
-            "type": "object"
+            "$ref": "#/definitions/oscal-complete-oscal-assessment-common:related-observation"
           },
           "minItems": 1,
           "type": "array"
@@ -2410,6 +2457,16 @@
       "$id": "#/definitions/oscal-complete-oscal-assessment-common:select-objective-by-id",
       "additionalProperties": false,
       "description": "Used to select a control objective for inclusion/exclusion based on the control objective's identifier.",
+      "properties": {
+        "objective-id": {
+          "$ref": "#/definitions/TokenDatatype",
+          "description": "Points to an assessment objective.",
+          "title": "Objective ID"
+        },
+        "remarks": {
+          "$ref": "#/definitions/oscal-complete-oscal-metadata:remarks"
+        }
+      },
       "required": [
         "objective-id"
       ],
@@ -2660,6 +2717,16 @@
                 "on-date": {
                   "additionalProperties": false,
                   "description": "The task is intended to occur on the specified date.",
+                  "properties": {
+                    "date": {
+                      "$ref": "#/definitions/DateTimeWithTimezoneDatatype",
+                      "description": "The task must occur on the specified date.",
+                      "title": "On Date Condition"
+                    },
+                    "remarks": {
+                      "$ref": "#/definitions/oscal-complete-oscal-metadata:remarks"
+                    }
+                  },
                   "required": [
                     "date"
                   ],
@@ -2677,6 +2744,21 @@
                 "within-date-range": {
                   "additionalProperties": false,
                   "description": "The task is intended to occur within the specified date range.",
+                  "properties": {
+                    "end": {
+                      "$ref": "#/definitions/DateTimeWithTimezoneDatatype",
+                      "description": "The task must occur on or before the specified date.",
+                      "title": "End Date Condition"
+                    },
+                    "remarks": {
+                      "$ref": "#/definitions/oscal-complete-oscal-metadata:remarks"
+                    },
+                    "start": {
+                      "$ref": "#/definitions/DateTimeWithTimezoneDatatype",
+                      "description": "The task must occur on or after the specified date.",
+                      "title": "Start Date Condition"
+                    }
+                  },
                   "required": [
                     "start",
                     "end"
@@ -2695,6 +2777,35 @@
                 "at-frequency": {
                   "additionalProperties": false,
                   "description": "The task is intended to occur at the specified frequency.",
+                  "properties": {
+                    "period": {
+                      "$ref": "#/definitions/PositiveIntegerDatatype",
+                      "description": "The task must occur after the specified period has elapsed.",
+                      "title": "Period"
+                    },
+                    "remarks": {
+                      "$ref": "#/definitions/oscal-complete-oscal-metadata:remarks"
+                    },
+                    "unit": {
+                      "allOf": [
+                        {
+                          "$ref": "#/definitions/StringDatatype"
+                        },
+                        {
+                          "enum": [
+                            "seconds",
+                            "minutes",
+                            "hours",
+                            "days",
+                            "months",
+                            "years"
+                          ]
+                        }
+                      ],
+                      "description": "The unit of time for the period.",
+                      "title": "Time Unit"
+                    }
+                  },
                   "required": [
                     "period",
                     "unit"
@@ -3345,6 +3456,16 @@
       "$id": "#/definitions/oscal-complete-oscal-component-definition:import-component-definition",
       "additionalProperties": false,
       "description": "Loads a component definition from another resource.",
+      "properties": {
+        "href": {
+          "$ref": "#/definitions/URIReferenceDatatype",
+          "description": "A link to a resource that defines a set of components and/or capabilities to import into this collection.",
+          "title": "Hyperlink Reference"
+        },
+        "remarks": {
+          "$ref": "#/definitions/oscal-complete-oscal-metadata:remarks"
+        }
+      },
       "required": [
         "href"
       ],
@@ -3432,6 +3553,23 @@
       "additionalProperties": false,
       "description": "Include all controls from the imported catalog or profile resources.",
       "title": "Include All",
+      "type": "object"
+    },
+    "oscal-complete-oscal-control-common:matching": {
+      "$id": "#/definitions/oscal-complete-oscal-control-common:matching",
+      "additionalProperties": false,
+      "description": "Selecting a set of controls by matching their IDs with a wildcard pattern.",
+      "properties": {
+        "pattern": {
+          "$ref": "#/definitions/StringDatatype",
+          "description": "A glob expression matching the IDs of one or more controls to be selected.",
+          "title": "Pattern"
+        },
+        "remarks": {
+          "$ref": "#/definitions/oscal-complete-oscal-metadata:remarks"
+        }
+      },
+      "title": "Match Controls by Pattern",
       "type": "object"
     },
     "oscal-complete-oscal-control-common:parameter": {
@@ -3731,6 +3869,51 @@
       "title": "Part",
       "type": "object"
     },
+    "oscal-complete-oscal-control-common:select-control-by-id": {
+      "$id": "#/definitions/oscal-complete-oscal-control-common:select-control-by-id",
+      "additionalProperties": false,
+      "description": "Select a control or controls from an imported control set.",
+      "properties": {
+        "matching": {
+          "items": {
+            "$ref": "#/definitions/oscal-complete-oscal-control-common:matching"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "with-child-controls": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/TokenDatatype"
+            },
+            {
+              "enum": [
+                "yes",
+                "no"
+              ]
+            }
+          ],
+          "description": "When a control is included, whether its child (dependent) controls are also included.",
+          "title": "Include Contained Controls with Control"
+        },
+        "with-ids": {
+          "items": {
+            "$ref": "#/definitions/oscal-complete-oscal-control-common:with-id"
+          },
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "title": "Select Control",
+      "type": "object"
+    },
+    "oscal-complete-oscal-control-common:with-id": {
+      "$id": "#/definitions/oscal-complete-oscal-control-common:with-id",
+      "description": "Selecting a control by its ID given as a literal.",
+      "pattern": "^(\\p{L}|_)(\\p{L}|\\p{N}|[.\\-_])*$",
+      "title": "Match Controls by Identifier",
+      "type": "string"
+    },
     "oscal-complete-oscal-implementation-common:authorized-privilege": {
       "$id": "#/definitions/oscal-complete-oscal-implementation-common:authorized-privilege",
       "additionalProperties": false,
@@ -3896,6 +4079,36 @@
       "$id": "#/definitions/oscal-complete-oscal-implementation-common:port-range",
       "additionalProperties": false,
       "description": "Where applicable this is the transport layer protocol port range an IPv4-based or IPv6-based service uses.",
+      "properties": {
+        "end": {
+          "$ref": "#/definitions/NonNegativeIntegerDatatype",
+          "description": "Indicates the ending port number in a port range for a transport layer protocol",
+          "title": "End"
+        },
+        "remarks": {
+          "$ref": "#/definitions/oscal-complete-oscal-metadata:remarks"
+        },
+        "start": {
+          "$ref": "#/definitions/NonNegativeIntegerDatatype",
+          "description": "Indicates the starting port number in a port range for a transport layer protocol",
+          "title": "Start"
+        },
+        "transport": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/TokenDatatype"
+            },
+            {
+              "enum": [
+                "TCP",
+                "UDP"
+              ]
+            }
+          ],
+          "description": "Indicates the transport type.",
+          "title": "Transport"
+        }
+      },
       "title": "Port Range",
       "type": "object"
     },
@@ -4183,34 +4396,25 @@
     },
     "oscal-complete-oscal-mapping-common:confidence-score": {
       "$id": "#/definitions/oscal-complete-oscal-mapping-common:confidence-score",
-      "additionalProperties": false,
-      "description": "This records either a string category or a decimal value from 0-1 representing a percentage. Both of these values describe an estimation of the author's confidence that this mapping is correct and accurate.",
-      "properties": {
-        "STRVALUE": {
-          "$ref": "#/definitions/StringDatatype"
-        },
-        "category": {
-          "anyOf": [
-            {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "category": {
               "$ref": "#/definitions/StringDatatype"
-            },
-            {
-              "enum": [
-                "unspecified",
-                "high",
-                "medium",
-                "low"
-              ]
             }
-          ]
+          }
         },
-        "percentage": {
-          "$ref": "#/definitions/DecimalDatatype"
+        {
+          "additionalProperties": false,
+          "properties": {
+            "percentage": {
+              "$ref": "#/definitions/oscal-complete-oscal-mapping-common:percentage"
+            }
+          }
         }
-      },
-      "required": [
-        "STRVALUE"
       ],
+      "description": "This records either a string category or a decimal value from 0-1 representing a percentage. Both of these values describe an estimation of the author's confidence that this mapping is correct and accurate.",
       "title": "Confidence Score",
       "type": "object"
     },
@@ -4219,9 +4423,6 @@
       "additionalProperties": false,
       "description": "A decimal value from 0-1, representing the percentage coverage of the targets by the sources.",
       "properties": {
-        "STRVALUE": {
-          "$ref": "#/definitions/DecimalDatatype"
-        },
         "generation-method": {
           "anyOf": [
             {
@@ -4232,11 +4433,16 @@
                 "arbitrary"
               ]
             }
-          ]
+          ],
+          "description": "The method used to determine the coverage value.",
+          "title": "Coverage Generation Method"
+        },
+        "target-coverage": {
+          "$ref": "#/definitions/DecimalDatatype"
         }
       },
       "required": [
-        "STRVALUE"
+        "target-coverage"
       ],
       "title": "Coverage",
       "type": "object"
@@ -4248,7 +4454,7 @@
       "properties": {
         "unmapped-controls": {
           "items": {
-            "$ref": "#/definitions/oscal-complete-oscal-mapping-common:select-control-by-id"
+            "$ref": "#/definitions/oscal-complete-oscal-control-common:select-control-by-id"
           },
           "minItems": 1,
           "type": "array"
@@ -4680,12 +4886,12 @@
       "title": "Mapped Resource Reference",
       "type": "object"
     },
-    "oscal-complete-oscal-mapping-common:matching": {
-      "$id": "#/definitions/oscal-complete-oscal-mapping-common:matching",
-      "additionalProperties": false,
-      "description": "Selecting a set of controls by matching their IDs with a wildcard pattern.",
-      "title": "Match Controls by Pattern",
-      "type": "object"
+    "oscal-complete-oscal-mapping-common:percentage": {
+      "$id": "#/definitions/oscal-complete-oscal-mapping-common:percentage",
+      "description": "A decimal value from 0-1, representing a percentage.",
+      "pattern": "^(\\+|-)?([0-9]+(\\.[0-9]*)?|\\.[0-9]+)$",
+      "title": "Percentage",
+      "type": "number"
     },
     "oscal-complete-oscal-mapping-common:qualifier-item": {
       "$id": "#/definitions/oscal-complete-oscal-mapping-common:qualifier-item",
@@ -4755,46 +4961,6 @@
         "description"
       ],
       "title": "Relationship Qualifier",
-      "type": "object"
-    },
-    "oscal-complete-oscal-mapping-common:select-control-by-id": {
-      "$id": "#/definitions/oscal-complete-oscal-mapping-common:select-control-by-id",
-      "additionalProperties": false,
-      "description": "Select a control or controls from an imported control set.",
-      "properties": {
-        "matching": {
-          "items": {
-            "$ref": "#/definitions/oscal-complete-oscal-mapping-common:matching"
-          },
-          "minItems": 1,
-          "type": "array"
-        },
-        "with-child-controls": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/TokenDatatype"
-            },
-            {
-              "enum": [
-                "yes",
-                "no"
-              ]
-            }
-          ],
-          "description": "When a control is included, whether its child (dependent) controls are also included.",
-          "title": "Include Contained Controls with Control"
-        },
-        "with-ids": {
-          "items": {
-            "$ref": "#/definitions/TokenDatatype",
-            "description": "Selecting a control by its ID given as a literal.",
-            "title": "Match Controls by Identifier"
-          },
-          "minItems": 1,
-          "type": "array"
-        }
-      },
-      "title": "Select Control",
       "type": "object"
     },
     "oscal-complete-oscal-mapping:mapping-collection": {
@@ -6064,6 +6230,16 @@
           "items": {
             "additionalProperties": false,
             "description": "Relates the poam-item to referenced finding(s).",
+            "properties": {
+              "finding-uuid": {
+                "$ref": "#/definitions/UUIDDatatype",
+                "description": "A machine-oriented identifier reference to a finding defined in the list of findings.",
+                "title": "Finding Universally Unique Identifier Reference"
+              },
+              "remarks": {
+                "$ref": "#/definitions/oscal-complete-oscal-metadata:remarks"
+              }
+            },
             "required": [
               "finding-uuid"
             ],
@@ -6075,26 +6251,14 @@
         },
         "related-observations": {
           "items": {
-            "additionalProperties": false,
-            "description": "Relates the poam-item to a set of referenced observations that were used to determine the finding.",
-            "required": [
-              "observation-uuid"
-            ],
-            "title": "Related Observation",
-            "type": "object"
+            "$ref": "#/definitions/oscal-complete-oscal-assessment-common:related-observation"
           },
           "minItems": 1,
           "type": "array"
         },
         "related-risks": {
           "items": {
-            "additionalProperties": false,
-            "description": "Relates the finding to a set of referenced risks that were used to determine the finding.",
-            "required": [
-              "risk-uuid"
-            ],
-            "title": "Associated Risk",
-            "type": "object"
+            "$ref": "#/definitions/oscal-complete-oscal-assessment-common:associated-risk"
           },
           "minItems": 1,
           "type": "array"
@@ -6252,7 +6416,7 @@
           "properties": {
             "exclude-controls": {
               "items": {
-                "$ref": "#/definitions/oscal-complete-oscal-profile:select-control-by-id"
+                "$ref": "#/definitions/oscal-complete-oscal-control-common:select-control-by-id"
               },
               "minItems": 1,
               "type": "array"
@@ -6275,7 +6439,7 @@
           "properties": {
             "exclude-controls": {
               "items": {
-                "$ref": "#/definitions/oscal-complete-oscal-profile:select-control-by-id"
+                "$ref": "#/definitions/oscal-complete-oscal-control-common:select-control-by-id"
               },
               "minItems": 1,
               "type": "array"
@@ -6287,7 +6451,7 @@
             },
             "include-controls": {
               "items": {
-                "$ref": "#/definitions/oscal-complete-oscal-profile:select-control-by-id"
+                "$ref": "#/definitions/oscal-complete-oscal-control-common:select-control-by-id"
               },
               "minItems": 1,
               "type": "array"
@@ -6310,7 +6474,7 @@
           "properties": {
             "exclude-controls": {
               "items": {
-                "$ref": "#/definitions/oscal-complete-oscal-profile:select-control-by-id"
+                "$ref": "#/definitions/oscal-complete-oscal-control-common:select-control-by-id"
               },
               "minItems": 1,
               "type": "array"
@@ -6344,14 +6508,14 @@
           "properties": {
             "exclude-controls": {
               "items": {
-                "$ref": "#/definitions/oscal-complete-oscal-profile:select-control-by-id"
+                "$ref": "#/definitions/oscal-complete-oscal-control-common:select-control-by-id"
               },
               "minItems": 1,
               "type": "array"
             },
             "include-controls": {
               "items": {
-                "$ref": "#/definitions/oscal-complete-oscal-profile:select-control-by-id"
+                "$ref": "#/definitions/oscal-complete-oscal-control-common:select-control-by-id"
               },
               "minItems": 1,
               "type": "array"
@@ -6380,13 +6544,6 @@
       ],
       "description": "Specifies which controls to use in the containing context.",
       "title": "Insert Controls",
-      "type": "object"
-    },
-    "oscal-complete-oscal-profile:matching": {
-      "$id": "#/definitions/oscal-complete-oscal-profile:matching",
-      "additionalProperties": false,
-      "description": "Selecting a set of controls by matching their IDs with a wildcard pattern.",
-      "title": "Match Controls by Pattern",
       "type": "object"
     },
     "oscal-complete-oscal-profile:merge": {
@@ -6558,6 +6715,50 @@
                 "items": {
                   "additionalProperties": false,
                   "description": "Specifies objects to be removed from a control based on specific aspects of the object that must all match.",
+                  "properties": {
+                    "by-class": {
+                      "$ref": "#/definitions/TokenDatatype",
+                      "description": "Identify items to remove by matching their class.",
+                      "title": "Reference by class"
+                    },
+                    "by-id": {
+                      "$ref": "#/definitions/TokenDatatype",
+                      "description": "Identify items to remove indicated by their id.",
+                      "title": "Reference by ID"
+                    },
+                    "by-item-name": {
+                      "allOf": [
+                        {
+                          "$ref": "#/definitions/TokenDatatype"
+                        },
+                        {
+                          "enum": [
+                            "param",
+                            "prop",
+                            "link",
+                            "part",
+                            "mapping",
+                            "map"
+                          ]
+                        }
+                      ],
+                      "description": "Identify items to remove by the name of the item's information object name, e.g. title or prop.",
+                      "title": "Item Name Reference"
+                    },
+                    "by-name": {
+                      "$ref": "#/definitions/TokenDatatype",
+                      "description": "Identify items remove by matching their assigned name.",
+                      "title": "Reference by (assigned) name"
+                    },
+                    "by-ns": {
+                      "$ref": "#/definitions/URIDatatype",
+                      "description": "Identify items to remove by the item's ns, which is the namespace associated with a part, or prop.",
+                      "title": "Item Namespace Reference"
+                    },
+                    "remarks": {
+                      "$ref": "#/definitions/oscal-complete-oscal-metadata:remarks"
+                    }
+                  },
                   "title": "Removal",
                   "type": "object"
                 },
@@ -6752,51 +6953,6 @@
       ],
       "title": "Profile",
       "type": "object"
-    },
-    "oscal-complete-oscal-profile:select-control-by-id": {
-      "$id": "#/definitions/oscal-complete-oscal-profile:select-control-by-id",
-      "additionalProperties": false,
-      "description": "Select a control or controls from an imported control set.",
-      "properties": {
-        "matching": {
-          "items": {
-            "$ref": "#/definitions/oscal-complete-oscal-profile:matching"
-          },
-          "minItems": 1,
-          "type": "array"
-        },
-        "with-child-controls": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/TokenDatatype"
-            },
-            {
-              "enum": [
-                "yes",
-                "no"
-              ]
-            }
-          ],
-          "description": "When a control is included, whether its child (dependent) controls are also included.",
-          "title": "Include Contained Controls with Control"
-        },
-        "with-ids": {
-          "items": {
-            "$ref": "#/definitions/oscal-complete-oscal-profile:with-id"
-          },
-          "minItems": 1,
-          "type": "array"
-        }
-      },
-      "title": "Select Control",
-      "type": "object"
-    },
-    "oscal-complete-oscal-profile:with-id": {
-      "$id": "#/definitions/oscal-complete-oscal-profile:with-id",
-      "description": "Selecting a control by its ID given as a literal.",
-      "pattern": "^(\\p{L}|_)(\\p{L}|\\p{N}|[.\\-_])*$",
-      "title": "Match Controls by Identifier",
-      "type": "string"
     },
     "oscal-complete-oscal-ssp:adjustment-justification": {
       "$id": "#/definitions/oscal-complete-oscal-ssp:adjustment-justification",

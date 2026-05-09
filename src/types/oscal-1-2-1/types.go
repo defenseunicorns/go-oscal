@@ -13,13 +13,13 @@ For more information on how to use go-oscal: go-oscal --help
 
 Source: https://github.com/defenseunicorns/go-oscal
 */
-package oscalTypes_1_2_0
+package oscalTypes_1_2_1
 
 import (
 	"time"
 )
 
-const Version = "1.2.0"
+const Version = "1.2.1"
 
 type OscalModels = OscalCompleteSchema
 type OscalCompleteSchema struct {
@@ -280,7 +280,10 @@ type DefinedComponent struct {
 	UUID                   string                      `json:"uuid" yaml:"uuid"`
 }
 
-type ImportComponentDefinition = map[string]interface{}
+type ImportComponentDefinition struct {
+	Href    string `json:"href" yaml:"href"`
+	Remarks string `json:"remarks,omitempty" yaml:"remarks,omitempty"`
+}
 
 type Mapping struct {
 	ConfidenceScore    *ConfidenceScore         `json:"confidence-score,omitempty" yaml:"confidence-score,omitempty"`
@@ -742,14 +745,13 @@ type Protocol struct {
 }
 
 type ConfidenceScore struct {
-	Strvalue   string  `json:"STRVALUE" yaml:"STRVALUE"`
 	Category   string  `json:"category,omitempty" yaml:"category,omitempty"`
 	Percentage float64 `json:"percentage,omitempty" yaml:"percentage,omitempty"`
 }
 
 type Coverage struct {
-	Strvalue         float64 `json:"STRVALUE" yaml:"STRVALUE"`
 	GenerationMethod string  `json:"generation-method,omitempty" yaml:"generation-method,omitempty"`
+	TargetCoverage   float64 `json:"target-coverage" yaml:"target-coverage"`
 }
 
 type Map struct {
@@ -768,8 +770,8 @@ type Map struct {
 }
 
 type GapSummary struct {
-	UnmappedControls []GapSummarySelectControlById `json:"unmapped-controls" yaml:"unmapped-controls"`
-	UUID             string                        `json:"uuid" yaml:"uuid"`
+	UnmappedControls []SelectControlById `json:"unmapped-controls" yaml:"unmapped-controls"`
+	UUID             string              `json:"uuid" yaml:"uuid"`
 }
 
 type MappingResourceReference struct {
@@ -786,9 +788,15 @@ type Origin struct {
 	RelatedTasks *[]RelatedTask `json:"related-tasks,omitempty" yaml:"related-tasks,omitempty"`
 }
 
-type RelatedObservation = map[string]interface{}
+type RelatedObservation struct {
+	ObservationUuid string `json:"observation-uuid" yaml:"observation-uuid"`
+	Remarks         string `json:"remarks,omitempty" yaml:"remarks,omitempty"`
+}
 
-type AssociatedRisk = map[string]interface{}
+type AssociatedRisk struct {
+	Remarks  string `json:"remarks,omitempty" yaml:"remarks,omitempty"`
+	RiskUuid string `json:"risk-uuid" yaml:"risk-uuid"`
+}
 
 type FindingTarget struct {
 	Description          string                `json:"description,omitempty" yaml:"description,omitempty"`
@@ -823,7 +831,10 @@ type PoamItemOrigin struct {
 	Actors []OriginActor `json:"actors" yaml:"actors"`
 }
 
-type RelatedFinding = map[string]interface{}
+type RelatedFinding struct {
+	FindingUuid string `json:"finding-uuid" yaml:"finding-uuid"`
+	Remarks     string `json:"remarks,omitempty" yaml:"remarks,omitempty"`
+}
 
 type Characterization struct {
 	Facets []Facet     `json:"facets" yaml:"facets"`
@@ -1043,18 +1054,32 @@ type PartyExternalIdentifier struct {
 	Scheme string `json:"scheme" yaml:"scheme"`
 }
 
-type SelectObjectiveById = map[string]interface{}
+type SelectObjectiveById struct {
+	ObjectiveId string `json:"objective-id" yaml:"objective-id"`
+	Remarks     string `json:"remarks,omitempty" yaml:"remarks,omitempty"`
+}
 
 type AssessedControlsSelectControlById struct {
 	ControlId    string    `json:"control-id" yaml:"control-id"`
 	StatementIds *[]string `json:"statement-ids,omitempty" yaml:"statement-ids,omitempty"`
 }
 
-type FrequencyCondition = map[string]interface{}
+type FrequencyCondition struct {
+	Period  int    `json:"period" yaml:"period"`
+	Remarks string `json:"remarks,omitempty" yaml:"remarks,omitempty"`
+	Unit    string `json:"unit" yaml:"unit"`
+}
 
-type OnDateCondition = map[string]interface{}
+type OnDateCondition struct {
+	Date    time.Time `json:"date" yaml:"date"`
+	Remarks string    `json:"remarks,omitempty" yaml:"remarks,omitempty"`
+}
 
-type OnDateRangeCondition = map[string]interface{}
+type OnDateRangeCondition struct {
+	End     time.Time `json:"end" yaml:"end"`
+	Remarks string    `json:"remarks,omitempty" yaml:"remarks,omitempty"`
+	Start   time.Time `json:"start" yaml:"start"`
+}
 
 type AssessmentLogEntry struct {
 	Description  string         `json:"description,omitempty" yaml:"description,omitempty"`
@@ -1086,7 +1111,12 @@ type ImplementedRequirementControlImplementation struct {
 	UUID             string                            `json:"uuid" yaml:"uuid"`
 }
 
-type PortRange = map[string]interface{}
+type PortRange struct {
+	End       int    `json:"end,omitempty" yaml:"end,omitempty"`
+	Remarks   string `json:"remarks,omitempty" yaml:"remarks,omitempty"`
+	Start     int    `json:"start,omitempty" yaml:"start,omitempty"`
+	Transport string `json:"transport,omitempty" yaml:"transport,omitempty"`
+}
 
 type QualifierItem struct {
 	Category    string `json:"category" yaml:"category"`
@@ -1102,12 +1132,6 @@ type MappingItem struct {
 	Props   *[]Property `json:"props,omitempty" yaml:"props,omitempty"`
 	Remarks string      `json:"remarks,omitempty" yaml:"remarks,omitempty"`
 	Type    string      `json:"type" yaml:"type"`
-}
-
-type GapSummarySelectControlById struct {
-	Matching          *[]SelectControlByIdMatching `json:"matching,omitempty" yaml:"matching,omitempty"`
-	WithChildControls string                       `json:"with-child-controls,omitempty" yaml:"with-child-controls,omitempty"`
-	WithIds           *[]string                    `json:"with-ids,omitempty" yaml:"with-ids,omitempty"`
 }
 
 type OriginActor struct {
@@ -1172,7 +1196,10 @@ type RiskLogEntry struct {
 	UUID             string                   `json:"uuid" yaml:"uuid"`
 }
 
-type Matching = map[string]interface{}
+type Matching struct {
+	Pattern string `json:"pattern,omitempty" yaml:"pattern,omitempty"`
+	Remarks string `json:"remarks,omitempty" yaml:"remarks,omitempty"`
+}
 
 type CustomGroupingGroup struct {
 	Class          string                 `json:"class,omitempty" yaml:"class,omitempty"`
@@ -1203,7 +1230,14 @@ type Addition struct {
 	Title    string       `json:"title,omitempty" yaml:"title,omitempty"`
 }
 
-type Removal = map[string]interface{}
+type Removal struct {
+	ByClass    string `json:"by-class,omitempty" yaml:"by-class,omitempty"`
+	ById       string `json:"by-id,omitempty" yaml:"by-id,omitempty"`
+	ByItemName string `json:"by-item-name,omitempty" yaml:"by-item-name,omitempty"`
+	ByName     string `json:"by-name,omitempty" yaml:"by-name,omitempty"`
+	ByNs       string `json:"by-ns,omitempty" yaml:"by-ns,omitempty"`
+	Remarks    string `json:"remarks,omitempty" yaml:"remarks,omitempty"`
+}
 
 type ByComponent struct {
 	ComponentUuid        string                                          `json:"component-uuid" yaml:"component-uuid"`
@@ -1256,7 +1290,11 @@ type Hash struct {
 	Value     string `json:"value" yaml:"value"`
 }
 
-type LoggedBy = map[string]interface{}
+type LoggedBy struct {
+	PartyUuid string `json:"party-uuid" yaml:"party-uuid"`
+	Remarks   string `json:"remarks,omitempty" yaml:"remarks,omitempty"`
+	RoleId    string `json:"role-id,omitempty" yaml:"role-id,omitempty"`
+}
 
 type ControlStatementImplementation struct {
 	Description      string             `json:"description" yaml:"description"`
@@ -1267,8 +1305,6 @@ type ControlStatementImplementation struct {
 	StatementId      string             `json:"statement-id" yaml:"statement-id"`
 	UUID             string             `json:"uuid" yaml:"uuid"`
 }
-
-type SelectControlByIdMatching = map[string]interface{}
 
 type IdentifiedSubject struct {
 	SubjectPlaceholderUuid string              `json:"subject-placeholder-uuid" yaml:"subject-placeholder-uuid"`
