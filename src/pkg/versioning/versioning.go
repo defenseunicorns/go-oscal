@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	latestVersion = "1.2.1"
+	latestVersion = "1.2.2"
 )
 
 var (
