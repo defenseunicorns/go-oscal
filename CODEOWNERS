@@ -1,9 +1,4 @@
-* @brandtkeller @meganwolf0
-
-# Privileged pipeline files
-/.github/ @brandtkeller @meganwolf0
-/.gitignore @brandtkeller @meganwolf0
-/.goreleaser.yml @brandtkeller @meganwolf0
+* @defenseunicorns/oss-dev
 
 # Additional privileged files
 /CODEOWNERS @jeff-mccoy @daveworth
