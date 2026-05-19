@@ -33,5 +33,5 @@ jobs:
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
-          echo '{"extends":["@commitlint/config-conventional"]}' > /tmp/commitlint.config.json
-          echo "$PR_TITLE" | npx commitlint --config /tmp/commitlint.config.json
+          echo '{"extends":["@commitlint/config-conventional"]}' > commitlint.config.json
+          echo "$PR_TITLE" | npx commitlint --config commitlint.config.json
