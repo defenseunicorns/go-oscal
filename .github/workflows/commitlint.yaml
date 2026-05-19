@@ -1,6 +1,9 @@
 name: PR Title Check
 
 on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize, edited]
   pull_request_target:
     branches: [main]
     types: [opened, reopened, synchronize, edited]
@@ -8,6 +11,10 @@ on:
 permissions:
   contents: read
   pull-requests: read
+
+concurrency:
+  group: title-check-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 jobs:
   title_check:
