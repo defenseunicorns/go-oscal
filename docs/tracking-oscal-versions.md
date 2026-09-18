@@ -1,32 +1,50 @@
 # How We Track OSCAL Version Changes
-We use a combination of Renovate and GitHub Actions to track OSCAL changes.
 
-## Renovate 
-A YAML file is used to track the changes to OSCAL version. located in update/oscal-version.yaml as
-```yaml
----
-oscal: X.X.X
-```
+We use Renovate and GitHub Actions to track OSCAL releases.
 
-The Renovate config file is setup to track GitHub tag changes on the USNISTGOV/OSCAL repo. Using the following configuration:
+## Renovate
+
+Renovate tracks the latest OSCAL version in two locations:
+
+- `update/oscal-version.yaml`
+
+  ```yaml
+  ---
+  oscal: vX.Y.Z
+  ```
+
+- `src/pkg/versioning/versioning.go`
+
+  ```go
+  const latestVersion = "X.Y.Z"
+  ```
+
+`TestGetLatestVersion` requires these values to match. The relevant Renovate configuration is:
+
 ```json
-  "regexManagers": [
-    {
-      "fileMatch": ["^update/oscal-version\\.yaml$"],
-      "matchStrings": ["oscal: v(?<currentValue>\\d+\\.\\d+\\.\\d+)"],
-      "datasource": "github-tags",
-      "depName": "usnistgov/OSCAL",
-      "versioning": "semver"
-    }
-  ]
-
+"customManagers": [
+  {
+    "customType": "regex",
+    "fileMatch": [
+      "^update/oscal-version\\.yaml$",
+      "^src/pkg/versioning/versioning\\.go$"
+    ],
+    "matchStrings": [
+      "oscal: v(?<currentValue>\\d+\\.\\d+\\.\\d+)",
+      "\\s*latestVersion = \"(?<currentValue>\\d+\\.\\d+\\.\\d+)\""
+    ],
+    "datasourceTemplate": "github-tags",
+    "depNameTemplate": "usnistgov/OSCAL"
+  }
+]
 ```
 
-When Renovate sees a tag change it will create a PR to update the version stored in the YAML file. This PR will trigger the GitHub Action to create an issue.
+When Renovate sees a new OSCAL tag, it opens a PR that updates both declarations. Updating `update/oscal-version.yaml` triggers the GitHub Action below.
 
 ## GitHub Action
 
-The GitHub Action located in .github/workflows/create-issue-oscal-version.yaml is triggered when a PR is created affecting this file location. The GitHub Action uses this configuration: 
+The GitHub Action in `.github/workflows/create-issue-oscal-version.yaml` runs for pull requests that change `update/oscal-version.yaml`:
+
 ```yaml
 name: Create Issue on PR for OSCAL Version Updates
 
@@ -58,7 +76,6 @@ jobs:
               body: body,
               labels: ['enhancement']
             });
-
 ```
 
-The GitHub Action creates an issue on the go-oscal repo to check out the releases for OSCAL to see what has changed. Depending on the change the level of effort for the update can vary. See [upgrading-oscal-version](./upgrading-oscal-version.md) for steps for handling a new release. 
+The resulting issue prompts review of the release delta. Follow [upgrading an OSCAL version](./upgrading-oscal-version.md) to add the doctored schema and generated types.
