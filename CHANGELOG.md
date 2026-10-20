@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.7.3](https://github.com/defenseunicorns/go-oscal/compare/v0.7.2...v0.7.3) (2026-10-20)
+
+
+### Miscellaneous
+
+* **deps:** update actions/setup-node action to v7.1.0 ([#481](https://github.com/defenseunicorns/go-oscal/issues/481)) ([04c3694](https://github.com/defenseunicorns/go-oscal/commit/04c369418d99a56e4ffb3f405cb6b531eac112dd))
+* **deps:** update goreleaser/goreleaser-action action to v7.3.0 ([#483](https://github.com/defenseunicorns/go-oscal/issues/483)) ([ddf3839](https://github.com/defenseunicorns/go-oscal/commit/ddf3839ccc8247c9de2a8b9b479aeb92965eb599))
+* **deps:** update ossf/scorecard-action action to v2.5.0 ([#482](https://github.com/defenseunicorns/go-oscal/issues/482)) ([d95de57](https://github.com/defenseunicorns/go-oscal/commit/d95de57cf64b015abffc8914c8cec47824b12c6e))
+
 ## [0.7.2](https://github.com/defenseunicorns/go-oscal/compare/v0.7.1...v0.7.2) (2026-09-18)
 
 
