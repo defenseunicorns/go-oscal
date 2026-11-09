@@ -16,7 +16,7 @@ const (
 )
 
 var (
-	versionRegexp = regexp.MustCompile(`^\d+([-\.]\d+){2}$`)
+	versionRegexp = regexp.MustCompile(`^[vV]?\d+([-\.]\d+){2}$`)
 )
 
 // IsValidOscalVersion returns true if the version is supported, false if not.
@@ -85,7 +85,7 @@ func GetOscalVersionFromMap(model map[string]interface{}) (version string, err e
 		return "", err
 	}
 
-	return version, nil
+	return FormatOscalVersion(version), nil
 }
 
 // ReplaceOscalVersionInMap returns the model with the oscal version replaced

@@ -2,7 +2,7 @@ component-definition:
   uuid: 87845756-127e-4a30-bea4-dbdc1d35a2ce
   metadata:
     version: 0.0.1
-    oscal-version: V1-1-1
+    oscal-version: "1.1"
     parties:
     - type: organization
       name: My Organization

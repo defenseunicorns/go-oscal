@@ -43,6 +43,14 @@ func TestVersionUtils(t *testing.T) {
 				t.Errorf("expected error, got %v", err)
 			}
 		})
+
+		t.Run("returns nil when a supported version prefixed with 'v' is passed", func(t *testing.T) {
+			t.Parallel()
+			err := versioning.IsValidOscalVersion("v" + validVersion)
+			if err != nil {
+				t.Errorf("expected no error, got %v", err)
+			}
+		})
 	})
 
 	t.Run("formatOscalVersion", func(t *testing.T) {
